@@ -1,0 +1,500 @@
+/* ✅ 배경 이미지 */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: url('main.jpg') no-repeat center center / cover;
+  filter: blur(2px);
+  opacity: 0.12;
+  z-index: -1;
+}
+
+/* ✅ 공통 */
+.upload-section, .select-country-section {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  background-color: white; /* 흰색 고정 */
+  border-radius: 1rem;
+  padding: 3rem;
+  position: relative;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* ✅ 진행 상태 표시 */
+.step-indicator {
+  display: flex;
+  justify-content: center;
+  gap: 2.5rem;
+  font-weight: 700;
+  font-size: 1.125rem;
+  margin-bottom: 2rem;
+}
+
+.step-indicator .step {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #888;
+}
+
+.step-indicator .step.active {
+  color: #2563eb;
+}
+
+.step-indicator .step.active .dot {
+  background-color: #2563eb;
+}
+
+.step-indicator .dot {
+  width: 1rem;
+  height: 1rem;
+  border-radius: 9999px;
+  background-color: #ccc;
+}
+
+/* ✅ 업로드 박스 */
+.upload-box {
+  border: 4px dashed #999;
+  border-radius: 1rem;
+  padding: 4rem 2rem;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: background-color 0.2s ease;
+  background-color: white;
+}
+
+.upload-box:hover {
+  background-color: #f9fafb;
+}
+
+.upload-box i {
+  font-size: 5rem;
+  color: #666;
+  margin-bottom: 1rem;
+}
+
+.upload-box p {
+  font-size: 1.125rem;
+  color: #555;
+  margin: 0.5rem 0;
+}
+
+#selectedFileName {
+  font-size: 0.875rem;
+  color: #333;
+}
+
+/* ✅ 파일 선택 버튼 */
+.select-btn {
+  padding: 0.5rem 1.5rem;
+  background-color: #3b82f6;
+  color: white;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 9999px;
+  transition: background-color 0.3s ease;
+  border: none;
+}
+
+.select-btn:hover {
+  background-color: #2563eb;
+}
+
+/* ✅ 가이드 리스트 */
+.upload-guide {
+  margin-top: 2.5rem;
+  font-size: 1rem;
+  color: #333;
+  line-height: 1.6;
+}
+
+/* ✅ 다음 단계 버튼 */
+#nextBtn, #selectCountryNextBtn {
+  position: absolute;
+  right: 2rem;
+  bottom: 2rem;
+  padding: 0.75rem 2rem;
+  font-size: 1.125rem;
+  border-radius: 9999px;
+  background-color: #3b82f6;
+  color: white;
+  opacity: 0.5;
+  cursor: not-allowed;
+  transition: all 0.3s ease;
+}
+
+#nextBtn:enabled, #selectCountryNextBtn:enabled {
+  opacity: 1;
+  cursor: pointer;
+}
+
+#nextBtn:hover:enabled, #selectCountryNextBtn:hover:enabled {
+  background-color: #2563eb;
+}
+
+/* ✅ 국가 선택 카드 */
+.country-grid {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.country-card {
+  width: 11rem;
+  height: 14rem;
+  padding: 1.5rem;
+  background-color: white;
+  border-radius: 1rem;
+  text-align: center;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.country-card img {
+  width: 120px;
+  height: auto;
+  object-fit: contain;
+}
+
+.country-card p {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.country-card:hover {
+  background-color: #f0f4ff;
+  border-color: #3b82f6;
+}
+
+.country-card.selected {
+  background-color: white;
+  border-color: transparent;
+}
+
+/* ✅ 선택 국가명 */
+.selected-country {
+  font-weight: bold;
+  text-align: center;
+  font-size: 1.125rem;
+  margin-top: 1.5rem;
+  color: #2563eb;
+}
+
+/* ✅ 국가 선택 경고 */
+.country-warning {
+  color: red;
+  text-align: center;
+  font-weight: 600;
+  margin-top: 1rem;
+}
+
+/* ✅ EU 모달 */
+#euModal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+}
+
+#euModal .modal-content {
+  background: white;
+  padding: 2rem;
+  max-height: 80vh;
+  width: 400px;
+  overflow-y: auto;
+  border-radius: 1rem;
+}
+
+#euModal .modal-content h2 {
+  font-size: 1.25rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.eu-country {
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 0.5rem;
+  margin: 0.5rem 0;
+  cursor: pointer;
+  text-align: center;
+  transition: background-color 0.2s ease;
+}
+
+.eu-country:hover {
+  background-color: #f0f4ff;
+}
+
+/* ✅ 이전 단계 버튼 */
+#goBackBtn {
+  position: absolute;
+  left: 2rem;
+  bottom: 2rem;
+  padding: 0.75rem 2rem;
+  font-size: 1.125rem;
+  border-radius: 9999px;
+  background-color: #3b82f6;
+  color: white;
+  opacity: 1;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+#goBackBtn:hover {
+  background-color: #2563eb;
+}
+
+/* ✅ 로딩 원형 회전 */
+.loader {
+  width: 40px;
+  height: 40px;
+  border: 5px solid #ddd;
+  border-top: 5px solid #2563eb;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ✅ 동그라미 점등 */
+.circle {
+  display: inline-block;
+  width: 0.9rem;
+  height: 0.9rem;
+  margin-right: 0.6rem;
+  border-radius: 50%;
+  background-color: #ddd;
+  transition: background-color 0.3s;
+}
+
+.circle.on {
+  background-color: #2563eb;
+}
+
+/* ✅ 체크박스 크기 키움 */
+input[type="checkbox"] {
+  width: 1.2rem;
+  height: 1.2rem;
+}
+/* ✅ 결과 페이지 전체 */
+.result-section {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  background-color: white;
+  border-radius: 1rem;
+  padding: 3rem;
+  position: relative;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* ✅ 결과 - 그래프 애니메이션 */
+.result-graph {
+  width: 100%;
+  height: 300px;
+  background: url('graph.png') no-repeat center center / contain;
+  animation: slideUp 0.8s ease-out forwards;
+  opacity: 0;
+  transform: translateY(30px);
+  margin-bottom: 2rem;
+}
+
+@keyframes slideUp {
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* ✅ 결과 - 분석 요약 및 코멘트 */
+.result-comment {
+  background-color: #f9fafc;
+  padding: 2rem;
+  border-radius: 1rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  font-size: 1.125rem;
+  color: #333;
+  line-height: 1.8;
+}
+
+/* ✅ 결과 페이지 텍스트 */
+.result-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 2rem;
+  color: #2563eb;
+}
+/* ✅ 이름, 가입일 스타일 */
+.profile-info {
+  font-size: 1.25rem;
+  line-height: 2rem;
+}
+.profile-info p + p {
+  margin-top: 1.2rem; /* 위아래 간격 넉넉하게 */
+}
+
+/* ✅ 이메일 박스 수직 정렬 위치 조정 */
+.email-box {
+  font-size: 1.25rem;
+  margin-top: 0.3rem;   /* 수직 위치 조정 */
+  margin-left: 2rem;
+}
+.email-box p {
+  margin: 0;
+}
+.email-box .email-value {
+  margin-left: 0.5rem;
+}
+
+/* ✅ 버튼 블록 수직 정렬 */
+.button-vertical-group {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 1rem;
+  margin-left: 2rem;
+  margin-top: 0.3rem;
+}
+
+/* ✅ 비밀번호 변경 버튼 */
+.change-password-btn {
+  padding: 0.5rem 1.2rem;
+  background-color: #f3f4f6;
+  border-radius: 9999px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: background-color 0.3s;
+  border: 1px solid #ccc;
+}
+.change-password-btn:hover {
+  background-color: #e5e7eb;
+}
+
+/* ✅ 회원 탈퇴 버튼 */
+.withdraw-btn {
+  padding: 0.5rem 1.2rem;
+  background-color: white;
+  color: red;
+  border: 1px solid red;
+  border-radius: 9999px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: background-color 0.3s;
+}
+.withdraw-btn:hover {
+  background-color: #ffe5e5;
+}
+
+/* ✅ 분석 리포트 테이블 th 오른쪽으로 이동 */
+.report-table th {
+  padding-left: 1.5rem;
+}
+.report-table td {
+  padding-left: 1.5rem;
+}
+
+/* ✅ 홈으로 돌아가기 버튼 */
+.home-btn {
+  padding: 0.8rem 2.5rem;
+  background-color: #2563eb;
+  color: white;
+  font-size: 1.125rem;
+  font-weight: bold;
+  border-radius: 9999px;
+  transition: background-color 0.3s ease;
+}
+.home-btn:hover {
+  background-color: #1e40af;
+}
+/* ✅ 탈퇴 모달 전체 레이아웃 */
+.withdraw-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.3);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ✅ 모달 박스 */
+.withdraw-modal-content {
+  background: white;
+  padding: 2.5rem 3rem;
+  border-radius: 1rem;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+  text-align: center;
+}
+
+/* ✅ 제목 */
+.withdraw-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+/* ✅ 경고 문구 */
+.withdraw-warning {
+  color: red;
+  font-weight: 600;
+  margin-bottom: 2rem;
+  font-size: 1.1rem;
+}
+
+/* ✅ 버튼 묶음 */
+.withdraw-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+}
+
+/* ✅ 예 버튼 */
+.confirm-withdraw {
+  background-color: #2563eb;
+  color: white;
+  padding: 0.6rem 2rem;
+  border-radius: 9999px;
+  font-weight: 600;
+  font-size: 1rem;
+  border: none;
+  transition: background-color 0.3s;
+}
+.confirm-withdraw:hover {
+  background-color: #1e40af;
+}
+
+/* ✅ 아니요 버튼 */
+.cancel-withdraw {
+  background-color: #2563eb;
+  color: white;
+  padding: 0.6rem 2rem;
+  border-radius: 9999px;
+  font-weight: 600;
+  font-size: 1rem;
+  border: none;
+  transition: background-color 0.3s;
+}
+.cancel-withdraw:hover {
+  background-color: #1e40af;
+}
