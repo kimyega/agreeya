@@ -1,0 +1,13 @@
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: url('main.jpg') no-repeat center center / cover;
+  filter: blur(4px);
+  opacity: 0.12;
+  z-index: -1;
+}
+.circle.on {
+  background-color: #3b82f6 !important; /* Tailwind blue-500 */
+}
