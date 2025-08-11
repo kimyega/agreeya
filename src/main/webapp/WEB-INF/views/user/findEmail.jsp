@@ -4,24 +4,25 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>안심계약 - AI 근로계약 분석</title>
+    <title>안심계약 - 본인 인증(전화번호)</title>
 
-    <!-- Tailwind CSS -->
+    <!-- Tailwind -->
     <script src="https://cdn.tailwindcss.com"></script>
 
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-    <link rel="stylesheet" href="table.css" />
-    <script src="table.js"></script>
+
+    <!-- 페이지 전용 CSS -->
+    <link rel="stylesheet" href="/css/phoneVerify.css" />
 </head>
 
-<body class="bg-cover bg-center bg-no-repeat min-h-screen flex flex-col" style="background-image: url('main.jpg');">
+<body class="bg-cover bg-center bg-no-repeat min-h-screen flex flex-col">
 
 <!-- ✅ 상단 헤더 -->
 <header class="w-full bg-white/90 backdrop-blur-md shadow-sm sticky top-0 z-10">
     <div class="w-full flex items-center justify-between py-1 px-6">
         <div class="flex-shrink-0">
-            <img src="logo.png" alt="Agreeya 로고" class="h-24" />
+            <img src="/images/logo.png" alt="Agreeya 로고" class="h-24" />
         </div>
         <nav class="flex items-center space-x-8 text-xl font-semibold text-gray-800 pr-4">
             <a href="#" class="hover:text-blue-600">홈</a>
@@ -43,17 +44,13 @@
     </div>
 </header>
 
-<!-- 본인 인증 박스 -->
+<!-- ✅ 본문 -->
 <main class="flex-grow flex items-center justify-center">
     <div class="bg-white bg-opacity-95 p-10 rounded-xl shadow-md w-full max-w-md text-center mt-10">
 
         <h2 class="text-2xl font-bold mb-6">본인 인증</h2>
 
-        <form class="space-y-6 text-left">
-
-            <!-- 이름 입력 -->
-            <!-- 이름 입력 -->
-            <!-- ✅ 이름 입력 -->
+        <form class="space-y-6 text-left" id="phone-verify-form">
             <!-- 이름 입력 -->
             <div class="relative mb-4 h-12">
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -68,8 +65,6 @@
                 <p id="name-msg" class="text-sm mt-1 ml-2 text-red-500 hidden"></p>
             </div>
 
-
-            <!-- ✅ 전화번호 입력 -->
             <!-- 전화번호 입력 -->
             <div class="relative mb-4 h-12">
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -84,76 +79,15 @@
                 <p id="phone-msg" class="text-sm mt-1 ml-2 text-red-500 hidden"></p>
             </div>
 
-
-
-
-            <!-- 인증번호 받기 버튼 -->
             <button type="submit"
                     class="w-full bg-blue-500 text-white py-3 rounded-full font-semibold hover:bg-blue-600 text-base">
                 인증번호 받기
             </button>
         </form>
-
-        </form>
     </div>
 </main>
 
-<!-- ✅ JavaScript -->
-<script>
-    const form = document.querySelector("form");
-    const nameInput = document.getElementById("name");
-    const phoneInput = document.getElementById("phone");
-    const nameMsg = document.getElementById("name-msg");
-    const phoneMsg = document.getElementById("phone-msg");
-
-    // 테스트용 사용자 정보
-    const dummyUser = {
-        name: "홍길동",
-        phone: "01012345678"
-    };
-
-    form.addEventListener("submit", function (e) {
-        e.preventDefault();
-
-        const name = nameInput.value.trim();
-        const phone = phoneInput.value.trim();
-
-        // 초기화
-        nameMsg.textContent = "";
-        phoneMsg.textContent = "";
-        nameMsg.classList.add("hidden");
-        phoneMsg.classList.add("hidden");
-
-        if (name === "") {
-            nameMsg.textContent = "이름을 입력해주세요.";
-            nameMsg.classList.remove("hidden");
-        }
-
-        if (phone === "") {
-            phoneMsg.textContent = "전화번호를 입력해주세요.";
-            phoneMsg.classList.remove("hidden");
-        }
-
-        if (name === "" || phone === "") return;
-
-        if (name !== dummyUser.name) {
-            nameMsg.textContent = "등록되지 않은 이름입니다.";
-            nameMsg.classList.remove("hidden");
-            return;
-        }
-
-        if (phone !== dummyUser.phone) {
-            phoneMsg.textContent = "전화번호가 일치하지 않습니다.";
-            phoneMsg.classList.remove("hidden");
-            return;
-        }
-
-
-        // 쿼리스트링으로 이름과 전화번호 전달
-        location.href = `Pin_001.html?name=${encodeURIComponent(name)}&phone=${encodeURIComponent(phone)}`;
-    });
-</script>
-
-
+<!-- ✅ 페이지 전용 JS -->
+<script src="/js/findEmail.js"></script>
 </body>
 </html>
