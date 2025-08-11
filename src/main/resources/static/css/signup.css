@@ -1,0 +1,11 @@
+/* 배경 */
+body {
+    background-image: url('../images/main.jpg'); /* 정적 이미지 경로 기준 */
+}
+
+/* 유효성 색상 */
+.valid { border-color:#4ade80 !important; }
+.invalid { border:2px solid #f87171 !important; }
+.invalid::placeholder { color:#f87171; }
+.success { color:#22c55e; }
+.error { color:#ef4444; }
