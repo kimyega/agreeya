@@ -53,7 +53,7 @@
 
       // 결과 페이지로 5초 뒤 이동
       setTimeout(() => {
-        window.location.href = "result.html";
+        window.location.href = "/contract/result";
       }, 5000);
     }
   }, 2000);
