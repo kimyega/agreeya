@@ -131,7 +131,7 @@
 
             <!-- 선택 버튼 -->
             <button type="button"
-                    onclick="location.href='/negotiation/simulate'"
+                    onclick="location.href='simulation.html'"
                     class="mt-6 bg-[#207CEB] text-white font-semibold rounded px-6 py-2 hover:bg-blue-700 transition w-full">
                 선택
             </button>
@@ -225,7 +225,7 @@
         }
 
         // 모두 입력했을 경우 simulation.html로 이동
-        window.location.href = '/negotiation/simulate';
+        window.location.href = 'simulation.html';
     });
 
 
