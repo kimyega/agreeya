@@ -65,6 +65,8 @@ public class ViewTestController {
         return "user/phoneVerify";
     }
 
+
+
     @GetMapping("mypage")
     public String mypage() {
         log.info("GET /mypage");

@@ -13,7 +13,7 @@
   <!-- Font Awesome (아이콘용) -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 
-  <link rel="stylesheet" href="country.css"/>
+  <link rel="stylesheet" href="../css/country.css"/>
 </head>
 
 <body class="bg-slate-100 text-gray-800 font-sans">
@@ -32,14 +32,14 @@
     
     <!-- 로고 -->
     <div class="flex-shrink-0">
-      <img src="logo.png" alt="Agreeya 로고" class="h-24" />
+      <img src="../images/logo.png" alt="Agreeya 로고" class="h-24" />
     </div>
 
     <!-- 메뉴 -->
     <nav class="flex items-center space-x-8 text-xl font-semibold text-gray-800 pr-4">
-      <a href="#" class="hover:text-blue-600">홈</a>
+      <a href="/index" class="hover:text-blue-600">홈</a>
       <a href="#" class="hover:text-blue-600">AI 모의 협상</a>
-      <a href="#" class="hover:text-blue-600">계약서 분석</a>
+      <a href="/contract/upload" class="hover:text-blue-600">계약서 분석</a>
       <a href="#" class="hover:text-blue-600">Q&A 챗봇</a>
 
       <!-- ✅ 로그인 버튼 -->
@@ -57,7 +57,7 @@
         </button>
         <div id="profileDropdown"
              class="absolute right-0 mt-2 w-40 bg-white border border-gray-300 rounded-md shadow-lg hidden z-50">
-          <a href="/profile" class="block px-4 py-3 text-center text-gray-800 hover:bg-gray-100">내 정보</a>
+          <a href="/mypage" class="block px-4 py-3 text-center text-gray-800 hover:bg-gray-100">내 정보</a>
           <a href="#" onclick="logout()" class="block px-4 py-3 text-center text-red-600 hover:bg-red-100 border-t border-gray-300">로그아웃</a>
         </div>
       </div>
@@ -93,15 +93,15 @@
     <!-- 국가 카드 -->
     <div class="flex justify-center gap-20 mb-6">
       <div class="flex flex-col items-center cursor-pointer country-card" data-country="대한민국">
-        <img src="kor.PNG" class="w-28 h-28 object-contain mb-2" />
+        <img src="../images/kor.png" class="w-28 h-28 object-contain mb-2" />
         <span class="text-xl font-semibold">대한민국</span>
       </div>
       <div class="flex flex-col items-center cursor-pointer country-card" data-country="E U">
-        <img src="eu.PNG" class="w-28 h-28 object-contain mb-2" />
+        <img src="../images/eu.png" class="w-28 h-28 object-contain mb-2" />
         <span class="text-xl font-semibold">E U</span>
       </div>
       <div class="flex flex-col items-center cursor-pointer country-card" data-country="일본">
-        <img src="jp.PNG" class="w-28 h-28 object-contain mb-2" />
+        <img src="../images/jp.png" class="w-28 h-28 object-contain mb-2" />
         <span class="text-xl font-semibold">일본</span>
       </div>
     </div>
@@ -164,6 +164,6 @@
 
 
 <!-- ✅ JS -->
-  <script src="country.js"></script>
+  <script src="../js/country.js"></script>
 </body>
 </html>

@@ -1,0 +1,6 @@
+/* 배경 이미지 (정적 경로 기준) */
+body {
+    background-image: url('../images/main.jpg');
+}
+
+/* 필요한 추가 커스터마이징은 여기서 */
