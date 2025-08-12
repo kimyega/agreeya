@@ -1,11 +1,12 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
          pageEncoding="UTF-8" %>
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<!DOCTYPE html >
 <html lang="ko">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>유사사례 상세 - 안심계약</title>
+    <title>안심계약 - AI 근로계약 분석</title>
+
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
 
@@ -37,10 +38,10 @@
 
         <!-- 메뉴 -->
         <nav class="flex items-center space-x-8 text-xl font-semibold text-gray-800 pr-4">
-            <a href="#" class="hover:text-blue-600">홈</a>
-            <a href="#" class="hover:text-blue-600">AI 모의 협상</a>
-            <a href="#" class="hover:text-blue-600">계약서 분석</a>
-            <a href="#" class="hover:text-blue-600">Q&A 챗봇</a>
+            <a href="/" class="hover:text-blue-600">홈</a>
+            <a href="/chatbot/aiSimulationMain" class="hover:text-blue-600">AI 모의 협상</a>
+            <a href="/contract/upload" class="hover:text-blue-600">계약서 분석</a>
+            <a href="/chatbot/qnaChatbot" class="hover:text-blue-600">Q&A 챗봇</a>
 
             <!-- ✅ 로그인 버튼 -->
             <a id="loginButton" href="#" onclick="simulateLogin()"

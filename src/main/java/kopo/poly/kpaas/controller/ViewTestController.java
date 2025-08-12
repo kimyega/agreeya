@@ -111,21 +111,21 @@ public class ViewTestController {
     }
 
     // ===== 협상/챗봇 영역 =====
-    @GetMapping("negotiation/simulate")
+    @GetMapping("chatbot/aiSimulationMain")
+    public String aiSimulationMain() {
+        log.info("GET /chatbot/aiSimulationMain");
+        return "chatbot/aiSimulationMain";
+    }
+
+    @GetMapping("chatbot/aiSimulationChat")
     public String aiSimulationChat() {
-        log.info("GET /negotiation/simulate");
-        return "negotiation/aiSimulationChat";
+        log.info("GET /chatbot/aiSimulationChat");
+        return "chatbot/aiSimulationChat";
     }
 
-    @GetMapping("negotiation/bot")
-    public String negotiationBot() {
-        log.info("GET /negotiation/bot");
-        return "negotiation/negotiation";
-    }
-
-    @GetMapping("qna")
+    @GetMapping("chatbot/qnaChatbot")
     public String qnaChatbot() {
-        log.info("GET /qna");
-        return "negotiation/qnaChatbot";
+        log.info("GET /chatbot/qnaChatbot");
+        return "chatbot/qnaChatbot";
     }
 }
