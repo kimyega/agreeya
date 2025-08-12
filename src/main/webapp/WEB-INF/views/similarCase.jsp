@@ -148,10 +148,10 @@
 
     <!-- 버튼 영역 -->
     <section class="flex flex-col sm:flex-row gap-4 justify-center mt-12">
-        <a href="/analysis-result.html" class="bg-gray-300 text-gray-800 px-6 py-3 rounded-full hover:bg-gray-400 transition w-full sm:w-auto text-center">
+        <a href="/contract/result" class="bg-gray-300 text-gray-800 px-6 py-3 rounded-full hover:bg-gray-400 transition w-full sm:w-auto text-center">
             분석 결과로 돌아가기
         </a>
-        <a href="/generate-draft.html" class="bg-blue-600 text-white px-6 py-3 rounded-full hover:bg-blue-700 transition w-full sm:w-auto text-center">
+        <a href="/contract/draft" class="bg-blue-600 text-white px-6 py-3 rounded-full hover:bg-blue-700 transition w-full sm:w-auto text-center">
             GPT로 계약서 초안 생성하기
         </a>
     </section>

@@ -72,7 +72,7 @@
     <div class="bg-white rounded-2xl p-8 shadow-xl space-y-6 relative">
 
         <!-- 홈 아이콘 버튼 (왼쪽 위) -->
-        <a href="index3.1.html"
+        <a href="/"
            class="absolute top-4 left-4 text-blue-600 hover:text-blue-800 text-4xl">
             <i class="fa-solid fa-house"></i>
         </a>

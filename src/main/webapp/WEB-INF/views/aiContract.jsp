@@ -66,7 +66,7 @@
 </header>
 
 <!-- 홈 아이콘 -->
-<a href="index3.1.html" class="fixed bottom-20 right-20 text-blue-600 hover:text-blue-800 text-4xl z-50" title="홈으로 이동">
+<a href="/" class="fixed bottom-20 right-20 text-blue-600 hover:text-blue-800 text-4xl z-50" title="홈으로 이동">
     <i class="fa-solid fa-house"></i>
 </a>
 
