@@ -48,9 +48,9 @@ function hideWithdrawModal() {
 function confirmWithdraw() {
   // 로그아웃 처리 및 홈으로 리디렉션
   alert("회원 탈퇴되었습니다.");
-  window.location.href = "index.html"; // 홈 경로에 맞게 수정
+  window.location.href = "/index"; // 홈 경로에 맞게 수정
 }
 
 function goToHome() {
-  window.location.href = "index.html"; // 홈 경로에 맞게 수정
+  window.location.href = "/index"; // 홈 경로에 맞게 수정
 }

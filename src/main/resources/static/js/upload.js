@@ -73,9 +73,10 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  goNextBtn.addEventListener("click", () => {
-    alert("다음 단계로 이동합니다.");
-  });
+    goNextBtn.addEventListener("click", () => {
+        if (goNextBtn.disabled) return;
+        window.location.href = "/contract/country";
+    });
 });
 
 

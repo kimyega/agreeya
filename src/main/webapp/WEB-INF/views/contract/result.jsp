@@ -1,6 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
          pageEncoding="UTF-8" %>
-<!DOCTYPE html>
+<!DOCTYPE html >
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
@@ -13,7 +13,8 @@
   <!-- Font Awesome (아이콘용) -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 
-  <link rel="stylesheet" href="result.css"/>
+  <link rel="stylesheet" href="css/table.css"/>
+  <script src="js/table.js"></script>
 </head>
 
 <body class="bg-slate-100 text-gray-800 font-sans">
@@ -29,18 +30,18 @@
 <!-- ✅ 헤더 -->
 <header class="bg-white/90 backdrop-blur-md shadow-sm sticky top-0 z-10">
   <div class="w-full flex items-center justify-between py-1 px-6">
-    
+
     <!-- 로고 -->
     <div class="flex-shrink-0">
-      <img src="logo.png" alt="Agreeya 로고" class="h-24" />
+      <img src="images/logo.png" alt="Agreeya 로고" class="h-24" />
     </div>
 
     <!-- 메뉴 -->
     <nav class="flex items-center space-x-8 text-xl font-semibold text-gray-800 pr-4">
-      <a href="#" class="hover:text-blue-600">홈</a>
-      <a href="#" class="hover:text-blue-600">AI 모의 협상</a>
-      <a href="#" class="hover:text-blue-600">계약서 분석</a>
-      <a href="#" class="hover:text-blue-600">Q&A 챗봇</a>
+      <a href="/" class="hover:text-blue-600">홈</a>
+      <a href="/chatbot/aiSimulationMain" class="hover:text-blue-600">AI 모의 협상</a>
+      <a href="/contract/upload" class="hover:text-blue-600">계약서 분석</a>
+      <a href="/chatbot/qnaChatbot" class="hover:text-blue-600">Q&A 챗봇</a>
 
       <!-- ✅ 로그인 버튼 -->
       <a id="loginButton" href="#" onclick="simulateLogin()"
@@ -82,7 +83,7 @@
 
     <!-- 그래프 이미지 -->
     <div class="flex justify-center mb-10">
-      <img src="gr.PNG" alt="분석 결과 그래프" class="max-w-full w-[550px] h-auto">
+      <img src="../images/gr.png" alt="분석 결과 그래프" class="max-w-full w-[550px] h-auto">
     </div>
 
     <!-- AI 코멘트 -->
@@ -116,14 +117,14 @@
 
     <!-- 버튼 -->
     <div class="flex justify-center mt-10 gap-6">
-      <button class="bg-blue-600 text-white text-sm px-6 py-2 rounded-full hover:bg-blue-700 transition">계약서 초안 자동 생성</button>
-      <button class="bg-gray-200 text-gray-800 text-sm px-6 py-2 rounded-full hover:bg-gray-300 transition">홈으로 돌아가기</button>
+      <button onclick="location.href ='/contract/draft' " class="bg-blue-600 text-white text-sm px-6 py-2 rounded-full hover:bg-blue-700 transition">계약서 초안 자동 생성</button>
+      <button onclick="location.href ='/' " class="bg-gray-200 text-gray-800 text-sm px-6 py-2 rounded-full hover:bg-gray-300 transition">홈으로 돌아가기</button>
     </div>
 
   </div>
 </main>
 
 <!-- ✅ JS -->
-  <script src="result.js"></script>
+  <script src="../js/result.js"></script>
 </body>
 </html>

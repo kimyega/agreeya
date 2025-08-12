@@ -1,11 +1,12 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
          pageEncoding="UTF-8" %>
-<!DOCTYPE html>
+<!DOCTYPE html >
 <html lang="ko">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>유사사례 상세 - 안심계약</title>
+    <title>안심계약 - AI 근로계약 분석</title>
+
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
 
@@ -37,10 +38,10 @@
 
         <!-- 메뉴 -->
         <nav class="flex items-center space-x-8 text-xl font-semibold text-gray-800 pr-4">
-            <a href="#" class="hover:text-blue-600">홈</a>
-            <a href="#" class="hover:text-blue-600">AI 모의 협상</a>
-            <a href="#" class="hover:text-blue-600">계약서 분석</a>
-            <a href="#" class="hover:text-blue-600">Q&A 챗봇</a>
+            <a href="/" class="hover:text-blue-600">홈</a>
+            <a href="/chatbot/aiSimulationMain" class="hover:text-blue-600">AI 모의 협상</a>
+            <a href="/contract/upload" class="hover:text-blue-600">계약서 분석</a>
+            <a href="/chatbot/qnaChatbot" class="hover:text-blue-600">Q&A 챗봇</a>
 
             <!-- ✅ 로그인 버튼 -->
             <a id="loginButton" href="#" onclick="simulateLogin()"
@@ -148,10 +149,10 @@
 
     <!-- 버튼 영역 -->
     <section class="flex flex-col sm:flex-row gap-4 justify-center mt-12">
-        <a href="/analysis-result.html" class="bg-gray-300 text-gray-800 px-6 py-3 rounded-full hover:bg-gray-400 transition w-full sm:w-auto text-center">
+        <a href="/contract/result" class="bg-gray-300 text-gray-800 px-6 py-3 rounded-full hover:bg-gray-400 transition w-full sm:w-auto text-center">
             분석 결과로 돌아가기
         </a>
-        <a href="/generate-draft.html" class="bg-blue-600 text-white px-6 py-3 rounded-full hover:bg-blue-700 transition w-full sm:w-auto text-center">
+        <a href="/contract/draft" class="bg-blue-600 text-white px-6 py-3 rounded-full hover:bg-blue-700 transition w-full sm:w-auto text-center">
             GPT로 계약서 초안 생성하기
         </a>
     </section>

@@ -1,6 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
          pageEncoding="UTF-8" %>
-<!DOCTYPE html>
+<!DOCTYPE html >
 <html lang="ko">
 <head>
     <meta charset="UTF-8" />
@@ -38,10 +38,10 @@
 
         <!-- 메뉴 -->
         <nav class="flex items-center space-x-8 text-xl font-semibold text-gray-800 pr-4">
-            <a href="#" class="hover:text-blue-600">홈</a>
-            <a href="#" class="hover:text-blue-600">AI 모의 협상</a>
-            <a href="#" class="hover:text-blue-600">계약서 분석</a>
-            <a href="#" class="hover:text-blue-600">Q&A 챗봇</a>
+            <a href="/" class="hover:text-blue-600">홈</a>
+            <a href="/chatbot/aiSimulationMain" class="hover:text-blue-600">AI 모의 협상</a>
+            <a href="/contract/upload" class="hover:text-blue-600">계약서 분석</a>
+            <a href="/chatbot/qnaChatbot" class="hover:text-blue-600">Q&A 챗봇</a>
 
             <!-- ✅ 로그인 버튼 -->
             <a id="loginButton" href="#" onclick="simulateLogin()"
@@ -72,7 +72,7 @@
     <div class="bg-white rounded-2xl p-8 shadow-xl space-y-6 relative">
 
         <!-- 홈 아이콘 버튼 (왼쪽 위) -->
-        <a href="index3.1.html"
+        <a href="/"
            class="absolute top-4 left-4 text-blue-600 hover:text-blue-800 text-4xl">
             <i class="fa-solid fa-house"></i>
         </a>

@@ -38,10 +38,10 @@
 
         <!-- 메뉴 -->
         <nav class="flex items-center space-x-8 text-xl font-semibold text-gray-800 pr-4">
-            <a href="#" class="hover:text-blue-600">홈</a>
-            <a href="#" class="hover:text-blue-600">AI 모의 협상</a>
-            <a href="#" class="hover:text-blue-600">계약서 분석</a>
-            <a href="#" class="hover:text-blue-600">Q&A 챗봇</a>
+            <a href="/" class="hover:text-blue-600">홈</a>
+            <a href="/chatbot/aiSimulationMain" class="hover:text-blue-600">AI 모의 협상</a>
+            <a href="/contract/upload" class="hover:text-blue-600">계약서 분석</a>
+            <a href="/chatbot/qnaChatbot" class="hover:text-blue-600">Q&A 챗봇</a>
 
             <!-- ✅ 로그인 버튼 -->
             <a id="loginButton" href="#" onclick="simulateLogin()"
@@ -94,9 +94,9 @@
                     업로드한 계약서에서 위험한 조항을 자동 탐지하고, 사용자에게 알림과 함께 분석 리포트를 제공합니다.
                 </p>
             </div>
-            <button class="bg-blue-500 text-white px-6 py-2 rounded-full hover:bg-blue-600 transition">
+            <a href="/contract/upload" class="bg-blue-500 text-white px-6 py-2 rounded-full hover:bg-blue-600 transition">
                 시작하기
-            </button>
+            </a>
         </div>
 
         <!-- Q&A 챗봇 카드 -->
@@ -115,7 +115,7 @@
                     노동법, 근로계약서 작성 등 궁금한 점을 AI 챗봇에게 질문하면 실시간으로 답변을 제공합니다.
                 </p>
             </div>
-            <a href="chatbot.html" class="bg-green-600 text-white px-6 py-2 rounded-full hover:bg-green-700 transition">
+            <a href="/chatbot/qnaChatbot" class="bg-green-600 text-white px-6 py-2 rounded-full hover:bg-green-700 transition">
                 시작하기
             </a>
         </div>
@@ -135,9 +135,9 @@
                     노동법, 근로계약서의 작성 방법 등 AI 챗봇에게 질문하면 실시간 답변을 드립니다.
                 </p>
             </div>
-            <button class="bg-purple-600 text-white px-6 py-2 rounded-full hover:bg-purple-700 transition">
+            <a href="/chatbot/aiSimulationMain" class="bg-purple-600 text-white px-6 py-2 rounded-full hover:bg-purple-700 transition">
                 시작하기
-            </button>
+            </a>
         </div>
     </div>
 </main>

@@ -39,6 +39,18 @@
   }
   let selectedCountry = '';
 
+
+ //버튼
+ nextBtn.addEventListener("click", () => {
+     if (nextBtn.disabled) return;
+     window.location.href = "/contract/loading";
+ });
+
+ prevBtn.addEventListener("click", () => {
+     if (prevBtn.disabled) return;
+     window.location.href = "/contract/upload";
+ });
+
   
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -71,15 +83,7 @@ document.addEventListener('DOMContentLoaded', function () {
     } else if (e.target === modal) {
       modal.classList.add('hidden');
     }
-  });
 
-  prevBtn.addEventListener('click', () => {
-    window.location.href = 'upload.html';
-  });
 
-  nextBtn.addEventListener('click', () => {
-    if (!nextBtn.disabled) {
-      alert("다음 단계로 이동!");
-    }
   });
 });
