@@ -1,29 +1,27 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<!DOCTYPE html>
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+         pageEncoding="UTF-8" %>
+<!DOCTYPE html >
 <html lang="ko">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>회원가입 | AGREEYA</title>
+    <title>안심계약 - AI 근로계약 분석</title>
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- Font Awesome -->
+    <!-- Font Awesome (아이콘용) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 
-    <!-- 공통 -->
-    <link rel="stylesheet" href="/css/table.css" />
-    <script src="/js/table.js" defer></script>
-
-    <!-- 페이지 전용 CSS -->
-    <link rel="stylesheet" href="/css/signup.css" />
+    <link rel="stylesheet" href="css/table.css"/>
+    <script src="js/table.js"></script>
 </head>
 
-<body class="bg-cover bg-center bg-no-repeat min-h-screen flex flex-col">
+<body class="bg-slate-100 text-gray-800 font-sans">
 
 <!-- ✅ 로그인 알림 메시지 -->
-<div id="loginMessage" class="hidden fixed inset-0 flex items-center justify-center bg-black/30 z-50">
+<div id="loginMessage"
+     class="hidden fixed inset-0 flex items-center justify-center bg-black/30 z-50">
     <div class="bg-white text-green-600 font-bold text-2xl px-6 py-4 rounded-xl shadow-lg">
         로그인되었습니다.
     </div>
@@ -32,17 +30,18 @@
 <!-- ✅ 헤더 -->
 <header class="bg-white/90 backdrop-blur-md shadow-sm sticky top-0 z-10">
     <div class="w-full flex items-center justify-between py-1 px-6">
+
         <!-- 로고 -->
         <div class="flex-shrink-0">
-            <img src="/images/logo.png" alt="Agreeya 로고" class="h-24" />
+            <img src="images/logo.png" alt="Agreeya 로고" class="h-24" />
         </div>
 
         <!-- 메뉴 -->
         <nav class="flex items-center space-x-8 text-xl font-semibold text-gray-800 pr-4">
-            <a href="#" class="hover:text-blue-600">홈</a>
-            <a href="#" class="hover:text-blue-600">AI 모의 협상</a>
-            <a href="#" class="hover:text-blue-600">계약서 분석</a>
-            <a href="#" class="hover:text-blue-600">Q&amp;A 챗봇</a>
+            <a href="/" class="hover:text-blue-600">홈</a>
+            <a href="/chatbot/aiSimulationMain" class="hover:text-blue-600">AI 모의 협상</a>
+            <a href="/contract/upload" class="hover:text-blue-600">계약서 분석</a>
+            <a href="/chatbot/qnaChatbot" class="hover:text-blue-600">Q&A 챗봇</a>
 
             <!-- ✅ 로그인 버튼 -->
             <a id="loginButton" href="#" onclick="simulateLogin()"
