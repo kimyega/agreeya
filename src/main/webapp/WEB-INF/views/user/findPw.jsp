@@ -1,6 +1,5 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8"
-         pageEncoding="UTF-8" %>
-<!DOCTYPE html >
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<!DOCTYPE html>
 <html lang="ko">
 <head>
     <meta charset="UTF-8" />
@@ -10,30 +9,28 @@
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- Font Awesome (아이콘용) -->
+    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 
-    <link rel="stylesheet" href="css/table.css"/>
-    <script src="js/table.js"></script>
+    <!-- 정적 리소스: 절대경로로 고정 -->
+    <link rel="stylesheet" href="/css/table.css"/>
+    <script src="/js/table.js"></script>
 </head>
 
-<body class="bg-slate-100 text-gray-800 font-sans">
+<!-- ✅ 중앙정렬 기본틀 -->
+<body class="min-h-screen flex flex-col bg-slate-100 text-gray-800 font-sans">
 
-<!-- ✅ 로그인 알림 메시지 -->
-<div id="loginMessage"
-     class="hidden fixed inset-0 flex items-center justify-center bg-black/30 z-50">
-    <div class="bg-white text-green-600 font-bold text-2xl px-6 py-4 rounded-xl shadow-lg">
-        로그인되었습니다.
-    </div>
+<!-- 로그인 알림 -->
+<div id="loginMessage" class="hidden fixed inset-0 flex items-center justify-center bg-black/30 z-50">
+    <div class="bg-white text-green-600 font-bold text-2xl px-6 py-4 rounded-xl shadow-lg">로그인되었습니다.</div>
 </div>
 
-<!-- ✅ 헤더 -->
+<!-- 헤더 -->
 <header class="bg-white/90 backdrop-blur-md shadow-sm sticky top-0 z-10">
     <div class="w-full flex items-center justify-between py-1 px-6">
-
         <!-- 로고 -->
         <div class="flex-shrink-0">
-            <img src="images/logo.png" alt="Agreeya 로고" class="h-24" />
+            <img src="/images/logo.png" alt="Agreeya 로고" class="h-24" />
         </div>
 
         <!-- 메뉴 -->
@@ -43,22 +40,20 @@
             <a href="/contract/upload" class="hover:text-blue-600">계약서 분석</a>
             <a href="/chatbot/qnaChatbot" class="hover:text-blue-600">Q&A 챗봇</a>
 
-            <!-- ✅ 로그인 버튼 -->
+            <!-- 로그인 버튼(데모) -->
             <a id="loginButton" href="#" onclick="simulateLogin()"
                class="bg-blue-500 text-white px-6 py-3 rounded-full hover:bg-blue-600 transition text-lg font-bold">
                 로그인
             </a>
 
-            <!-- ✅ 로그인 후 드롭다운 메뉴 -->
+            <!-- 로그인 후 드롭다운 -->
             <div id="profileDropdownWrapper" class="relative hidden">
-                <button onclick="toggleDropdown()"
-                        class="flex items-center space-x-2 text-xl font-bold text-gray-800 focus:outline-none">
+                <button onclick="toggleDropdown()" class="flex items-center space-x-2 text-xl font-bold text-gray-800 focus:outline-none">
                     <i class="fa-solid fa-user-circle text-2xl"></i>
                     <span>Hong</span>
                 </button>
-                <div id="profileDropdown"
-                     class="absolute right-0 mt-2 w-40 bg-white border border-gray-300 rounded-md shadow-lg hidden z-50">
-                    <a href="/profile" class="block px-4 py-3 text-center text-gray-800 hover:bg-gray-100">내 정보</a>
+                <div id="profileDropdown" class="absolute right-0 mt-2 w-40 bg-white border border-gray-300 rounded-md shadow-lg hidden z-50">
+                    <a href="/mypage" class="block px-4 py-3 text-center text-gray-800 hover:bg-gray-100">내 정보</a>
                     <a href="#" onclick="logout()" class="block px-4 py-3 text-center text-red-600 hover:bg-red-100 border-t border-gray-300">로그아웃</a>
                 </div>
             </div>
@@ -66,13 +61,13 @@
     </div>
 </header>
 
-<!-- ✅ 본문 -->
-<main class="flex-grow flex items-center justify-center">
-    <div class="bg-white/95 p-10 rounded-xl shadow-md w-full max-w-md text-center mt-10">
+<!-- ✅ 본문: 정중앙 -->
+<main class="flex-1 flex items-center justify-center px-4">
+    <div class="bg-white/95 p-10 rounded-xl shadow-md w-full max-w-md text-center">
         <h2 class="text-2xl font-bold mb-6">비밀번호 찾기</h2>
 
         <form id="find-password-form" class="space-y-6 text-left">
-            <div class="relative mb-4 h-12">
+            <div class="relative h-12">
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <i class="fa-solid fa-envelope text-gray-400 text-[16px]"></i>
                 </div>
@@ -89,7 +84,7 @@
     </div>
 </main>
 
-<!-- ✅ 성공 모달 (원하면 사용 가능, 기본은 즉시 이동) -->
+<!-- (선택) 전송 안내 모달 -->
 <div id="successModal" class="fixed inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm z-50 hidden">
     <div class="bg-white rounded-2xl shadow-xl p-10 w-full max-w-md text-center border border-gray-300">
         <h2 class="text-xl font-semibold mb-6 text-green-600">전송되었습니다.</h2>
@@ -99,7 +94,47 @@
     </div>
 </div>
 
-<!-- 페이지 JS -->
+<!-- 페이지 JS (있다면 사용) -->
 <script src="/js/findPw.js"></script>
+
+<!-- 🔧 최소 동작 스크립트(외부 JS가 없어도 제출 → /emailVerify 동작) -->
+<script>
+    (function(){
+        if (window.__BIND_FINDPW__) return;  // 중복 바인딩 방지
+        window.__BIND_FINDPW__ = true;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('find-password-form');
+            const email = document.getElementById('email');
+            const msg = document.getElementById('email-msg');
+            const modal = document.getElementById('successModal');
+
+            const showErr = (m) => { msg.textContent = m; msg.classList.remove('hidden'); email.classList.add('border-red-400'); }
+            const clearErr = () => { msg.textContent = ''; msg.classList.add('hidden'); email.classList.remove('border-red-400'); }
+
+            form?.addEventListener('submit', (e) => {
+                e.preventDefault();
+                clearErr();
+
+                const v = email.value.trim();
+                const ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+                if (!ok) {
+                    showErr('유효한 이메일 형식이 아닙니다.');
+                    return;
+                }
+
+                // TODO: 실제 발송 API 호출 (fetch/axios) 후 성공 시 아래로 진행
+                // 바로 다음 단계로 이동:
+                window.location.href = '/emailVerify';
+
+                // 모달을 쓰고 싶다면 위 한 줄 대신 아래 3줄 사용:
+                // modal.classList.remove('hidden');
+                // setTimeout(() => window.location.href = '/emailVerify', 800);
+            });
+        });
+
+        window.closeModal = function(){ document.getElementById('successModal')?.classList.add('hidden'); }
+    })();
+</script>
 </body>
 </html>
