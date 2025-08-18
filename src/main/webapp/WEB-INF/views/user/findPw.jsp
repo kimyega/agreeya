@@ -76,6 +76,7 @@
                 <p id="email-msg" class="text-sm mt-1 ml-2 text-red-500 hidden"></p>
             </div>
 
+            <br>
             <button type="submit"
                     class="w-full bg-blue-500 text-white py-3 rounded-full font-semibold hover:bg-blue-600 transition">
                 인증메일 받기
@@ -97,44 +98,5 @@
 <!-- 페이지 JS (있다면 사용) -->
 <script src="/js/findPw.js"></script>
 
-<!-- 🔧 최소 동작 스크립트(외부 JS가 없어도 제출 → /emailVerify 동작) -->
-<script>
-    (function(){
-        if (window.__BIND_FINDPW__) return;  // 중복 바인딩 방지
-        window.__BIND_FINDPW__ = true;
-
-        document.addEventListener('DOMContentLoaded', () => {
-            const form = document.getElementById('find-password-form');
-            const email = document.getElementById('email');
-            const msg = document.getElementById('email-msg');
-            const modal = document.getElementById('successModal');
-
-            const showErr = (m) => { msg.textContent = m; msg.classList.remove('hidden'); email.classList.add('border-red-400'); }
-            const clearErr = () => { msg.textContent = ''; msg.classList.add('hidden'); email.classList.remove('border-red-400'); }
-
-            form?.addEventListener('submit', (e) => {
-                e.preventDefault();
-                clearErr();
-
-                const v = email.value.trim();
-                const ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
-                if (!ok) {
-                    showErr('유효한 이메일 형식이 아닙니다.');
-                    return;
-                }
-
-                // TODO: 실제 발송 API 호출 (fetch/axios) 후 성공 시 아래로 진행
-                // 바로 다음 단계로 이동:
-                window.location.href = '/emailVerify';
-
-                // 모달을 쓰고 싶다면 위 한 줄 대신 아래 3줄 사용:
-                // modal.classList.remove('hidden');
-                // setTimeout(() => window.location.href = '/emailVerify', 800);
-            });
-        });
-
-        window.closeModal = function(){ document.getElementById('successModal')?.classList.add('hidden'); }
-    })();
-</script>
 </body>
 </html>

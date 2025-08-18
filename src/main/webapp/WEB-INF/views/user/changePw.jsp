@@ -13,8 +13,11 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
 
     <!-- 정적 리소스: 절대경로로 고정 -->
-    <link rel="stylesheet" href="/css/table.css"/>
-    <script src="/js/table.js"></script>
+    <link rel="stylesheet" href="/css/changePw.css"/>
+
+    <!-- sweetAlert2 -->
+    <link rel="stylesheet" href="/sweetAlert/css/all.min.css"/>
+    <script src="/sweetAlert/js/all.min.js"></script>
 </head>
 
 <!-- ✅ 바디를 flex-col + min-h-screen 로 변경 (중앙정렬 기본틀) -->
@@ -90,65 +93,9 @@
     </div>
 </main>
 
-<!-- 완료 모달 -->
-<div id="modal" class="fixed inset-0 bg-black/40 flex items-center justify-center hidden z-50">
-    <div class="bg-white p-6 rounded-lg shadow-xl text-center w-full max-w-sm">
-        <p id="modal-message" class="text-green-600 font-semibold text-base mb-4">비밀번호가 성공적으로 변경되었습니다.</p>
-        <button id="modal-confirm" class="bg-blue-500 text-white px-6 py-2 rounded-full font-medium hover:bg-blue-600">
-            로그인 화면으로 돌아가기
-        </button>
-    </div>
-</div>
-
 <!-- 페이지 JS -->
 <script src="/js/changePw.js"></script>
 
-<!-- 🔧 최소 동작 보장용(외부 JS 없을 때도 동작) -->
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const form = document.getElementById('reset-form');
-        const np = document.getElementById('new-password');
-        const cp = document.getElementById('confirm-password');
-        const npMsg = document.getElementById('new-password-msg');
-        const cpMsg = document.getElementById('confirm-password-msg');
-        const modal = document.getElementById('modal');
 
-        const setErr = (el, msgEl, msg) => {
-            el.classList.add('border-red-400'); el.classList.remove('border-gray-300');
-            msgEl.classList.add('text-red-500'); msgEl.textContent = msg;
-        };
-        const clearErr = (el, msgEl) => {
-            el.classList.remove('border-red-400'); el.classList.add('border-gray-300');
-            msgEl.textContent = '';
-        };
-
-        form?.addEventListener('submit', (e) => {
-            e.preventDefault();
-            let ok = true;
-
-            if (!np.value || np.value.length < 8) {
-                setErr(np, npMsg, '비밀번호는 8자 이상 입력하세요.');
-                ok = false;
-            } else {
-                clearErr(np, npMsg);
-            }
-            if (cp.value !== np.value) {
-                setErr(cp, cpMsg, '비밀번호가 일치하지 않습니다.');
-                ok = false;
-            } else {
-                clearErr(cp, cpMsg);
-            }
-
-            if (!ok) return;
-
-            // ✅ 여기서 실제 서버 호출(fetch/axios) 후 성공 시 모달 표시
-            modal.classList.remove('hidden');
-        });
-
-        document.getElementById('modal-confirm')?.addEventListener('click', () => {
-            window.location.href = '/login';
-        });
-    });
-</script>
 </body>
 </html>

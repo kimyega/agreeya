@@ -22,50 +22,6 @@ public class ViewTestController {
         return "index";
     }
 
-    // ===== 사용자 영역 =====
-    @GetMapping("login")
-    public String login() {
-        log.info("GET /login");
-        return "user/login"; // /WEB-INF/views/user/login.jsp
-    }
-
-    @GetMapping("signup")
-    public String signup() {
-        log.info("GET /signup");
-        return "user/signup";
-    }
-
-    @GetMapping("findPw")
-    public String findPw() {
-        log.info("GET /findPw");
-        return "user/findPw";
-    }
-
-    @GetMapping("changePw")
-    public String changePw() {
-        log.info("GET /changePw");
-        return "user/changePw";
-    }
-
-    @GetMapping("findEmail")
-    public String findEmail() {
-        log.info("GET /findEmail");
-        return "user/findEmail";
-    }
-
-    @GetMapping("emailVerify")
-    public String emailVerify() {
-        log.info("GET /emailVerify");
-        return "user/emailVerify";
-    }
-
-    @GetMapping("phoneVerify")
-    public String phoneVerify() {
-        log.info("GET /phoneVerify");
-        return "user/phoneVerify";
-    }
-
-
 
     @GetMapping("mypage")
     public String mypage() {

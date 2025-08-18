@@ -21,8 +21,6 @@ const emailInput = document.getElementById("email");
 const emailMsg = document.getElementById("email-msg");
 const modal = document.getElementById("successModal");
 
-// 더미 등록 이메일(테스트용)
-const registeredEmails = ["gildong@email.com", "user@example.com"];
 
 form?.addEventListener("submit", function (e) {
     e.preventDefault();
@@ -45,21 +43,24 @@ form?.addEventListener("submit", function (e) {
         return;
     }
 
-    if (!registeredEmails.includes(email)) {
-        emailMsg.textContent = "등록되지 않은 이메일입니다.";
-        emailMsg.classList.remove("hidden");
-        return;
-    }
+    // 이메일 전송  (value = 값)
+    fetch("/user/emailCheck", { //fatch = 받아오다
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userEmail: emailInput.value }) //{} 제아슨
+    })
+        .then(res => {
+            if (!res.ok) throw new Error("존재하지 않음");
+            return res.text();
+        })
+        .then(data => {
+            sessionStorage.setItem("email",data);
+            alert("✅ " + "인증 코드 전송 완료");
+            window.location.href = "/emailVerify"; // 다음 단계로 이동
+        })
+        .catch(err => {
+            alert("❌ " + err.message);
+        });
 
-    // 성공 시: 이메일 인증(코드 입력) 페이지로 이동
-    window.location.href = `/emailVerify?email=${encodeURIComponent(email)}`;
-    // 모달을 쓰고 싶으면 위 라인 주석 처리하고 아래 두 줄 사용:
-    // modal?.classList.remove("hidden");
-    // setTimeout(() => window.location.href = "/email/verify", 1200);
 });
 
-// 모달 닫기
-function closeModal() {
-    modal?.classList.add("hidden");
-}
-window.closeModal = closeModal;
