@@ -1,56 +1,41 @@
- function toggleDropdown() {
-    const dropdown = document.getElementById('profileDropdown');
-    dropdown.classList.toggle('hidden');
-  }
-
-  // 외부 클릭 시 드롭다운 닫기
-  window.addEventListener('click', function (e) {
-    const wrapper = document.getElementById('profileDropdownWrapper');
-    const dropdown = document.getElementById('profileDropdown');
-    if (!wrapper.contains(e.target)) {
-      dropdown.classList.add('hidden');
+// /static/js/mypage.js
+document.addEventListener('DOMContentLoaded', async () => {
+  // 프로필 로드
+  try {
+    const res = await fetch('/api/mypage/profile');
+    if (!res.ok) {
+      alert('로그인이 필요합니다.');
+      location.href = '/user/login';
+      return;
     }
+    const d = await res.json();
+    // 화면 바인딩 (백엔드 alias와 맞추세요)
+    document.getElementById('pfName').textContent   = d.name ?? '-';
+    document.getElementById('pfEmail').textContent  = d.email ?? '-';
+    document.getElementById('pfRegDt').textContent  = d.regDt ?? '-';
+    document.getElementById('headerNick').textContent = d.nickname || d.userId || 'User';
+    // 헤더 상태 가짜로그인 UI 토글
+    document.getElementById('loginButton')?.classList.add('hidden');
+    document.getElementById('profileDropdownWrapper')?.classList.remove('hidden');
+  } catch (e) {
+    console.error(e);
+    alert('프로필 로딩 실패');
+  }
+
+  // 모달
+  const modal = document.getElementById('withdrawModal');
+  document.getElementById('btnWithdraw')?.addEventListener('click', () => {
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
   });
-
-  // 로그인 시 동작
-  function simulateLogin() {
-    const message = document.getElementById('loginMessage');
-    const loginBtn = document.getElementById('loginButton');
-    const profileMenu = document.getElementById('profileDropdownWrapper');
-
-    message.classList.remove('hidden');
-
-    setTimeout(() => {
-      message.classList.add('hidden');
-      loginBtn.classList.add('hidden');
-      profileMenu.classList.remove('hidden');
-    }, 1500);
-  }
-
-  // 로그아웃 시 원래 상태로 복원
-  function logout() {
-    const loginBtn = document.getElementById('loginButton');
-    const profileMenu = document.getElementById('profileDropdownWrapper');
-    const dropdown = document.getElementById('profileDropdown');
-
-    loginBtn.classList.remove('hidden');
-    profileMenu.classList.add('hidden');
-    dropdown.classList.add('hidden');
-  }
-  function showWithdrawModal() {
-  document.getElementById('withdrawModal').classList.remove('hidden');
-}
-
-function hideWithdrawModal() {
-  document.getElementById('withdrawModal').classList.add('hidden');
-}
-
-function confirmWithdraw() {
-  // 로그아웃 처리 및 홈으로 리디렉션
-  alert("회원 탈퇴되었습니다.");
-  window.location.href = "/index"; // 홈 경로에 맞게 수정
-}
-
-function goToHome() {
-  window.location.href = "/index"; // 홈 경로에 맞게 수정
-}
+  document.getElementById('cancelWithdraw')?.addEventListener('click', () => {
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+  });
+  document.getElementById('confirmWithdraw')?.addEventListener('click', async () => {
+    // TODO: 실제 탈퇴 API 호출 (/api/mypage/delete)
+    alert('탈퇴 처리 API 연동 예정');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+  });
+});
