@@ -17,5 +17,71 @@ public class ViewTestController {
         log.info("GET / or /index");
         model.addAttribute("msg", "서버 OK - JSP 연결 확인");
         return "index"; // /WEB-INF/views/index.jsp
+
+        // /WEB-INF/views/common/index.jsp
+        return "index";
+    }
+
+
+    @GetMapping("mypage")
+    public String mypage() {
+        log.info("GET /mypage");
+        return "user/mypage";
+    }
+
+    // ===== 계약서/분석 영역 =====
+    @GetMapping("contract/upload")
+    public String upload() {
+        log.info("GET /contract/upload");
+        return "contract/upload";
+    }
+
+    @GetMapping("contract/loading")
+    public String loading() {
+        log.info("GET /contract/loading");
+        return "contract/loading";
+    }
+
+    @GetMapping("contract/result")
+    public String result() {
+        log.info("GET /contract/result");
+        return "contract/result";
+    }
+
+    @GetMapping("contract/similar")
+    public String similarCase() {
+        log.info("GET /contract/similar");
+        return "contract/similarCase";
+    }
+
+    @GetMapping("contract/country")
+    public String country() {
+        log.info("GET /contract/country");
+        return "contract/country";
+    }
+
+    @GetMapping("contract/draft")
+    public String aiContractDraft() {
+        log.info("GET /contract/draft");
+        return "contract/aiContract";
+    }
+
+    // ===== 협상/챗봇 영역 =====
+    @GetMapping("chatbot/aiSimulationMain")
+    public String aiSimulationMain() {
+        log.info("GET /chatbot/aiSimulationMain");
+        return "chatbot/aiSimulationMain";
+    }
+
+    @GetMapping("chatbot/aiSimulationChat")
+    public String aiSimulationChat() {
+        log.info("GET /chatbot/aiSimulationChat");
+        return "chatbot/aiSimulationChat";
+    }
+
+    @GetMapping("chatbot/qnaChatbot")
+    public String qnaChatbot() {
+        log.info("GET /chatbot/qnaChatbot");
+        return "chatbot/qnaChatbot";
     }
 }
