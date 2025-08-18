@@ -1,4 +1,18 @@
-/* 배경 이미지 (정적 리소스 기준) */
-body {
-    background-image: url('../images/main.jpg');
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background: url('../images/main.jpg') no-repeat center center / cover;
+    filter: blur(2px);
+    opacity: 0.12;
+    z-index: -1;
+}
+
+.rounded-border {
+    border-radius: 20px !important;
+}
+
+.swal2-confirm.rounded-button {
+    border-radius: 20px !important;  /* 완전 둥글게 */
+    /*padding: 0.75rem 1.25rem;          !* 버튼 크기 조금 키움(선택) *!*/
 }

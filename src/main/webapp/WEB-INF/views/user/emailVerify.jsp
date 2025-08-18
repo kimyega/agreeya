@@ -86,41 +86,5 @@
 <!-- 페이지 전용 JS -->
 <script src="/js/emailVerify.js"></script>
 
-<!-- 🔧 최소 동작 스크립트(외부 JS 없어도 동작) -->
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const form = document.getElementById('code-form');
-        const code = document.getElementById('code');
-        const msg = document.getElementById('message');
-        const errorModal = document.getElementById('errorModal');
-
-        function showError(text){ msg.textContent = text; msg.classList.remove('hidden'); }
-        function clearError(){ msg.textContent = ''; msg.classList.add('hidden'); }
-
-        form?.addEventListener('submit', (e) => {
-            e.preventDefault();
-            clearError();
-
-            const v = code.value.trim();
-
-            if (!/^\d{6}$/.test(v)) {           // 6자리 숫자 체크
-                showError('6자리 숫자로 입력하세요.');
-                return;
-            }
-
-            // TODO: 실제 서버 검증 호출 (fetch/axios)
-            const OK = (v === '123456');        // 임시 검증
-            if (OK) {
-                window.location.href = '/changePw'; // 다음 단계로
-            } else {
-                errorModal.classList.remove('hidden');
-            }
-        });
-
-        window.closeModal = function(){
-            errorModal.classList.add('hidden');
-        }
-    });
-</script>
 </body>
 </html>
