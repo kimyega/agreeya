@@ -18,5 +18,4 @@ public class UserDTO {
         private String tel;
         private String isForeigner;
 
-
 }
