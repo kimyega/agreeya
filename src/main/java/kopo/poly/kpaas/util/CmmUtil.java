@@ -1,4 +1,4 @@
-package kopo.poly.hanium.util;
+package kopo.poly.kpaas.util;
 
 public class CmmUtil {
 	public static String nvl(String str, String chg_str) {

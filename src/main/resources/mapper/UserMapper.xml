@@ -5,34 +5,89 @@
 
 <mapper namespace="kopo.poly.kpaas.mapper.UserMapper">
 
+    <!-- ===== users ===== -->
     <select id="getUserByEmail" parameterType="string" resultType="kopo.poly.kpaas.dto.UserDTO">
         SELECT
             user_id      AS userId,
-            name         AS userName,
-            email        AS userEmail,
-            nickname     AS userNickName,
-            password     AS userPassword,
-            birth_date   AS userBirthDate,
-            is_foreigner AS isForeigner,
-            created_at   AS createdAt,
-            email_code   AS authCode,
-            limited_time AS limitedTime
+            name         AS name,
+            email        AS email,
+            nickname     AS nickname,
+            password     AS password,
+            birth_date   AS birthDate,
+            tel          AS tel,
+            is_foreigner AS isForeigner
         FROM users
-        WHERE email = #{userEmail}
+        WHERE LOWER(email) = LOWER(#{email})
+            LIMIT 1
     </select>
 
-    <update id="updatePasswordByEmail">
+    <update id="updatePasswordByEmail" parameterType="kopo.poly.kpaas.dto.UserDTO">
         UPDATE users
-        SET password = #{userPassword}
-        WHERE email = #{userEmail}
+        SET password = #{password}
+        WHERE LOWER(email) = LOWER(#{email})
     </update>
 
-    <update id="updateEmailCodeByEmail">
-        UPDATE users
-        SET email_code = #{authCode},
-            limited_time = #{limitedTime}
-        WHERE email = #{email}
-    </update>
+    <!-- ===== email_verify (SQL-side hashing & expiry) ===== -->
 
+    <!-- 인증코드 업서트: DB가 해시/만료 계산 -->
+    <insert id="upsertEmailVerifySqlSide">
+        INSERT INTO email_verify (email, purpose, code_hash, expires_at)
+        VALUES (
+                   #{email},
+                   #{purpose},
+                   SHA2(#{plainCode}, 256),
+                   DATE_ADD(NOW(), INTERVAL #{expireMin} MINUTE)
+               )
+            ON DUPLICATE KEY UPDATE
+                                 code_hash  = VALUES(code_hash),
+                                 expires_at = VALUES(expires_at),
+                                 created_at = NOW()
+    </insert>
+
+    <!-- 인증코드 검증 + 1회성 소모(삭제) -->
+    <delete id="verifyAndConsumeSqlSide">
+        DELETE FROM email_verify
+        WHERE LOWER(email) = LOWER(#{email})
+          AND purpose      = #{purpose}
+          AND code_hash    = SHA2(#{inputCode}, 256)
+          AND expires_at  >= NOW()
+    </delete>
+
+    <!-- (옵션) 조회/디버깅용: 필요 시 함께 사용하세요 -->
+    <select id="getEmailVerify" resultType="kopo.poly.kpaas.dto.EmailVerifyDTO">
+        SELECT
+            email,
+            purpose,
+            code_hash  AS codeHash,
+            expires_at AS expiresAt,
+            created_at AS createdAt
+        FROM email_verify
+        WHERE LOWER(email) = LOWER(#{email})
+          AND purpose      = #{purpose}
+            LIMIT 1
+    </select>
+
+    <select id="hasValidCode" resultType="int">
+        SELECT EXISTS(
+            SELECT 1 FROM email_verify
+            WHERE LOWER(email) = LOWER(#{email})
+              AND purpose      = #{purpose}
+              AND expires_at  >= NOW()
+            LIMIT 1
+        )
+    </select>
+
+    <select id="getVerifyRemainingSeconds" resultType="int">
+        SELECT
+            CASE
+                WHEN expires_at >= NOW()
+                    THEN TIMESTAMPDIFF(SECOND, NOW(), expires_at)
+                ELSE NULL
+                END AS remainingSeconds
+        FROM email_verify
+        WHERE LOWER(email) = LOWER(#{email})
+          AND purpose      = #{purpose}
+            LIMIT 1
+    </select>
 
 </mapper>

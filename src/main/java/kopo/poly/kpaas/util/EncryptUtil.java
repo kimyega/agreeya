@@ -1,4 +1,4 @@
-package kopo.poly.hanium.util;
+package kopo.poly.kpaas.util;
 
 import org.apache.tomcat.util.codec.binary.Base64;
 
