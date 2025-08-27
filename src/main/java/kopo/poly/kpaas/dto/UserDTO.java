@@ -10,18 +10,12 @@ import java.time.LocalDateTime;
 public class UserDTO {
 
         private String userId;
-        private String userEmail;
-        private String userTel;
-        private String userName;
-        private String userPassword;
-        private LocalDateTime registrationDate;
-        private LocalDateTime updateDate;
-        private String userBirthDate;
-        private String userNickName;
-        private String userCountry;
-        private LocalDateTime limitedTime;
-        private String authCode;
-
-
+        private String name;
+        private String email;
+        private String nickname;
+        private String password;
+        private String birthDate;
+        private String tel;
+        private String isForeigner;
 
 }
