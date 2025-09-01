@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kopo.poly.kpaas.mapper.ContractMapper">
+
+    <resultMap id="SummaryMap" type="kopo.poly.kpaas.dto.AnalysisSummaryDto">
+        <id     column="contract_id"   property="contractId"/>
+        <result column="created_at"    property="createdAt"/>
+        <result column="risk_chart_data" property="riskChartData"/>
+        <result column="total_risk_level" property="totalRiskLevel"/>
+        <result column="translated_text" property="translatedText"/>
+    </resultMap>
+
+    <select id="getSummary" resultMap="SummaryMap">
+        SELECT s.contract_id, s.risk_chart_data, s.total_risk_level, s.translated_text,
+               c.created_at
+        FROM contract_analysis_summary s
+                 JOIN contracts c ON c.contract_id = s.contract_id
+        WHERE s.contract_id = #{contractId} AND c.user_id = #{userId}
+    </select>
+
+    <select id="getClauses" parameterType="int" resultType="kopo.poly.kpaas.dto.ClauseDto">
+        SELECT clause_id AS clauseId, clause_text AS clauseText,
+               risk_score AS riskScore, ai_comment AS aiComment, risk_type AS riskType
+        FROM contract_clauses
+        WHERE contract_id = #{contractId}
+        ORDER BY clause_id
+    </select>
+
+    <!-- (선택) 저장/갱신 -->
+    <!--
+    <insert id="upsertSummary" parameterType="kopo.poly.kpaas.dto.AnalysisSummaryDto">
+      INSERT INTO contract_analysis_summary
+        (contract_id, risk_chart_data, total_risk_level, translated_text)
+      VALUES (#{contractId}, #{riskChartData}, #{totalRiskLevel}, #{translatedText})
+      ON DUPLICATE KEY UPDATE
+        risk_chart_data = VALUES(risk_chart_data),
+        total_risk_level = VALUES(total_risk_level),
+        translated_text = VALUES(translated_text)
+    </insert>
+    -->
+</mapper>
