@@ -72,6 +72,12 @@
             <artifactId>tomcat-embed-jasper</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>net.nurigo</groupId>
+            <artifactId>sdk</artifactId>
+            <version>4.3.0</version>
+        </dependency>
+
         <!-- 메일 전송 기능을 위한 Spring Boot Mail Starter -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

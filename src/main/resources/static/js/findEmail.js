@@ -16,61 +16,72 @@ function logout() {
 }
 
 // ===== 본문 로직 =====
-const form = document.getElementById("phone-verify-form");
-const nameInput = document.getElementById("name");
-const phoneInput = document.getElementById("phone");
-const nameMsg = document.getElementById("name-msg");
-const phoneMsg = document.getElementById("phone-msg");
+document.addEventListener('DOMContentLoaded', () => {
+    const form = document.getElementById('phone-verify-form');
+    const name = document.getElementById('name');
+    const phone = document.getElementById('phone');
+    const nMsg = document.getElementById('name-msg');
+    const pMsg = document.getElementById('phone-msg');
 
-// 테스트용 사용자
-const dummyUser = {
-    name: "홍길동",
-    phone: "01012345678"
-};
+    const setErr = (el, msgEl, msg) => {
+        msgEl.textContent = msg;
+        msgEl.classList.remove('hidden');
+        el.classList.add('border-red-400');
+    };
+    const clrErr = (el, msgEl) => {
+        msgEl.textContent = '';
+        msgEl.classList.add('hidden');
+        el.classList.remove('border-red-400');
+    };
 
-form?.addEventListener("submit", function (e) {
-    e.preventDefault();
+    // 휴대폰 번호 입력 시 숫자만 추출 후 하이픈 넣어주기
+    phone.addEventListener('input', () => {
+        const digits = phone.value.replace(/\D/g, '');
+        let v = digits;
+        if (v.length > 3 && v.length <= 7) v = v.replace(/(\d{3})(\d+)/, '$1-$2');
+        else if (v.length > 7) v = v.replace(/(\d{3})(\d{4})(\d+)/, '$1-$2-$3');
+        phone.value = v;
+    });
 
-    const name = (nameInput.value || "").trim();
-    const phone = (phoneInput.value || "").replaceAll("-", "").trim();
+    // 폼 제출 시 실행
+    form?.addEventListener('submit', (e) => {
+        e.preventDefault();
+        let ok = true;
 
-    // 초기화
-    nameMsg.textContent = "";
-    phoneMsg.textContent = "";
-    nameMsg.classList.add("hidden");
-    phoneMsg.classList.add("hidden");
+        if (!name.value.trim()) {
+            setErr(name, nMsg, '이름을 입력하세요.');
+            ok = false;
+        } else {
+            clrErr(name, nMsg);
+        }
 
-    // 기본 체크
-    if (!name) {
-        nameMsg.textContent = "이름을 입력해주세요.";
-        nameMsg.classList.remove("hidden");
-    }
-    if (!phone) {
-        phoneMsg.textContent = "전화번호를 입력해주세요.";
-        phoneMsg.classList.remove("hidden");
-    }
-    if (!name || !phone) return;
+        if (!/^01[0-9]-?\d{3,4}-?\d{4}$/.test(phone.value.trim())) {
+            setErr(phone, pMsg, '휴대폰 번호 형식이 올바르지 않습니다.');
+            ok = false;
+        } else {
+            clrErr(phone, pMsg);
+        }
 
-    // 형식 체크(국내 휴대폰)
-    const phoneRegex = /^01[016789]\d{7,8}$/; // 하이픈 제거 기준
-    if (!phoneRegex.test(phone)) {
-        phoneMsg.textContent = "전화번호 형식이 올바르지 않습니다.";
-        phoneMsg.classList.remove("hidden");
-        return;
-    }
+        if (!ok) return;
 
-    // 더미 유저 매칭
-    if (name !== dummyUser.name) {
-        nameMsg.textContent = "등록되지 않은 이름입니다.";
-        nameMsg.classList.remove("hidden");
-        return;
-    }
-    if (phone !== dummyUser.phone) {
-        phoneMsg.textContent = "전화번호가 일치하지 않습니다.";
-        phoneMsg.classList.remove("hidden");
-        return;
-    }
+        // ✅ 서버로 인증번호 발송 요청
+        const rawPhone = phone.value.trim();
+        const digits = rawPhone.replace(/\D/g, '');
 
-    // 성공 → 코드 입력 페이지로 이동 (라우트에 맞게 수정)
-    window.location.href = `/emailVerify?name=${encodeURIComponent(name)}&phone=${encodeURIComponent(phone)}`;
+        fetch('/user/find-email/request', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ phone: digits, name: name.value.trim() })
+        })
+            .then(r => r.json())
+            .then(res => {
+                if (res.ok) {
+                    sessionStorage.setItem('fe_phone', digits); // 다음 화면에서 사용
+                    window.location.href = '/phoneVerify';
+                } else {
+                    alert(res.message || '인증번호 발송 실패');
+                }
+            })
+            .catch(() => alert('네트워크 오류가 발생했습니다.'));
+    });
 });
