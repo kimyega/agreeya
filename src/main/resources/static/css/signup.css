@@ -1,6 +1,19 @@
+
+input {
+    box-sizing: border-box; /* 테두리 포함 높이 계산 */
+    height: 3rem;           /* 원하는 높이 고정 */
+}
+.invalid, .valid {
+    border-width: 2px;
+}
+
 /* 배경 */
 body {
     background-image: url('../images/main.jpg'); /* 정적 이미지 경로 기준 */
+    background-size: cover;        /* 화면 꽉 채우기 */
+    background-position: center;   /* 가운데 정렬 */
+    background-repeat: no-repeat;  /* 반복 금지 */
+    background-attachment: fixed;  /* 스크롤해도 고정 */
 }
 
 /* 유효성 색상 */

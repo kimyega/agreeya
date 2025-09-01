@@ -13,8 +13,11 @@
     <!-- Font Awesome (아이콘용) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 
-    <link rel="stylesheet" href="css/table.css"/>
-    <script src="js/table.js"></script>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/table.css"/>
+    <script src="${pageContext.request.contextPath}/js/table.js"></script>
+
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/signup.css"/>
+
 </head>
 
 <body class="bg-slate-100 text-gray-800 font-sans">
@@ -33,7 +36,7 @@
 
         <!-- 로고 -->
         <div class="flex-shrink-0">
-            <img src="images/logo.png" alt="Agreeya 로고" class="h-24" />
+            <img src="${pageContext.request.contextPath}/images/logo.png" alt="Agreeya 로고" class="h-24" />
         </div>
 
         <!-- 메뉴 -->
@@ -95,12 +98,12 @@
 
         <form id="signupForm" class="space-y-3">
             <!-- 이름 -->
-            <div class="relative">
-                <i class="fa-solid fa-user absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+            <div class="relative flex items-center">
+                <i class="fa-solid fa-user absolute left-4 text-gray-400"></i>
                 <input id="name" type="text" placeholder="이름을 입력하세요"
                        class="w-full pl-10 p-3 border rounded-full focus:outline-none focus:ring-0" />
-                <p id="name-msg" class="text-sm mt-1"></p>
             </div>
+            <p id="name-msg" class="text-xs ml-8 h-4 overflow-hidden m-0"></p>
 
             <!-- 비밀번호 -->
             <div class="relative flex items-center">
@@ -110,7 +113,7 @@
                 <i class="fa-solid fa-eye-slash absolute right-4 text-gray-400 cursor-pointer"
                    onclick="togglePassword('password', this)"></i>
             </div>
-            <p id="password-msg" class="text-sm mt-1"></p>
+            <p id="password-msg" class="text-xs ml-8 h-4 overflow-hidden m-0"></p>
 
             <!-- 비밀번호 확인 -->
             <div class="relative flex items-center">
@@ -120,7 +123,7 @@
                 <i class="fa-solid fa-eye-slash absolute right-4 text-gray-400 cursor-pointer"
                    onclick="togglePassword('password-check', this)"></i>
             </div>
-            <p id="password-check-msg" class="text-sm mt-1"></p>
+            <p id="password-check-msg" class="text-xs ml-8 h-4 overflow-hidden m-0"></p>
 
             <!-- 닉네임 -->
             <div class="relative flex items-center">
@@ -128,20 +131,22 @@
                 <input id="nickname" type="text" placeholder="닉네임[한글·영문·숫자 조합 15자 이내]"
                        class="w-full pl-10 py-[0.875rem] border rounded-full focus:outline-none focus:ring-0 text-base" />
             </div>
-            <p id="nickname-msg" class="text-sm mt-1"></p>
+            <p id="nickname-msg" class="text-xs ml-8 h-4 overflow-hidden m-0"></p>
 
             <!-- 전화번호 -->
             <div class="relative flex items-center">
                 <i class="fa-solid fa-phone absolute left-4 top-0 bottom-0 my-auto flex items-center text-gray-400"></i>
                 <input id="phone" type="text" placeholder="전화번호를 입력하세요"
-                       class="w-full pl-10 py-[0.875rem] border rounded-full focus:outline-none focus:ring-0 text-base" />
+                       class="w-full pl-10 py-[0.875rem] border rounded-full focus:outline-none focus:ring-0 text-base"
+                       maxlength="11" />
             </div>
-            <p id="phone-msg" class="text-sm mt-1"></p>
+            <p id="phone-msg" class="text-xs ml-8 h-4 overflow-hidden m-0"></p>
 
             <!-- 생년월일 -->
             <div class="flex gap-2">
                 <input id="birth-year" type="text" placeholder="년[4자]"
-                       class="w-1/2 p-3 border rounded-lg focus:outline-none focus:ring-0" />
+                       class="w-1/2 p-3 border rounded-lg focus:outline-none focus:ring-0"
+                       maxlength="4" />
                 <select id="birth-month"
                         class="w-1/4 p-3 border rounded-lg focus:outline-none focus:ring-0">
                     <option value="">월</option>
@@ -151,9 +156,10 @@
                     <option value="10">10월</option><option value="11">11월</option><option value="12">12월</option>
                 </select>
                 <input id="birth-day" type="text" placeholder="일"
-                       class="w-1/4 p-3 border rounded-lg focus:outline-none focus:ring-0" />
+                       class="w-1/4 p-3 border rounded-lg focus:outline-none focus:ring-0"
+                       maxlength="2" />
             </div>
-            <p id="birth-msg" class="text-sm mt-1"></p>
+            <p id="birth-msg" class="text-xs ml-2 h-4 overflow-hidden m-0"></p>
 
             <!-- 이메일 + 인증메일 -->
             <div class="flex gap-2">
@@ -163,20 +169,20 @@
                     인증메일 받기
                 </button>
             </div>
-            <p id="email-msg" class="text-sm mt-1"></p>
+            <p id="email-msg" class="text-xs ml-2 h-4 overflow-hidden m-0"></p>
 
             <!-- 인증번호 확인 -->
             <div class="flex gap-2">
-                <input id="email-code" type="text" placeholder="이메일로 받은 인증번호를 입력해주세요"
+                <input id="email-code" type="text" placeholder="인증번호를 입력해주세요"
                        class="flex-1 p-3 border rounded-lg focus:outline-none focus:ring-0" />
                 <button type="button" onclick="verifyEmailCode()" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 text-sm">
                     인증확인
                 </button>
             </div>
-            <p id="email-code-msg" class="text-sm mt-1"></p>
+            <p id="email-code-msg" class="text-xs ml-2 h-4 overflow-hidden m-0"></p>
 
             <!-- 국적 선택 -->
-            <div class="flex justify-center gap-10 my-4">
+            <div class="flex justify-center gap-10 my-6">
                 <label class="flex items-center gap-2">
                     <input type="radio" name="nation" checked class="accent-blue-500" />
                     <span>내국인</span>
@@ -188,7 +194,7 @@
             </div>
 
             <!-- 버튼 -->
-            <button type="submit" class="w-full bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600 transition">회원가입</button>
+            <button type="submit" class="w-full bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600 transition mt-2">회원가입</button>
             <button type="button" class="w-full border py-3 rounded-lg mt-2" onclick="history.back()">취소</button>
         </form>
     </div>
