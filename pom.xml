@@ -94,6 +94,12 @@
             <artifactId>tomcat-embed-jasper</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>net.nurigo</groupId>
+            <artifactId>sdk</artifactId>
+            <version>4.3.0</version>
+        </dependency>
+
         <!-- 메일 전송 기능을 위한 Spring Boot Mail Starter -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -111,6 +117,12 @@
             <groupId>javax.servlet</groupId>
             <artifactId>jstl</artifactId>
             <version>1.2</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-crypto</artifactId>
+            <version>6.3.1</version> <!-- 프로젝트 스프링 버전에 맞게 조정 -->
         </dependency>
     </dependencies>
 

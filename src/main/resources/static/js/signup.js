@@ -37,6 +37,18 @@ document.addEventListener("DOMContentLoaded", function () {
     const month = document.getElementById("birth-month");
     const day = document.getElementById("birth-day");
 
+    // 숫자만 입력 허용 + 붙여넣기 차단
+    const allowOnlyNumbers = (input) => {
+        input.addEventListener("input", () => {
+            input.value = input.value.replace(/[^0-9]/g, "");
+        });
+    };
+
+    // 적용
+    allowOnlyNumbers(year);
+    allowOnlyNumbers(day);
+    allowOnlyNumbers(phone);
+
     // 이름
     name?.addEventListener("input", function () {
         const msg = document.getElementById("name-msg");
@@ -138,11 +150,23 @@ document.addEventListener("DOMContentLoaded", function () {
         if (inputCode !== expected) return setError(emailCode, msg, "인증번호가 일치하지 않습니다.");
 
         setSuccess(emailCode, msg, "인증되었습니다.");
-        email.disabled = true;
-        email.nextElementSibling.disabled = true; // 인증메일 버튼
-        emailCode.disabled = true;
+
+        email.readOnly = true;
+        emailCode.readOnly = true;
+
+        email.nextElementSibling.disabled = true;
+        emailCode.nextElementSibling.disabled = true;
+
+        email.style.opacity = 0.5;
+        emailCode.style.opacity = 0.5;
         email.nextElementSibling.style.opacity = 0.5;
+        emailCode.nextElementSibling.style.opacity = 0.5;
+
+        email.style.cursor = "not-allowed";
+        emailCode.style.cursor = "not-allowed";
         email.nextElementSibling.style.cursor = "not-allowed";
+        emailCode.nextElementSibling.style.cursor = "not-allowed";
+
     };
     emailCode?.addEventListener("blur", verifyEmailCode);
     window.verifyEmailCode = verifyEmailCode;

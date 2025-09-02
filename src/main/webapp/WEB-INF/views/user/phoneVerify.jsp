@@ -83,10 +83,13 @@
     <!-- 이메일 찾기 결과 모달 -->
     <div id="resultModal" class="hidden fixed inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm z-50">
         <div class="bg-white rounded-2xl shadow-xl p-10 w-full max-w-md text-center border border-gray-300">
-            <h2 class="text-xl font-semibold mb-4">홍길동님의 이메일을 찾았습니다!</h2>
+            <h2 class="text-xl font-semibold mb-4">
+                <span id="resultName"></span>님의 이메일을 찾았습니다!
+            </h2>
             <p class="mb-6 text-lg">
-                이메일: <span class="font-bold">HongGildong@naver.com</span>
+                이메일: <span id="resultEmail" class="font-bold"></span>
             </p>
+
             <a href="/login"
                class="inline-block bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-6 rounded-full transition">
                 로그인 화면으로 돌아가기
@@ -99,39 +102,6 @@
 <script src="/js/phoneVerify.js"></script>
 
 <!-- 🔧 최소 동작 스크립트(외부 JS 없어도 작동) -->
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const form = document.getElementById('verify-form');
-        const code = document.getElementById('code');
-        const msg  = document.getElementById('message');
-        const modal = document.getElementById('resultModal');
 
-        function showErr(text){
-            msg.textContent = text;
-            msg.classList.remove('hidden');
-            code.classList.add('border-red-400');
-        }
-        function clearErr(){
-            msg.textContent = '';
-            msg.classList.add('hidden');
-            code.classList.remove('border-red-400');
-        }
-
-        form?.addEventListener('submit', (e) => {
-            e.preventDefault();
-            clearErr();
-
-            const v = code.value.trim();
-
-            if (!/^\d{6}$/.test(v)) {
-                showErr('인증번호는 6자리 숫자여야 합니다.');
-                return;
-            }
-
-            // TODO: 실제 서버 검증(fetch/axios) 후 성공 시 모달 오픈
-            modal.classList.remove('hidden');
-        });
-    });
-</script>
 </body>
 </html>
