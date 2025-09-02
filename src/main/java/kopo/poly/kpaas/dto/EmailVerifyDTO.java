@@ -1,11 +1,13 @@
 package kopo.poly.kpaas.dto;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
+
 import java.time.LocalDateTime;
 
-@Getter
-@Setter
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class EmailVerifyDTO {
 
     /** 인증 목적 상수 (오타 방지) */
