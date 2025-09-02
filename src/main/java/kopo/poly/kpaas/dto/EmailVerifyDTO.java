@@ -10,22 +10,21 @@ import java.time.LocalDateTime;
 @Builder
 public class EmailVerifyDTO {
 
-    /** 인증 목적 상수 (오타 방지) */
+    // contact_type 상수 (문자열로 유지: Enum 안 써도 됨)
+    public static final String TYPE_EMAIL = "EMAIL";
+    public static final String TYPE_PHONE = "PHONE";
+
+    // purpose 상수
     public static final String SIGNUP = "SIGNUP";
     public static final String RESET_PASSWORD = "RESET_PASSWORD";
+    public static final String FIND_EMAIL_BY_PHONE = "FIND_EMAIL_BY_PHONE";
 
-    /** 이메일 (PK part) */
-    private String email;
+    // === 새 스키마 필드 ===
+    private String contactType;    // EMAIL | PHONE
+    private String contactValue;   // 이메일 주소 or 전화번호
+    private String purpose;        // 위 상수 중 하나
 
-    /** 인증 목적 (PK part): SIGNUP / RESET_PASSWORD */
-    private String purpose;
-
-    /** 인증코드의 SHA-256 해시(hex 64자) — 평문 저장 금지 */
-    private String codeHash;
-
-    /** 발송 시점 기준 만료 시각 (NOW + 5분 등) */
+    private String codeHash;       // SHA-256 hex 64자
     private LocalDateTime expiresAt;
-
-    /** 생성 시각(DB default CURRENT_TIMESTAMP) */
     private LocalDateTime createdAt;
 }

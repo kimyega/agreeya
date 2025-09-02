@@ -96,43 +96,6 @@
 <!-- 페이지 전용 JS -->
 <script src="/js/findEmail.js"></script>
 
-<!-- 🔧 최소 동작 스크립트(외부 JS 없어도 동작) -->
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const form  = document.getElementById('phone-verify-form');
-        const name  = document.getElementById('name');
-        const phone = document.getElementById('phone');
-        const nMsg  = document.getElementById('name-msg');
-        const pMsg  = document.getElementById('phone-msg');
 
-        const setErr = (el, msgEl, msg) => { msgEl.textContent = msg; msgEl.classList.remove('hidden'); el.classList.add('border-red-400'); };
-        const clrErr = (el, msgEl) => { msgEl.textContent = ''; msgEl.classList.add('hidden'); el.classList.remove('border-red-400'); };
-
-        // 간단 포맷터: 숫자만 입력 + 010-1234-5678 형태로 자동 하이픈(선택)
-        phone.addEventListener('input', () => {
-            const digits = phone.value.replace(/\D/g, '');
-            let v = digits;
-            if (v.length > 3 && v.length <= 7) v = v.replace(/(\d{3})(\d+)/, '$1-$2');
-            else if (v.length > 7) v = v.replace(/(\d{3})(\d{4})(\d+)/, '$1-$2-$3');
-            phone.value = v;
-        });
-
-        form?.addEventListener('submit', (e) => {
-            e.preventDefault();
-            let ok = true;
-
-            if (!name.value.trim()) { setErr(name, nMsg, '이름을 입력하세요.'); ok = false; } else { clrErr(name, nMsg); }
-            if (!/^01[0-9]-?\d{3,4}-?\d{4}$/.test(phone.value.trim())) {
-                setErr(phone, pMsg, '휴대폰 번호 형식이 올바르지 않습니다.'); ok = false;
-            } else { clrErr(phone, pMsg); }
-
-            if (!ok) return;
-
-            // TODO: 실제로 인증번호 발송 API 호출 (fetch/axios)
-            // 성공 시 다음 단계(휴대폰 인증번호 입력 화면)로 이동
-            window.location.href = '/phoneVerify';
-        });
-    });
-</script>
 </body>
 </html>
