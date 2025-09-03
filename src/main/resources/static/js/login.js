@@ -15,12 +15,10 @@ window.addEventListener('click', function (e) {
 
 // 로그인 모달 열기/닫기
 function simulateLogin() {
-    const modal = document.getElementById("loginModal");
-    if (modal) modal.classList.remove("hidden");
+    document.getElementById("loginModal")?.classList.remove("hidden");
 }
 function closeLoginModal() {
-    const modal = document.getElementById("loginModal");
-    if (modal) modal.classList.add("hidden");
+    document.getElementById("loginModal")?.classList.add("hidden");
 }
 
 // 성공 모달
@@ -31,69 +29,70 @@ function showSuccessModal() {
     setTimeout(() => successModal.classList.add("hidden"), 1500);
 }
 
-// 로그아웃
+// 로그아웃 (✅ GET 방식으로 복구)
 function logout() {
-    const loginBtn = document.getElementById('loginButton');
-    const profileMenu = document.getElementById('profileDropdownWrapper');
-    const dropdown = document.getElementById('profileDropdown');
-    loginBtn?.classList.remove('hidden');
-    profileMenu?.classList.add('hidden');
-    dropdown?.classList.add('hidden');
+    fetch("/user/logout", { method: "GET", credentials: "include" })
+        .then(() => {
+            location.href = "/";
+        })
+        .catch((e) => {
+            console.error("로그아웃 실패:", e);
+            alert("로그아웃 실패");
+        });
 }
 
-// 로그인 폼
-(function initLoginForms(){
+// 로그인 처리
+document.addEventListener("DOMContentLoaded", () => {
     const form = document.getElementById("login-form");
-    const emailInput = document.getElementById("email");
-    const passwordInput = document.getElementById("password");
-    const emailMsg = document.getElementById("email-msg");
-    const passwordMsg = document.getElementById("password-msg");
-
-    const dummyUser = { email: "test@example.com", password: "12345678" };
-
-    form?.addEventListener("submit", function (e) {
+    form?.addEventListener("submit", async (e) => {
         e.preventDefault();
-        const email = emailInput.value.trim();
-        const password = passwordInput.value.trim();
 
-        emailMsg.textContent = "";
-        passwordMsg.textContent = "";
-        emailMsg.classList.add("hidden");
-        passwordMsg.classList.add("hidden");
+        const email = document.getElementById("email").value.trim();
+        const password = document.getElementById("password").value.trim();
+        const emailMsgEl = document.getElementById("email-msg");
+        const passwordMsgEl = document.getElementById("password-msg");
 
-        if (!email) { emailMsg.textContent = "이메일을 입력해주세요."; emailMsg.classList.remove("hidden"); return; }
-        if (!password) { passwordMsg.textContent = "비밀번호를 입력해주세요."; passwordMsg.classList.remove("hidden"); return; }
-        if (email !== dummyUser.email) { emailMsg.textContent = "등록되지 않은 이메일입니다."; emailMsg.classList.remove("hidden"); return; }
-        if (password !== dummyUser.password) { passwordMsg.textContent = "비밀번호가 일치하지 않습니다."; passwordMsg.classList.remove("hidden"); return; }
+        emailMsgEl.classList.add("hidden");
+        passwordMsgEl.classList.add("hidden");
 
-        showSuccessModal();
-        // TODO: 실제 로그인 성공 시 이동 경로 지정
-        // window.location.href = "/";
+        if (!email) {
+            emailMsgEl.textContent = "이메일을 입력해주세요.";
+            emailMsgEl.classList.remove("hidden");
+            return;
+        }
+        if (!password) {
+            passwordMsgEl.textContent = "비밀번호를 입력해주세요.";
+            passwordMsgEl.classList.remove("hidden");
+            return;
+        }
+
+        try {
+            const res = await fetch("/user/loginProc", {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: new URLSearchParams({ email, password }),
+                credentials: "include"   // ✅ 세션 유지
+            });
+
+            const data = await res.json();
+            if (data.res === 1) {
+                showSuccessModal();
+
+                // 상단바 갱신
+                document.getElementById("loginButton")?.classList.add("hidden");
+                const profileWrapper = document.getElementById("profileDropdownWrapper");
+                profileWrapper?.classList.remove("hidden");
+                profileWrapper.querySelector("span").textContent =
+                    data.user?.name || data.user?.userId || "User";
+
+                setTimeout(() => (location.href = "/"), 1500);
+            } else {
+                emailMsgEl.textContent = data.msg || "로그인 실패";
+                emailMsgEl.classList.remove("hidden");
+            }
+        } catch (err) {
+            console.error("로그인 요청 오류:", err);
+            alert("로그인 요청 중 문제가 발생했습니다.");
+        }
     });
-
-    // 모달 폼
-    const modalForm = document.getElementById("modal-login-form");
-    const modalEmail = document.getElementById("modal-email");
-    const modalPassword = document.getElementById("modal-password");
-    const modalEmailMsg = document.getElementById("modal-email-msg");
-    const modalPasswordMsg = document.getElementById("modal-password-msg");
-
-    modalForm?.addEventListener("submit", function (e) {
-        e.preventDefault();
-        const email = modalEmail.value.trim();
-        const password = modalPassword.value.trim();
-
-        modalEmailMsg.textContent = "";
-        modalPasswordMsg.textContent = "";
-        modalEmailMsg.classList.add("hidden");
-        modalPasswordMsg.classList.add("hidden");
-
-        if (!email) { modalEmailMsg.textContent = "이메일을 입력해주세요."; modalEmailMsg.classList.remove("hidden"); return; }
-        if (!password) { modalPasswordMsg.textContent = "비밀번호를 입력해주세요."; modalPasswordMsg.classList.remove("hidden"); return; }
-        if (email !== dummyUser.email) { modalEmailMsg.textContent = "등록되지 않은 이메일입니다."; modalEmailMsg.classList.remove("hidden"); return; }
-        if (password !== dummyUser.password) { modalPasswordMsg.textContent = "비밀번호가 일치하지 않습니다."; modalPasswordMsg.classList.remove("hidden"); return; }
-
-        showSuccessModal();
-        closeLoginModal();
-    });
-})();
+});

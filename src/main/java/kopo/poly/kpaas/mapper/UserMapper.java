@@ -2,31 +2,35 @@ package kopo.poly.kpaas.mapper;
 
 import kopo.poly.kpaas.dto.UserDTO;
 import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
 
 @Mapper
 public interface UserMapper {
 
-    // 기존 사용자 관련은 그대로
-    UserDTO getUserByEmail(@Param("email") String email);
-    int updatePasswordByEmail(UserDTO userDTO);
+    /** userId 기반 프로필 조회 */
+    UserDTO getUserProfile(String userId);
 
+    /** 이메일 기반 조회 (로그인/비번 재설정) */
+    UserDTO getUserByEmail(String email);
 
-    UserDTO getUserByPhone(@Param("phone") String phone);
+    /** 회원 탈퇴 */
+    int deleteUser(int userId);
 
-    // === 인증 저장: 업서트(SQL에서 SHA2 해시 + 만료 계산) ===
-    int upsertEmailVerifySqlSide(@Param("contactType") String contactType,
-                                 @Param("contactValue") String contactValue,
-                                 @Param("purpose") String purpose,
-                                 @Param("plainCode") String plainCode,
-                                 @Param("expireMin") int expireMin);
+    /** 비밀번호 업데이트 (이메일 기준) */
+    int updatePasswordByEmail(UserDTO pDTO);
 
-    // === 인증 검증: 성공 시 1행 삭제 ===
-    int verifyAndConsumeSqlSide(@Param("contactType") String contactType,
-                                @Param("contactValue") String contactValue,
-                                @Param("purpose") String purpose,
-                                @Param("inputCode") String inputCode);
+    /** 인증코드 UPSERT */
+    int upsertEmailVerifySqlSide(String contactType,
+                                 String contactValue,
+                                 String purpose,
+                                 String plainCode,
+                                 int expireMin);
 
+    /** 인증코드 검증 후 삭제 */
+    int verifyAndConsumeSqlSide(String contactType,
+                                String contactValue,
+                                String purpose,
+                                String inputCode);
 
-
+    /** 휴대폰으로 사용자 조회 */
+    UserDTO getUserByPhone(String phone);
 }

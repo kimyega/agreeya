@@ -5,27 +5,45 @@
 
 <mapper namespace="kopo.poly.kpaas.mapper.UserMapper">
 
-
-        <!-- 사용자 이메일로 조회 -->
-    <select id="getUserByEmail" resultType="UserDTO">
-        SELECT
-            user_id      AS userId,
-            name         AS name,
-            email        AS email,
-            nickname     AS nickname,
-            password     AS password,
-            birth_date   AS birthDate,
-            is_foreigner AS isForeigner
+    <!-- 사용자 프로필 조회 (userId 기반) -->
+    <select id="getUserProfile" parameterType="string" resultType="kopo.poly.kpaas.dto.UserDTO">
+        SELECT user_id      AS userId,
+               name,
+               email,
+               nickname,
+               DATE_FORMAT(created_at, '%Y-%m-%d') AS createdAt
         FROM users
-        WHERE LOWER(email) = LOWER(#{email})
+        WHERE user_id = #{userId}
+            LIMIT 1
     </select>
 
-        <!-- 비밀번호 업데이트 -->
-        <update id="updatePasswordByEmail">
-            UPDATE users
-            SET password = #{password}
-            WHERE email = #{email}
-        </update>
+    <!-- 로그인 / 이메일로 사용자 1건 조회 -->
+    <select id="getUserByEmail" parameterType="string" resultType="kopo.poly.kpaas.dto.UserDTO">
+        SELECT user_id,
+               name,
+               email,
+               nickname,
+               password,
+               birth_date,
+               is_foreigner,
+               tel,
+               DATE_FORMAT(created_at, '%Y-%m-%d')
+        FROM users
+        WHERE LOWER(email) = LOWER(#{email})
+            LIMIT 1
+    </select>
+
+    <!-- 회원 탈퇴 -->
+    <delete id="deleteUser" parameterType="int">
+        DELETE FROM users WHERE user_id = #{userId}
+    </delete>
+
+    <!-- 비밀번호 업데이트 -->
+    <update id="updatePasswordByEmail" parameterType="kopo.poly.kpaas.dto.UserDTO">
+        UPDATE users
+        SET password = #{password}
+        WHERE email = #{email}
+    </update>
 
     <!-- 인증코드 upsert (PK: contact_type, contact_value, purpose) -->
     <insert id="upsertEmailVerifySqlSide">
@@ -41,7 +59,7 @@
         NOW()
         )
         ON DUPLICATE KEY UPDATE
-        code_hash = VALUES(code_hash),
+        code_hash  = VALUES(code_hash),
         expires_at = VALUES(expires_at),
         created_at = created_at   <!-- ✅ 최초 생성시각 유지 -->
     </insert>
@@ -57,17 +75,16 @@
             LIMIT 1
     </delete>
 
-    <!-- (추가) 휴대폰으로 사용자 1건 조회 -->
-    <select id="getUserByPhone" resultType="UserDTO">
-        SELECT
-            user_id      AS userId,
-            name         AS name,
-            email        AS email,
-            nickname     AS nickname,
-            password     AS password,
-            birth_date   AS birthDate,
-            is_foreigner AS isForeigner,
-            tel          AS tel
+    <!-- 휴대폰으로 사용자 1건 조회 -->
+    <select id="getUserByPhone" parameterType="string" resultType="kopo.poly.kpaas.dto.UserDTO">
+        SELECT user_id      AS userId,
+               name,
+               email,
+               nickname,
+               password,
+               birth_date   AS birthDate,
+               is_foreigner AS isForeigner,
+               tel
         FROM users
         WHERE REPLACE(tel, '-', '') = REPLACE(#{phone}, '-', '')
             LIMIT 1

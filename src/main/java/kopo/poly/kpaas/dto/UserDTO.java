@@ -18,5 +18,6 @@ public class UserDTO {
         private String birthDate;
         private String tel;
         private String isForeigner;
+        private String createdAt;  // ✅ 가입일
 
 }
