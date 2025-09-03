@@ -2,7 +2,7 @@ package kopo.poly.kpaas.service;
 
 import kopo.poly.kpaas.dto.UserDTO;
 import kopo.poly.kpaas.mapper.UserMapper;
-import kopo.poly.kpaas.util.CoolSmsUtil;
+//import kopo.poly.kpaas.util.CoolSmsUtil;
 import kopo.poly.kpaas.util.EncryptUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +17,34 @@ import java.util.concurrent.ThreadLocalRandom;
 @Service // 팀 방침: 서비스 하나(UserService). 필요시 이름 바꾸면 알려줘.
 @RequiredArgsConstructor
 public class UserService {
+    public UserDTO login(String email, String password) {
+        String norm = normalizeEmail(email);
+        UserDTO rDTO = userMapper.getUserByEmail(norm);
+        if (rDTO == null) {
+            log.warn("❌ 로그인 실패 - 사용자 없음");
+            return null;
+        }
+
+        String dbPw = rDTO.getPassword();
+        if (dbPw != null &&
+                (dbPw.equals(password) || dbPw.equals(EncryptUtil.encHashSHA256(password)))) {
+            log.info("✅ 로그인 성공 userId={}", rDTO.getUserId());
+            return rDTO;
+        }
+
+        log.warn("❌ 로그인 실패 - 비밀번호 불일치");
+        return null;
+    }
+
+    /** 마이페이지 프로필 조회 */
+    public UserDTO getUserProfile(String userId) {
+        return userMapper.getUserProfile(userId);
+    }
+
+    /** 회원 탈퇴 */
+    public int deleteUser(String userId) throws Exception {
+        return userMapper.deleteUser(Integer.parseInt(userId));
+    }
 
     private final UserMapper userMapper;
     private final JavaMailSender mailSender;
@@ -24,7 +52,7 @@ public class UserService {
     @Value("${spring.mail.username}")
     private String mailAddress;
 
-    private final CoolSmsUtil coolSmsUtil;
+//    private final CoolSmsUtil coolSmsUtil;
 
     /**
      * 인증코드 유효시간(분)
@@ -215,7 +243,7 @@ public class UserService {
         userMapper.upsertEmailVerifySqlSide("PHONE", phone, "FIND_EMAIL_BY_PHONE", code, 5);
 
         String msg = "[안심계약] 이메일 찾기 인증번호: " + code + " (5분 이내 입력)\n타인 노출에 주의하세요.";
-        coolSmsUtil.sendVerificationCode(phone, code); // CoolSmsUtil 주입되어 있어야 함
+//        coolSmsUtil.sendVerificationCode(phone, code); // CoolSmsUtil 주입되어 있어야 함
     }
 
     public String verifyFindEmailCode(String rawPhone, String inputCode) {
