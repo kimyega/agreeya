@@ -1,4 +1,4 @@
-// 상단 메뉴용 (필요 시 공통 js로 이동 가능)
+// ===== 상단 메뉴용 (공통 기능) =====
 function simulateLogin() {
     const modal = document.getElementById("loginModal");
     if (modal) modal.classList.remove("hidden");
@@ -14,39 +14,32 @@ function logout() {
 }
 
 // ===== 이메일 인증 로직 =====
-const form = document.getElementById("code-form");
-const codeInput = document.getElementById("code");
-const messageBox = document.getElementById("message");
-const errorModal = document.getElementById("errorModal");
-
-form?.addEventListener('submit', (e) => {
+$("#code-form").on("submit", function (e) {
     e.preventDefault();
 
+    const code = $("#code").val().trim();
+    console.log("입력한 코드:", code);
 
-    const v = code.value.trim();
-
-    if (!/^\d{6}$/.test(v)) { // 6자리 숫자 체크
-        alert('6자리 숫자로 입력하세요.');
+    if (!/^\d{6}$/.test(code)) {
+        alert("6자리 숫자로 입력하세요.");
         return;
     }
 
-    // 서버에 인증번호 검증 요청
-    fetch("/user/email/verify", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/x-www-form-urlencoded"
-        },
-        body: `email=${encodeURIComponent(sessionStorage.getItem("email"))}&code=${encodeURIComponent(v)}`
-    })
-        .then((res) => {
-            if (res.ok) {
-                // 인증 성공 → 비밀번호 변경 페이지 이동
-                window.location.href = '/changePw';
+    $.ajax({
+        url: "/user/verifyResetCode",
+        type: "post",
+        dataType: "json",
+        data: { code: code },
+        success: function (json) {
+            if (json.result === 1) {
+                alert(json.msg);
+                location.href = "/changePw"; // 비밀번호 변경 페이지로 이동
             } else {
-                res.text().then(msg => {alert(msg)});
+                alert(json.msg);
             }
-        })
-        .catch((err) => {
-            console.error("서버 요청 오류:", err);
-        });
+        },
+        error: function () {
+            alert("❌ 서버 요청 중 오류 발생");
+        }
+    });
 });

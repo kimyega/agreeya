@@ -1,6 +1,5 @@
-package kopo.poly.kpaas.service;
+package kopo.poly.kpaas.service.impl;
 
-import jakarta.servlet.http.HttpSession;
 import kopo.poly.kpaas.dto.AnalysisSummaryDto;
 import kopo.poly.kpaas.dto.ClauseDto;
 import kopo.poly.kpaas.mapper.ContractMapper;

@@ -15,6 +15,8 @@
     <!-- 정적 리소스: 절대경로로 고정 -->
     <link rel="stylesheet" href="/css/table.css"/>
     <script src="/js/table.js"></script>
+    <!--j쿼리-->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 
 <!-- ✅ 중앙정렬 기본틀 -->
@@ -71,7 +73,7 @@
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <i class="fa-solid fa-envelope text-gray-400 text-[16px]"></i>
                 </div>
-                <input id="email" type="email" placeholder="이메일을 입력하세요"
+                <input id="email" name="email" type="email" placeholder="이메일을 입력하세요"
                        class="w-full h-full pl-10 pr-4 border rounded-full focus:outline-none focus:ring-2 focus:ring-blue-300 text-base placeholder-gray-400 text-gray-800" />
                 <p id="email-msg" class="text-sm mt-1 ml-2 text-red-500 hidden"></p>
             </div>

@@ -2,7 +2,6 @@ package kopo.poly.kpaas.dto;
 
 import lombok.*;
 
-import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
