@@ -14,6 +14,8 @@
 
     <!-- 정적 리소스: 절대경로로 고정 -->
     <link rel="stylesheet" href="/css/changePw.css"/>
+    <!--j쿼리-->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
     <!-- sweetAlert2 -->
     <link rel="stylesheet" href="/sweetAlert/css/all.min.css"/>

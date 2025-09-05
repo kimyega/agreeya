@@ -5,20 +5,9 @@
 
 <mapper namespace="kopo.poly.kpaas.mapper.UserMapper">
 
-    <!-- 사용자 프로필 조회 (userId 기반) -->
-    <select id="getUserProfile" parameterType="string" resultType="kopo.poly.kpaas.dto.UserDTO">
-        SELECT user_id      AS userId,
-               name,
-               email,
-               nickname,
-               DATE_FORMAT(created_at, '%Y-%m-%d') AS createdAt
-        FROM users
-        WHERE user_id = #{userId}
-            LIMIT 1
-    </select>
 
-    <!-- 로그인 / 이메일로 사용자 1건 조회 -->
-    <select id="getUserByEmail" parameterType="string" resultType="kopo.poly.kpaas.dto.UserDTO">
+    <!-- 이메일로 사용자 조회 -->
+    <select id="getUserByEmail" parameterType="UserDTO" resultType="UserDTO">
         SELECT user_id,
                name,
                email,
@@ -26,68 +15,32 @@
                password,
                birth_date,
                is_foreigner,
-               tel,
-               DATE_FORMAT(created_at, '%Y-%m-%d')
+               tel
+        FROM users
+        WHERE email = #{email}
+            LIMIT 1
+    </select>
+
+    <!-- 전화번호로 사용자 조회 (서비스에서 숫자만 정규화 전제) -->
+    <select id="getUserByPhone" parameterType="UserDTO" resultType="UserDTO">
+        SELECT user_id,
+               name,
+               email,
+               nickname,
+               password,
+               birth_date,
+               is_foreigner,
+               tel
         FROM users
         WHERE LOWER(email) = LOWER(#{email})
             LIMIT 1
     </select>
 
-    <!-- 회원 탈퇴 -->
-    <delete id="deleteUser" parameterType="int">
-        DELETE FROM users WHERE user_id = #{userId}
-    </delete>
-
-    <!-- 비밀번호 업데이트 -->
-    <update id="updatePasswordByEmail" parameterType="kopo.poly.kpaas.dto.UserDTO">
+    <!-- 이메일 기준 비밀번호 업데이트 -->
+    <update id="updatePassword" parameterType="UserDTO">
         UPDATE users
         SET password = #{password}
         WHERE email = #{email}
     </update>
-
-    <!-- 인증코드 upsert (PK: contact_type, contact_value, purpose) -->
-    <insert id="upsertEmailVerifySqlSide">
-        INSERT INTO email_verify
-        (contact_type, contact_value, purpose, code_hash, expires_at, created_at)
-        VALUES
-        (
-        #{contactType},
-        #{contactValue},
-        #{purpose},
-        SHA2(#{plainCode}, 256),
-        DATE_ADD(NOW(), INTERVAL #{expireMin} MINUTE),
-        NOW()
-        )
-        ON DUPLICATE KEY UPDATE
-        code_hash  = VALUES(code_hash),
-        expires_at = VALUES(expires_at),
-        created_at = created_at   <!-- ✅ 최초 생성시각 유지 -->
-    </insert>
-
-    <!-- 인증코드 검증 후 1회성 삭제 -->
-    <delete id="verifyAndConsumeSqlSide">
-        DELETE FROM email_verify
-        WHERE contact_type  = #{contactType}
-          AND contact_value = #{contactValue}
-          AND purpose       = #{purpose}
-          AND code_hash     = SHA2(#{inputCode}, 256)
-          AND expires_at    > NOW()
-            LIMIT 1
-    </delete>
-
-    <!-- 휴대폰으로 사용자 1건 조회 -->
-    <select id="getUserByPhone" parameterType="string" resultType="kopo.poly.kpaas.dto.UserDTO">
-        SELECT user_id      AS userId,
-               name,
-               email,
-               nickname,
-               password,
-               birth_date   AS birthDate,
-               is_foreigner AS isForeigner,
-               tel
-        FROM users
-        WHERE REPLACE(tel, '-', '') = REPLACE(#{phone}, '-', '')
-            LIMIT 1
-    </select>
 
 </mapper>
