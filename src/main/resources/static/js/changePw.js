@@ -45,7 +45,7 @@ $("#reset-form").on("submit", function (e) {
         success: function (json) {
             if (json.result === 1) {
                 alert(json.msg);
-                location.href = "/login"; // 로그인 화면으로 이동
+                location.href = "/user/login"; // 로그인 화면으로 이동
             } else {
                 alert(json.msg);
             }

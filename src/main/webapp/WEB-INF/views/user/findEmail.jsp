@@ -12,6 +12,9 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 
+    <!--j쿼리-->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
     <!-- 정적 리소스: 절대경로 -->
     <link rel="stylesheet" href="/css/table.css"/>
     <script src="/js/table.js"></script>
@@ -70,7 +73,7 @@
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <i class="fa-solid fa-user text-gray-400 text-[16px]"></i>
                 </div>
-                <input id="name" type="text" placeholder="이름을 입력하세요"
+                <input id="name" name="name" type="text" placeholder="이름을 입력하세요"
                        class="w-full h-full pl-10 pr-4 border rounded-full focus:outline-none focus:ring-2 focus:ring-blue-300 text-base placeholder-gray-400 text-gray-800"/>
                 <p id="name-msg" class="text-sm mt-1 ml-2 text-red-500 hidden"></p>
             </div>
@@ -80,7 +83,7 @@
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <i class="fa-solid fa-phone text-gray-400 text-[16px]"></i>
                 </div>
-                <input id="phone" type="tel" placeholder="전화번호를 입력하세요"
+                <input id="phone" name="tel" type="tel" placeholder="전화번호를 입력하세요"
                        class="w-full h-full pl-10 pr-4 border rounded-full focus:outline-none focus:ring-2 focus:ring-blue-300 text-base placeholder-gray-400 text-gray-800"/>
                 <p id="phone-msg" class="text-sm mt-1 ml-2 text-red-500 hidden"></p>
             </div>

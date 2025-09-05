@@ -8,8 +8,9 @@ import org.apache.ibatis.annotations.Mapper;
 public interface UserMapper {
 
     UserDTO getUserByEmail(UserDTO pDTO) throws Exception;
-    UserDTO getUserByPhone(UserDTO pDTO) throws Exception;
+
     int updatePassword(UserDTO pDTO) throws Exception;
 
+    UserDTO getUserByNameAndPhone(UserDTO pDto) throws Exception;
 
 }
