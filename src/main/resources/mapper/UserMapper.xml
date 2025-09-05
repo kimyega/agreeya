@@ -21,18 +21,12 @@
             LIMIT 1
     </select>
 
-    <!-- 전화번호로 사용자 조회 (서비스에서 숫자만 정규화 전제) -->
-    <select id="getUserByPhone" parameterType="UserDTO" resultType="UserDTO">
-        SELECT user_id,
-               name,
-               email,
-               nickname,
-               password,
-               birth_date,
-               is_foreigner,
-               tel
+    <!---전화번호 조회-->
+    <select id="getUserByNameAndPhone" parameterType="UserDTO" resultType="UserDTO">
+        SELECT user_id, name, email, tel
         FROM users
-        WHERE LOWER(email) = LOWER(#{email})
+        WHERE name = #{name}
+          AND REPLACE(tel, '-', '') = REPLACE(#{tel}, '-', '')
             LIMIT 1
     </select>
 

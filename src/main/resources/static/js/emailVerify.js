@@ -33,7 +33,7 @@ $("#code-form").on("submit", function (e) {
         success: function (json) {
             if (json.result === 1) {
                 alert(json.msg);
-                location.href = "/changePw"; // 비밀번호 변경 페이지로 이동
+                location.href = "/user/changePw"; // 비밀번호 변경 페이지로 이동
             } else {
                 alert(json.msg);
             }

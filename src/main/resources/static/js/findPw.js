@@ -49,7 +49,7 @@ $("#find-password-form").on("submit", function (e) {
         success: function (json) {
             if (json.result === 1) {
                 alert(json.msg);
-                location.href = "/emailVerify"; // 인증코드 입력 화면으로 이동
+                location.href = "/user/emailVerify"; // 인증코드 입력 화면으로 이동
             } else {
                 alert(json.msg);
             }
@@ -59,3 +59,4 @@ $("#find-password-form").on("submit", function (e) {
         }
     });
 });
+

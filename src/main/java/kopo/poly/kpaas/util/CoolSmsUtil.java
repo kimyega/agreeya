@@ -35,10 +35,10 @@ public class CoolSmsUtil {
     }
 
     /**
-     * SMS 인증번호 발송
+     * SMS 발송 (인증번호는 Service에서 생성해서 넘겨줌)
      *
      * @param to   수신자 전화번호 (010xxxxxxxx)
-     * @param code 인증번호 (6자리)
+     * @param code 인증번호 (Service에서 생성된 값)
      */
     public void sendVerificationCode(String to, String code) {
         Message message = new Message();
@@ -50,7 +50,7 @@ public class CoolSmsUtil {
             SingleMessageSentResponse response = messageService.sendOne(new SingleMessageSendingRequest(message));
             log.info("✅ CoolSMS 전송 성공: {}", response);
         } catch (Exception e) {
-            log.error("❌ CoolSMS 전송 실패: {}", e.getMessage());
+            log.error("❌ CoolSMS 전송 실패: {}", e.getMessage(), e);
             throw new RuntimeException("SMS 전송 실패: " + e.getMessage(), e);
         }
     }
