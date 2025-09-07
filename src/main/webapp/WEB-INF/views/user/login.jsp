@@ -12,17 +12,18 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 
-    <!-- 정적 리소스(절대경로로 고정) -->
+    <!-- 정적 리소스 -->
     <link rel="stylesheet" href="/css/table.css"/>
     <script src="/js/table.js"></script>
 </head>
 
-<!-- ✅ 바디를 flex-col + min-h-screen 로 변경 -->
 <body class="min-h-screen flex flex-col bg-slate-100 text-gray-800 font-sans">
 
 <!-- 로그인 알림 -->
 <div id="loginMessage" class="hidden fixed inset-0 flex items-center justify-center bg-black/30 z-50">
-    <div class="bg-white text-green-600 font-bold text-2xl px-6 py-4 rounded-xl shadow-lg">로그인되었습니다.</div>
+    <div class="bg-white text-green-600 font-bold text-2xl px-6 py-4 rounded-xl shadow-lg">
+        로그인되었습니다.
+    </div>
 </div>
 
 <!-- 헤더 -->
@@ -38,18 +39,20 @@
             <a href="/contract/upload" class="hover:text-blue-600">계약서 분석</a>
             <a href="/chatbot/qnaChatbot" class="hover:text-blue-600">Q&A 챗봇</a>
 
+            <!-- 로그인 버튼 -->
             <a id="loginButton" href="#" onclick="simulateLogin()"
                class="bg-blue-500 text-white px-6 py-3 rounded-full hover:bg-blue-600 transition text-lg font-bold">
                 로그인
             </a>
 
+            <!-- 로그인 후 드롭다운 -->
             <div id="profileDropdownWrapper" class="relative hidden">
                 <button onclick="toggleDropdown()" class="flex items-center space-x-2 text-xl font-bold text-gray-800 focus:outline-none">
                     <i class="fa-solid fa-user-circle text-2xl"></i>
-                    <span>Hong</span>
+                    <span id="headerNick">User</span>
                 </button>
                 <div id="profileDropdown" class="absolute right-0 mt-2 w-40 bg-white border border-gray-300 rounded-md shadow-lg hidden z-50">
-                    <a href="/mypage" class="block px-4 py-3 text-center text-gray-800 hover:bg-gray-100">내 정보</a>
+                    <a href="/user/mypage" class="block px-4 py-3 text-center text-gray-800 hover:bg-gray-100">내 정보</a>
                     <a href="#" onclick="logout()" class="block px-4 py-3 text-center text-red-600 hover:bg-red-100 border-t border-gray-300">로그아웃</a>
                 </div>
             </div>
@@ -57,11 +60,9 @@
     </div>
 </header>
 
-<!-- ✅ main을 flex-1 로 바꿔 중앙 정렬 유지 -->
+<!-- 메인 -->
 <main class="flex-1 flex items-center justify-center px-4">
     <div class="bg-white/90 backdrop-blur-md p-10 rounded-xl shadow-md w-full max-w-md text-center">
-
-        <!-- 아이콘 경로 절대경로로 -->
         <div class="mb-4 flex justify-center">
             <img src="/images/lock.png" alt="로그인 아이콘" class="w-20 h-20" />
         </div>
@@ -96,7 +97,9 @@
 
     <!-- 로그인 성공 모달 -->
     <div id="successModal" class="hidden fixed inset-0 flex items-center justify-center bg-black/40 z-50">
-        <div class="bg-white px-8 py-6 rounded-xl shadow-xl text-green-600 text-xl font-bold">✅ 로그인 성공</div>
+        <div class="bg-white px-8 py-6 rounded-xl shadow-xl text-green-600 text-xl font-bold">
+            ✅ 로그인 성공
+        </div>
     </div>
 
     <!-- 로그인 모달 -->
