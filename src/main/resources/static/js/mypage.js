@@ -43,9 +43,10 @@ $(document).ready(function () {
     $.ajax({
       url: "/user/delete",
       type: "DELETE",
-      xhrFields: { withCredentials: true }, // 세션 유지
+      xhrFields: { withCredentials: true },
       success: function (d) {
-        if (d.res === 1) {
+        // 컨트롤러가 int 반환하도록 맞췄다고 가정 (1=성공, 0=실패)
+        if (d === 1) {
           $("#withdrawModal").addClass("hidden");
           $("#withdrawDoneModal").removeClass("hidden").addClass("flex");
 
@@ -53,7 +54,7 @@ $(document).ready(function () {
             location.href = "/";
           }, 2000);
         } else {
-          alert(d.msg || "탈퇴 실패");
+          alert("탈퇴 실패");
         }
       },
       error: function (xhr, status, error) {

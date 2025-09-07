@@ -20,33 +20,18 @@ public class UserService implements IUserService {
     /** 로그인 */
     @Override
     public UserDTO login(UserDTO pDTO) throws Exception {
-        String email = pDTO.getEmail();          // ✅ 평문 이메일 그대로 사용
-        String password = pDTO.getPassword();
+        log.info("🟢 login() 호출: {}", pDTO);
 
-        // String emailEnc = EncryptUtil.encAES128CBC(email);  // ❌ 테스트용 주석 처리
-        String pwEnc = EncryptUtil.encHashSHA256(password);    // ✅ 비밀번호는 해시 비교 유지 컨트롤러로 옮기기
+        // ✅ Mapper에서 email + password 조건으로 바로 조회
+        UserDTO rDTO = userMapper.getLogin(pDTO);
 
-        // DB 조회 (평문 이메일로 검색)
-        UserDTO rDTO = userMapper.getUserByEmail(
-                UserDTO.builder()
-                        .email(email)   // 암호화 대신 평문 그대로 전달
-                        .build()
-        );
-
-        if (rDTO == null) {
-            log.warn("❌ 로그인 실패 - 사용자 없음");
-            return null;
+        if (rDTO != null) {
+            log.info("✅ 로그인 성공: {}", rDTO.getUserId());
+        } else {
+            log.warn("❌ 로그인 실패 (이메일 또는 비밀번호 불일치)");
         }
 
-        // 비밀번호 확인
-        if (rDTO.getPassword() != null &&
-                (rDTO.getPassword().equals(password) || rDTO.getPassword().equals(pwEnc))) {
-            log.info("✅ 로그인 성공 userId={}", rDTO.getUserId());
-            return rDTO;
-        }
-
-        log.warn("❌ 로그인 실패 - 비밀번호 불일치"); // null 이면optional아니면 1
-        return null;
+        return rDTO;
     }
 
     /** 마이페이지 프로필 조회 */

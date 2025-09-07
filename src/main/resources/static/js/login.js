@@ -32,7 +32,7 @@ function showSuccessModal() {
 // 로그아웃
 function logout() {
     $.ajax({
-        url: ctx + "/user/logout", // ✅ contextPath 적용
+        url: ctx + "/user/logout",
         type: "GET",
         success: function () {
             location.href = ctx + "/";
@@ -67,22 +67,24 @@ $(document).ready(function () {
         }
 
         $.ajax({
-            url: ctx + "/user/loginProc", // ✅ contextPath 적용
+            url: ctx + "/user/loginProc",
             type: "POST",
             data: { email: email, password: password },
             success: function (data) {
-                if (data.res === 1) {
+                if (data) {
+                    // ✅ 성공 시 DTO 그대로 옴
                     showSuccessModal();
 
-                    // 상단바 갱신
                     $("#loginButton").addClass("hidden");
                     const profileWrapper = $("#profileDropdownWrapper");
                     profileWrapper.removeClass("hidden");
+
+                    // 닉네임 대신 이름 표시
                     profileWrapper.find("span").text(data.name || data.userId || "User");
 
                     setTimeout(() => (location.href = ctx + "/"), 1500);
                 } else {
-                    emailMsgEl.text(data.msg || "로그인 실패").removeClass("hidden");
+                    emailMsgEl.text("이메일 또는 비밀번호가 올바르지 않습니다.").removeClass("hidden");
                 }
             },
             error: function (xhr, status, error) {
