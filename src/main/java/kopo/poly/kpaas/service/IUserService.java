@@ -1,4 +1,4 @@
-package kopo.poly.kpaas.service.impl;
+package kopo.poly.kpaas.service;
 
 import kopo.poly.kpaas.dto.UserDTO;
 

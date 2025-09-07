@@ -19,5 +19,8 @@ public class UserDTO {
         private String tel;
         private String isForeigner;
         private String createdAt;  // ✅ 가입일
+        private int res;      // 처리 결과 (1=성공, 0=실패)
+        private String msg;   // 메시지
+
 
 }

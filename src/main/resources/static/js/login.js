@@ -1,98 +1,94 @@
-// 공통: 드롭다운
+// 공통: 드롭다운, AJAX
 function toggleDropdown() {
-    const dropdown = document.getElementById('profileDropdown');
-    dropdown.classList.toggle('hidden');
+    const dropdown = document.getElementById("profileDropdown");
+    dropdown.classList.toggle("hidden");
 }
 
 // 외부 클릭 시 드롭다운 닫기
-window.addEventListener('click', function (e) {
-    const wrapper = document.getElementById('profileDropdownWrapper');
-    const dropdown = document.getElementById('profileDropdown');
+window.addEventListener("click", function (e) {
+    const wrapper = document.getElementById("profileDropdownWrapper");
+    const dropdown = document.getElementById("profileDropdown");
     if (wrapper && dropdown && !wrapper.contains(e.target)) {
-        dropdown.classList.add('hidden');
+        dropdown.classList.add("hidden");
     }
 });
 
 // 로그인 모달 열기/닫기
 function simulateLogin() {
-    document.getElementById("loginModal")?.classList.remove("hidden");
+    $("#loginModal").removeClass("hidden");
 }
 function closeLoginModal() {
-    document.getElementById("loginModal")?.classList.add("hidden");
+    $("#loginModal").addClass("hidden");
 }
 
 // 성공 모달
-const successModal = document.getElementById("successModal");
 function showSuccessModal() {
-    if (!successModal) return;
-    successModal.classList.remove("hidden");
-    setTimeout(() => successModal.classList.add("hidden"), 1500);
+    const successModal = $("#successModal");
+    if (successModal.length === 0) return;
+    successModal.removeClass("hidden");
+    setTimeout(() => successModal.addClass("hidden"), 1500);
 }
 
-// 로그아웃 (✅ GET 방식으로 복구)
+// 로그아웃
 function logout() {
-    fetch("/user/logout", { method: "GET", credentials: "include" })
-        .then(() => {
-            location.href = "/";
-        })
-        .catch((e) => {
-            console.error("로그아웃 실패:", e);
+    $.ajax({
+        url: ctx + "/user/logout", // ✅ contextPath 적용
+        type: "GET",
+        success: function () {
+            location.href = ctx + "/";
+        },
+        error: function (xhr, status, error) {
+            console.error("로그아웃 실패:", error);
             alert("로그아웃 실패");
-        });
+        },
+    });
 }
 
 // 로그인 처리
-document.addEventListener("DOMContentLoaded", () => {
-    const form = document.getElementById("login-form");
-    form?.addEventListener("submit", async (e) => {
+$(document).ready(function () {
+    $("#login-form").on("submit", function (e) {
         e.preventDefault();
 
-        const email = document.getElementById("email").value.trim();
-        const password = document.getElementById("password").value.trim();
-        const emailMsgEl = document.getElementById("email-msg");
-        const passwordMsgEl = document.getElementById("password-msg");
+        const email = $("#email").val().trim();
+        const password = $("#password").val().trim();
+        const emailMsgEl = $("#email-msg");
+        const passwordMsgEl = $("#password-msg");
 
-        emailMsgEl.classList.add("hidden");
-        passwordMsgEl.classList.add("hidden");
+        emailMsgEl.addClass("hidden");
+        passwordMsgEl.addClass("hidden");
 
         if (!email) {
-            emailMsgEl.textContent = "이메일을 입력해주세요.";
-            emailMsgEl.classList.remove("hidden");
+            emailMsgEl.text("이메일을 입력해주세요.").removeClass("hidden");
             return;
         }
         if (!password) {
-            passwordMsgEl.textContent = "비밀번호를 입력해주세요.";
-            passwordMsgEl.classList.remove("hidden");
+            passwordMsgEl.text("비밀번호를 입력해주세요.").removeClass("hidden");
             return;
         }
 
-        try {
-            const res = await fetch("/user/loginProc", {
-                method: "POST",
-                headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                body: new URLSearchParams({ email, password }),
-                credentials: "include"   // ✅ 세션 유지
-            });
+        $.ajax({
+            url: ctx + "/user/loginProc", // ✅ contextPath 적용
+            type: "POST",
+            data: { email: email, password: password },
+            success: function (data) {
+                if (data.res === 1) {
+                    showSuccessModal();
 
-            const data = await res.json();
-            if (data.res === 1) {
-                showSuccessModal();
+                    // 상단바 갱신
+                    $("#loginButton").addClass("hidden");
+                    const profileWrapper = $("#profileDropdownWrapper");
+                    profileWrapper.removeClass("hidden");
+                    profileWrapper.find("span").text(data.name || data.userId || "User");
 
-                // 상단바 갱신
-                document.getElementById("loginButton")?.classList.add("hidden");
-                const profileWrapper = document.getElementById("profileDropdownWrapper");
-                profileWrapper?.classList.remove("hidden");
-                profileWrapper.querySelector("span").textContent =
-                    data.user?.name || data.user?.userId || "User";
-
-                setTimeout(() => (location.href = "/"), 1500);
-            } else {
-                emailMsgEl.textContent = data.msg || "로그인 실패";
-                emailMsgEl.classList.remove("hidden");
-            }
-        } catch (err) {
-            console.error("로그인 요청 오류:", err);
-            alert("로그인 요청 중 문제가 발생했습니다.");
-        }
+                    setTimeout(() => (location.href = ctx + "/"), 1500);
+                } else {
+                    emailMsgEl.text(data.msg || "로그인 실패").removeClass("hidden");
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error("로그인 요청 오류:", error);
+                alert("로그인 요청 중 문제가 발생했습니다.");
+            },
+        });
     });
 });

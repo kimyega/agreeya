@@ -12,10 +12,19 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 
+    <!-- ✅ jQuery 추가 -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- ✅ contextPath 전역 변수 선언 -->
+    <script>
+        const ctx = "${pageContext.request.contextPath}";
+    </script>
+
     <!-- 정적 리소스 -->
     <link rel="stylesheet" href="/css/table.css"/>
     <script src="/js/table.js"></script>
 </head>
+
 
 <body class="min-h-screen flex flex-col bg-slate-100 text-gray-800 font-sans">
 

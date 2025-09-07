@@ -6,38 +6,36 @@
 <mapper namespace="kopo.poly.kpaas.mapper.UserMapper">
 
     <!-- 사용자 프로필 조회 (userId 기반) -->
-    <select id="getUserProfile" parameterType="string" resultType="kopo.poly.kpaas.dto.UserDTO">
-        SELECT user_id      AS userId,
-               name,
-               email,
-               nickname,
-               DATE_FORMAT(created_at, '%Y-%m-%d') AS createdAt
+    <select id="getLogin" parameterType="UserDTO" resultType="UserDTO">
+        SELECT user_id, name, email, password
+        FROM users
+        WHERE email = #{email}
+          AND password = #{password}
+            LIMIT 1
+    </select>
+
+    <!-- 프로필 조회 -->
+    <select id="getUserProfile" parameterType="UserDTO" resultType="UserDTO">
+        SELECT user_id, name, email, nickname, tel, birth_date, is_foreigner, created_at
         FROM users
         WHERE user_id = #{userId}
             LIMIT 1
     </select>
 
-    <!-- 로그인 / 이메일로 사용자 1건 조회 -->
-    <select id="getUserByEmail" parameterType="string" resultType="kopo.poly.kpaas.dto.UserDTO">
-        SELECT user_id,
-               name,
-               email,
-               nickname,
-               password,
-               birth_date,
-               is_foreigner,
-               tel,
-               DATE_FORMAT(created_at, '%Y-%m-%d')
+    <!-- 이메일로 사용자 조회 -->
+    <select id="getUserByEmail" parameterType="UserDTO" resultType="UserDTO">
+        SELECT user_id, name, email, nickname, password, birth_date, is_foreigner, tel, created_at
         FROM users
-        WHERE LOWER(email) = LOWER(#{email})
+        WHERE email = #{email}
             LIMIT 1
     </select>
 
-    <!-- 회원 탈퇴 -->
-    <delete id="deleteUser" parameterType="int">
-        DELETE FROM users WHERE user_id = #{userId}
-    </delete>
 
+    <!-- 회원 탈퇴 -->
+    <delete id="deleteUser" parameterType="UserDTO">
+        DELETE FROM users
+        WHERE user_id = #{userId}
+    </delete>
     <!-- 비밀번호 업데이트 -->
     <update id="updatePasswordByEmail" parameterType="kopo.poly.kpaas.dto.UserDTO">
         UPDATE users

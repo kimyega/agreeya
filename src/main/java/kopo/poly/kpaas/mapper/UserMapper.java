@@ -7,14 +7,13 @@ import org.apache.ibatis.annotations.Mapper;
 public interface UserMapper {
 
     /** userId 기반 프로필 조회 */
-    UserDTO getUserProfile(String userId);
+    UserDTO getUserProfile(UserDTO pDTO);
 
-    /** 이메일 기반 조회 (로그인/비번 재설정) */
-    UserDTO getUserByEmail(String email);
+    /** 이메일 기반 조회 (로그인/비밀번호 재설정) */
+    UserDTO getUserByEmail(UserDTO pDTO);
 
-    /** 회원 탈퇴 */
-    int deleteUser(int userId);
-
+    /** 회원 탈퇴 (userId 기준) */
+    int deleteUser(UserDTO pDTO);
     /** 비밀번호 업데이트 (이메일 기준) */
     int updatePasswordByEmail(UserDTO pDTO);
 
@@ -32,5 +31,6 @@ public interface UserMapper {
                                 String inputCode);
 
     /** 휴대폰으로 사용자 조회 */
-    UserDTO getUserByPhone(String phone);
+// UserMapper.java
+    UserDTO getUserByPhone(UserDTO pDTO);
 }
