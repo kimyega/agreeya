@@ -24,7 +24,7 @@ public class UserService implements IUserService {
         String password = pDTO.getPassword();
 
         // String emailEnc = EncryptUtil.encAES128CBC(email);  // ❌ 테스트용 주석 처리
-        String pwEnc = EncryptUtil.encHashSHA256(password);    // ✅ 비밀번호는 해시 비교 유지
+        String pwEnc = EncryptUtil.encHashSHA256(password);    // ✅ 비밀번호는 해시 비교 유지 컨트롤러로 옮기기
 
         // DB 조회 (평문 이메일로 검색)
         UserDTO rDTO = userMapper.getUserByEmail(
@@ -45,7 +45,7 @@ public class UserService implements IUserService {
             return rDTO;
         }
 
-        log.warn("❌ 로그인 실패 - 비밀번호 불일치");
+        log.warn("❌ 로그인 실패 - 비밀번호 불일치"); // null 이면optional아니면 1
         return null;
     }
 

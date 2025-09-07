@@ -7,13 +7,15 @@ import org.apache.ibatis.annotations.Mapper;
 public interface UserMapper {
 
     /** userId 기반 프로필 조회 */
-    UserDTO getUserProfile(UserDTO pDTO);
+    UserDTO getUserProfile(UserDTO pDTO); //이름 xml똑같이 고치기
 
     /** 이메일 기반 조회 (로그인/비밀번호 재설정) */
     UserDTO getUserByEmail(UserDTO pDTO);
 
     /** 회원 탈퇴 (userId 기준) */
     int deleteUser(UserDTO pDTO);
+
+
     /** 비밀번호 업데이트 (이메일 기준) */
     int updatePasswordByEmail(UserDTO pDTO);
 

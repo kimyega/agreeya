@@ -23,7 +23,7 @@ public class UserController {
 
     // ===== 로그인 처리 =====
     @ResponseBody
-    @PostMapping("/loginProc")
+    @PostMapping("/loginProc") //responseEntity바꾸기
     public ResponseEntity<UserDTO> loginProc(HttpServletRequest request, HttpSession session) throws Exception {
 
         String email = CmmUtil.nvl(request.getParameter("email"));
@@ -48,8 +48,6 @@ public class UserController {
             UserDTO resDTO = UserDTO.builder()
                     .userId(rDTO.getUserId())
                     .name(rDTO.getName())
-                    .msg("로그인 성공")
-                    .res(1)
                     .build();
 
             return ResponseEntity.ok(resDTO);
@@ -57,8 +55,6 @@ public class UserController {
         } else {
             // 실패 응답
             UserDTO resDTO = UserDTO.builder()
-                    .msg("이메일 또는 비밀번호가 올바르지 않습니다.")
-                    .res(0)
                     .build();
 
             return ResponseEntity.ok(resDTO);
@@ -93,7 +89,7 @@ public class UserController {
 
     // ===== 회원 탈퇴 =====
     @ResponseBody
-    @DeleteMapping("/delete")
+    @DeleteMapping("/delete") //responseEntity지우기
     public ResponseEntity<?> deleteUser(HttpSession session) throws Exception {
         log.info("🔥 회원탈퇴 컨트롤러 진입");
 
@@ -124,7 +120,7 @@ public class UserController {
         log.info("로그아웃 시작");
         session.invalidate(); // 세션 전체 제거
         log.info("로그아웃 완료 → 메인 페이지로 이동");
-        return "redirect:/"; // 홈으로 리다이렉트
+        return "/";
     }
 
     // ===== 화면 이동 =====

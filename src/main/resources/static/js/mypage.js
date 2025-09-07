@@ -1,65 +1,65 @@
-document.addEventListener('DOMContentLoaded', async () => {
-  try {
-    // 프로필 조회
-    const res = await fetch('/user/mypage/profile', {
-      method: 'GET',
-      credentials: 'include'
-    });
-
-    if (!res.ok) throw new Error('응답 오류');
-
-    const d = await res.json();
-    if (!d) {
-      alert('로그인이 필요합니다.');
-      location.href = '/user/login';
-      return;
-    }
-
-    // ✅ DOM 채우기
-    document.getElementById('pfName').textContent  = d.name ?? '-';
-    document.getElementById('pfEmail').textContent = d.email ?? '-';
-    document.getElementById('pfRegDt').textContent = d.createdAt ?? '-';
-    document.getElementById('headerNick').textContent = d.nickname || d.userId || 'User';
-
-    // ✅ 상단바 토글
-    document.getElementById('loginButton')?.classList.add('hidden');
-    document.getElementById('profileDropdownWrapper')?.classList.remove('hidden');
-
-  } catch (e) {
-    console.error(e);
-    alert('프로필 로딩 실패');
-    location.href = '/user/login';
-  }
-
-  // 회원 탈퇴 모달
-  const modal = document.getElementById('withdrawModal');
-  document.getElementById('btnWithdraw')?.addEventListener('click', () => {
-    modal.classList.remove('hidden');
-    modal.classList.add('flex');
-  });
-  document.getElementById('cancelWithdraw')?.addEventListener('click', () => {
-    modal.classList.add('hidden');
-    modal.classList.remove('flex');
-  });
-
-  document.getElementById('confirmWithdraw')?.addEventListener('click', async () => {
-    try {
-      const res = await fetch('/user/delete', {
-        method: 'DELETE',
-        credentials: 'include'
-      });
-
-      const d = await res.json();
-      if (d.res === 1) {
-        alert('탈퇴 완료');
-        location.href = '/';
-      } else {
-        alert(d.msg || '탈퇴 실패');
+$(document).ready(function () {
+  // ✅ 프로필 조회
+  $.ajax({
+    url: "/user/mypage/profile",
+    type: "GET",
+    xhrFields: { withCredentials: true }, // 세션 유지
+    success: function (d) {
+      if (!d) {
+        alert("로그인이 필요합니다.");
+        location.href = "/user/login";
+        return;
       }
-    } catch (err) {
-      console.error(err);
-      alert('탈퇴 요청 실패');
+
+      // DOM 채우기
+      $("#pfName").text(d.name ?? "-");
+      $("#pfEmail").text(d.email ?? "-");
+      $("#pfRegDt").text(d.createdAt ?? "-");
+      $("#headerNick").text(d.name || d.userId || "User");
+
+      // 상단바 토글
+      $("#loginButton").addClass("hidden");
+      $("#profileDropdownWrapper").removeClass("hidden");
+    },
+    error: function (xhr, status, error) {
+      console.error("프로필 로딩 실패:", error);
+      alert("프로필 로딩 실패");
+      location.href = "/user/login";
     }
   });
 
+  // ✅ 회원 탈퇴 모달 열기
+  $("#btnWithdraw").on("click", () => {
+    $("#withdrawModal").removeClass("hidden").addClass("flex");
+  });
+
+  // 회원 탈퇴 모달 닫기
+  $("#cancelWithdraw").on("click", () => {
+    $("#withdrawModal").addClass("hidden").removeClass("flex");
+  });
+
+  // ✅ 회원 탈퇴 요청
+  $("#confirmWithdraw").on("click", function () {
+    $.ajax({
+      url: "/user/delete",
+      type: "DELETE",
+      xhrFields: { withCredentials: true }, // 세션 유지
+      success: function (d) {
+        if (d.res === 1) {
+          $("#withdrawModal").addClass("hidden");
+          $("#withdrawDoneModal").removeClass("hidden").addClass("flex");
+
+          setTimeout(() => {
+            location.href = "/";
+          }, 2000);
+        } else {
+          alert(d.msg || "탈퇴 실패");
+        }
+      },
+      error: function (xhr, status, error) {
+        console.error("탈퇴 요청 실패:", error);
+        alert("탈퇴 요청 실패");
+      }
+    });
+  });
 });
