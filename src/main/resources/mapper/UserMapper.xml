@@ -23,8 +23,19 @@
     <!-- 이메일로 사용자 조회 -->
     <select id="getUserByEmail" parameterType="UserDTO" resultType="UserDTO">
         SELECT user_id, name, email, nickname, password, birth_date, is_foreigner, tel, created_at
+    <!-- 이메일로 사용자 조회 -->
+    <select id="getUserByEmail" parameterType="UserDTO" resultType="UserDTO">
+        SELECT user_id,
+               name,
+               email,
+               nickname,
+               password,
+               birth_date,
+               is_foreigner,
+               tel
         FROM users
         WHERE email = #{email}
+            LIMIT 1
     </select>
 
 
@@ -36,6 +47,21 @@
 
     <!-- 비밀번호 업데이트 -->
     <update id="updatePasswordByEmail" parameterType="kopo.poly.kpaas.dto.UserDTO">
+        UPDATE users
+        SET password = #{password}
+        WHERE email = #{email}
+    </update>
+    <!---전화번호 조회-->
+    <select id="getUserByNameAndPhone" parameterType="UserDTO" resultType="UserDTO">
+        SELECT user_id, name, email, tel
+        FROM users
+        WHERE name = #{name}
+          AND REPLACE(tel, '-', '') = REPLACE(#{tel}, '-', '')
+            LIMIT 1
+    </select>
+
+    <!-- 이메일 기준 비밀번호 업데이트 -->
+    <update id="updatePassword" parameterType="UserDTO">
         UPDATE users
         SET password = #{password}
         WHERE email = #{email}
@@ -55,7 +81,7 @@
         NOW()
         )
         ON DUPLICATE KEY UPDATE
-        code_hash  = VALUES(code_hash),
+        code_hash = VALUES(code_hash),
         expires_at = VALUES(expires_at),
         created_at = created_at   <!-- ✅ 최초 생성시각 유지 -->
     </insert>
@@ -71,16 +97,17 @@
             LIMIT 1
     </delete>
 
-    <!-- 휴대폰으로 사용자 1건 조회 -->
-    <select id="getUserByPhone" parameterType="string" resultType="kopo.poly.kpaas.dto.UserDTO">
-        SELECT user_id      AS userId,
-               name,
-               email,
-               nickname,
-               password,
-               birth_date   AS birthDate,
-               is_foreigner AS isForeigner,
-               tel
+    <!-- (추가) 휴대폰으로 사용자 1건 조회 -->
+    <select id="getUserByPhone" resultType="UserDTO">
+        SELECT
+            user_id      AS userId,
+            name         AS name,
+            email        AS email,
+            nickname     AS nickname,
+            password     AS password,
+            birth_date   AS birthDate,
+            is_foreigner AS isForeigner,
+            tel          AS tel
         FROM users
         WHERE REPLACE(tel, '-', '') = REPLACE(#{phone}, '-', '')
             LIMIT 1

@@ -1,5 +1,6 @@
 package kopo.poly.kpaas.mapper;
 
+import kopo.poly.kpaas.dto.MailDTO;
 import kopo.poly.kpaas.dto.UserDTO;
 import org.apache.ibatis.annotations.Mapper;
 
@@ -10,16 +11,13 @@ public interface UserMapper {
     UserDTO getLogin(UserDTO pDTO);
 
     UserDTO getUserProfile(UserDTO pDTO); //이름 xml똑같이 고치기
+    UserDTO getUserByEmail(UserDTO pDTO) throws Exception;
 
-    /** 이메일 기반 조회 (로그인/비밀번호 재설정) */
-    UserDTO getUserByEmail(UserDTO pDTO);
+    int updatePassword(UserDTO pDTO) throws Exception;
 
     /** 회원 탈퇴 (userId 기준) */
     int deleteUser(UserDTO pDTO);
-
-
-    /** 비밀번호 업데이트 (이메일 기준) */
-    int updatePasswordByEmail(UserDTO pDTO);
+    UserDTO getUserByNameAndPhone(UserDTO pDto) throws Exception;
 
     /** 인증코드 UPSERT */
     int upsertEmailVerifySqlSide(String contactType,
@@ -35,6 +33,5 @@ public interface UserMapper {
                                 String inputCode);
 
     /** 휴대폰으로 사용자 조회 */
-// UserMapper.java
-    UserDTO getUserByPhone(UserDTO pDTO);
+    UserDTO getUserByPhone(String phone);
 }

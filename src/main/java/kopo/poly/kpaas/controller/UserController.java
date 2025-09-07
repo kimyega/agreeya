@@ -5,9 +5,19 @@ import jakarta.servlet.http.HttpSession;
 import kopo.poly.kpaas.dto.UserDTO;
 import kopo.poly.kpaas.service.IUserService;
 import kopo.poly.kpaas.util.CmmUtil;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
+import kopo.poly.kpaas.dto.UserDTO;
+import kopo.poly.kpaas.service.UserService;
+import kopo.poly.kpaas.util.CmmUtil;
+import kopo.poly.kpaas.util.EncryptUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 import org.springframework.web.bind.annotation.*;
 
 @Slf4j
@@ -108,35 +118,47 @@ public class UserController {
     @GetMapping("/login")
     public String login() {
         return "user/login";
+        log.info("GET /user/login");
+        return "user/login";
     }
 
     @GetMapping("/signup")
     public String signup() {
+        log.info("GET /user/signup");
         return "user/signup";
     }
 
     @GetMapping("/findEmail")
     public String findEmail() {
+        log.info("GET /user/findEmail");
         return "user/findEmail";
     }
 
     @GetMapping("/findPw")
     public String findPw() {
+        log.info("GET /user/findPw");
         return "user/findPw";
     }
 
     @GetMapping("/phoneVerify")
     public String phoneVerify() {
+        log.info("GET /user/phoneVerify");
         return "user/phoneVerify";
     }
 
     @GetMapping("/emailVerify")
     public String emailVerify() {
+        log.info("GET /user/emailVerify");
         return "user/emailVerify";
     }
 
     @GetMapping("/changePw")
     public String changePw() {
+        log.info("GET /user/changePw");
         return "user/changePw";
     }
+
+
+
 }
+

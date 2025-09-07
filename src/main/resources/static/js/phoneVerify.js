@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const modal = document.getElementById('resultModal');
     const emailEl = document.getElementById('resultEmail');
 
-    const savedPhone = (sessionStorage.getItem('fe_phone') || '').trim();
+    const savedTel = (sessionStorage.getItem('fe_tel') || '').trim();
 
     function showErr(text) {
         msg.textContent = text;
@@ -45,25 +45,27 @@ document.addEventListener('DOMContentLoaded', () => {
             showErr('인증번호는 6자리 숫자여야 합니다.');
             return;
         }
-        if (!savedPhone) {
+        if (!savedTel) {
             showErr('세션이 만료되었습니다. 처음부터 다시 진행해주세요.');
             return;
         }
 
-        fetch('/user/find-email/verify', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ phone: savedPhone.replace(/\D/g, ''), code: v })
-        })
-            .then(r => r.json())
-            .then(res => {
-                if (!res.ok) {
-                    showErr(res.message || '인증 실패');
-                    return;
+        $.ajax({
+            url: "/user/userVerifyFindEmail",
+            type: "post",
+            dataType: "json",
+            data: { tel: savedTel, code: v },
+            success: function (res) {
+                if (res.result === 1) {
+                    if (emailEl) emailEl.textContent = res.msg; // 마스킹된 이메일
+                    modal?.classList.remove('hidden');
+                } else {
+                    showErr(res.msg || "인증 실패");
                 }
-                if (emailEl) emailEl.textContent = res.email || '';
-                modal?.classList.remove('hidden');
-            })
-            .catch(() => showErr('네트워크 오류가 발생했습니다.'));
+            },
+            error: function () {
+                showErr("❌ 서버 요청 중 오류 발생");
+            }
+        });
     });
 });
