@@ -16,7 +16,6 @@ public interface IUserService {
 
     String maskEmail(String email);
 
-    // ✅ 이메일 찾기용 SMS 인증코드 발송
-    void sendFindEmailCode(HttpServletRequest request, String name, String tel);
+    String sendFindEmailCode(String name, String tel);
 
 }
