@@ -3,7 +3,7 @@ package kopo.poly.kpaas.controller;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import kopo.poly.kpaas.dto.UserDTO;
-import kopo.poly.kpaas.service.UserService;
+import kopo.poly.kpaas.service.IUserService;
 import kopo.poly.kpaas.util.CmmUtil;
 import kopo.poly.kpaas.util.EncryptUtil;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +20,7 @@ import java.util.Map;
 @Controller
 public class UserController {
 
-    private final UserService userService;
+    private final IUserService userService;
 
     // ===== 로그인 처리 =====
     // ===== 로그인 처리 =====

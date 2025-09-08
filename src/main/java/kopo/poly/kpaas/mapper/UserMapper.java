@@ -1,6 +1,6 @@
 package kopo.poly.kpaas.mapper;
 
-import kopo.poly.kpaas.dto.MailDTO;
+
 import kopo.poly.kpaas.dto.UserDTO;
 import org.apache.ibatis.annotations.Mapper;
 
