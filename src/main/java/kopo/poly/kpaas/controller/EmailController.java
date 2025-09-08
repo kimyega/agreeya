@@ -248,4 +248,81 @@ public class EmailController {
             log.info("resetPassword end!");
         }
     }
+
+    // 1. 이름 + 전화번호 확인 → 인증번호 발송
+    @PostMapping("/userFindEmail")
+    @ResponseBody
+    public Map<String, Object> findEmail(HttpServletRequest request) {
+        log.info("findEmail start!");
+
+        String name = CmmUtil.nvl(request.getParameter("name"));
+        String tel = CmmUtil.nvl(request.getParameter("tel"));
+
+        Map<String, Object> rMap = new HashMap<>();
+
+        try {
+            UserDTO rDto = userService.getUserByNameAndPhone(name, tel);
+
+            if (rDto == null) {
+                rMap.put("result", 0);
+                rMap.put("msg", "등록되지 않은 사용자입니다.");
+            } else {
+                userService.sendFindEmailCode(request, name, tel);
+                rMap.put("result", 1);
+                rMap.put("msg", "인증번호를 발송했습니다.");
+            }
+        } catch (Exception e) {
+            rMap.put("result", -1);
+            rMap.put("msg", "이메일 찾기 중 오류 발생");
+            log.error("findEmail Error: {}", e.getMessage(), e);
+        }
+
+        log.info("findEmail end!");
+        return rMap;
+    }
+
+    // 2. 인증번호 검증 → 이메일 반환
+    @PostMapping("/userVerifyFindEmail")
+    @ResponseBody
+    public Map<String, Object> verifyFindEmail(HttpServletRequest request) {
+        log.info("verifyFindEmail start!");
+
+        String inputCode = CmmUtil.nvl(request.getParameter("code"));
+        Map<String, Object> rMap = new HashMap<>();
+
+        try {
+            HttpSession session = request.getSession();
+            String savedCode = (String) session.getAttribute("findEmailCode");
+            String name = (String) session.getAttribute("findEmailName");
+            String tel = (String) session.getAttribute("findEmailTel");
+            Long expireAt = (Long) session.getAttribute("findEmailExpire");
+
+            if (savedCode == null || expireAt == null || System.currentTimeMillis() > expireAt) {
+                rMap.put("result", 0);
+                rMap.put("msg", "인증번호가 만료되었습니다.");
+            } else if (savedCode.equals(inputCode)) {
+                UserDTO rDto = userService.getUserByNameAndPhone(name, tel);
+
+                if (rDto != null) {
+                    String maskedEmail = userService.maskEmail(rDto.getEmail());
+                    rMap.put("result", 1);
+                    rMap.put("msg", "가입된 이메일: " + maskedEmail);
+                } else {
+                    rMap.put("result", 0);
+                    rMap.put("msg", "사용자를 찾을 수 없습니다.");
+                }
+            } else {
+                rMap.put("result", 0);
+                rMap.put("msg", "인증번호가 일치하지 않습니다.");
+            }
+        } catch (Exception e) {
+            rMap.put("result", -1);
+            rMap.put("msg", "인증 처리 중 오류 발생");
+            log.error("verifyFindEmail Error: {}", e.getMessage(), e);
+        }
+
+        log.info("verifyFindEmail end!");
+        return rMap;
+    }
 }
+

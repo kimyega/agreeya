@@ -1,6 +1,5 @@
 package kopo.poly.kpaas.service;
 
-import jakarta.servlet.http.HttpServletRequest;
 import kopo.poly.kpaas.dto.MailDTO;
 import kopo.poly.kpaas.dto.UserDTO;
 
