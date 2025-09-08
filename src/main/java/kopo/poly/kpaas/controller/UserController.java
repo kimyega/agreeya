@@ -5,19 +5,9 @@ import jakarta.servlet.http.HttpSession;
 import kopo.poly.kpaas.dto.UserDTO;
 import kopo.poly.kpaas.service.IUserService;
 import kopo.poly.kpaas.util.CmmUtil;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
-import kopo.poly.kpaas.dto.UserDTO;
-import kopo.poly.kpaas.service.UserService;
-import kopo.poly.kpaas.util.CmmUtil;
-import kopo.poly.kpaas.util.EncryptUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.Map;
 import org.springframework.web.bind.annotation.*;
 
 @Slf4j
@@ -113,15 +103,15 @@ public class UserController {
         log.info("로그아웃 완료 → 메인 페이지로 이동");
         return "redirect:/"; // 홈으로 리다이렉트
     }
-
-    // ===== 화면 이동 =====
     @GetMapping("/login")
     public String login() {
-        return "user/login";
         log.info("GET /user/login");
-        return "user/login";
+
+        return "user/login";  // /WEB-INF/views/user/login.jsp 를 찾음
     }
 
+
+    // ===== 화면 이동 =====
     @GetMapping("/signup")
     public String signup() {
         log.info("GET /user/signup");
@@ -157,8 +147,4 @@ public class UserController {
         log.info("GET /user/changePw");
         return "user/changePw";
     }
-
-
-
 }
-
