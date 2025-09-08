@@ -7,7 +7,7 @@ import org.apache.ibatis.annotations.Mapper;
 public interface UserMapper {
 
     // 로그인
-    UserDTO getLogin(UserDTO pDTO);
+    UserDTO getUserLogin(UserDTO pDTO);
 
     // 프로필 조회
     UserDTO getUserProfile(UserDTO pDTO);

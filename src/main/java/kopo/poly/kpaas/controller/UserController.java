@@ -19,6 +19,7 @@ public class UserController {
     private final IUserService userService;
 
     // ===== 로그인 처리 =====
+    // ===== 로그인 처리 =====
     @ResponseBody
     @PostMapping("/loginProc")
     public UserDTO loginProc(HttpServletRequest request, HttpSession session) throws Exception {
@@ -31,7 +32,7 @@ public class UserController {
                 .password(password)
                 .build();
 
-        UserDTO rDTO = userService.login(pDTO);
+        UserDTO rDTO = userService.getUserLogin(pDTO);
 
         if (rDTO != null) {
             // 세션 저장
@@ -51,6 +52,7 @@ public class UserController {
     public String mypage() {
         return "user/mypage";
     }
+
 
     // ===== 마이페이지 프로필 조회 =====
     @ResponseBody
@@ -79,6 +81,8 @@ public class UserController {
         log.info("🔥 회원탈퇴 컨트롤러 진입");
 
         String userId = CmmUtil.nvl((String) session.getAttribute("LOGIN_USER_ID"));
+        log.info("회원탈퇴 요청 - 세션 userId={}", userId);
+
         if (userId.isEmpty()) {
             log.warn("⚠️ 로그인 필요 - 세션 없음");
             return 0; // 로그인 안 된 경우 0 반환
@@ -95,6 +99,7 @@ public class UserController {
         return res; // 성공 1 / 실패 0
     }
 
+
     // ===== 로그아웃 =====
     @GetMapping("/logout")
     public String logout(HttpSession session) {
@@ -103,6 +108,9 @@ public class UserController {
         log.info("로그아웃 완료 → 메인 페이지로 이동");
         return "redirect:/"; // 홈으로 리다이렉트
     }
+
+
+    // ===== 화면 이동 =====
     @GetMapping("/login")
     public String login() {
         log.info("GET /user/login");
@@ -147,4 +155,5 @@ public class UserController {
         log.info("GET /user/changePw");
         return "user/changePw";
     }
+
 }

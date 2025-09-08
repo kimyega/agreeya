@@ -31,7 +31,7 @@ public class UserService implements IUserService {
 
     /** 로그인 */
     @Override
-    public UserDTO login(UserDTO pDTO) throws Exception {
+    public UserDTO getUserLogin(UserDTO pDTO) throws Exception {
         log.info("🟢 login() 호출: {}", pDTO);
 
         String rawPw = pDTO.getPassword(); // 사용자가 입력한 비밀번호 (평문)

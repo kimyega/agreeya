@@ -7,7 +7,7 @@ import kopo.poly.kpaas.dto.UserDTO;
 public interface IUserService {
 
     // 로그인
-    UserDTO login(UserDTO pDTO) throws Exception;
+    UserDTO getUserLogin(UserDTO pDTO) throws Exception;
 
     // 마이페이지 프로필 조회
     UserDTO getUserProfile(UserDTO pDTO) throws Exception;
