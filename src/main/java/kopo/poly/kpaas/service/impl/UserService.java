@@ -16,9 +16,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 
 @Slf4j
 @Service
@@ -34,6 +32,9 @@ public class UserService implements IUserService {
     @Value("${spring.mail.username}")
     private String fromMail;
 
+    /**
+     * 메일 발송
+     */
     @Override
     public int doSendMail(MailDTO pDTO) {
         log.info("doSendMail start!");
@@ -43,10 +44,10 @@ public class UserService implements IUserService {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
-            helper.setTo(pDTO.getToMail());
+            helper.setTo(CmmUtil.nvl(pDTO.getToMail())); // null 방지
             helper.setFrom(fromMail);
-            helper.setSubject(pDTO.getTitle());
-            helper.setText(pDTO.getContents(), true);
+            helper.setSubject(CmmUtil.nvl(pDTO.getTitle()));
+            helper.setText(CmmUtil.nvl(pDTO.getContents()), true);
 
             mailSender.send(message);
 
@@ -60,12 +61,15 @@ public class UserService implements IUserService {
         return res;
     }
 
+    /**
+     * 이메일로 사용자 조회
+     */
     @Override
     public UserDTO getUserByEmail(String email) throws Exception {
         log.info("getUserByEmail start!");
 
         UserDTO pDto = new UserDTO();
-        pDto.setEmail(email);
+        pDto.setEmail(CmmUtil.nvl(email)); // null 방지
 
         UserDTO rDto = userMapper.getUserByEmail(pDto);
 
@@ -73,13 +77,15 @@ public class UserService implements IUserService {
         return rDto;
     }
 
-
+    /**
+     * 비밀번호 업데이트
+     */
     @Override
     public int updatePassword(UserDTO pDto) throws Exception {
         log.info("updatePassword start!");
 
-        // ✅ 암호화
-        String hashPw = EncryptUtil.encHashSHA256(pDto.getPassword());
+        String rawPw = CmmUtil.nvl(pDto.getPassword());
+        String hashPw = EncryptUtil.encHashSHA256(rawPw); // SHA256 암호화
         pDto.setPassword(hashPw);
 
         int res = userMapper.updatePassword(pDto);
@@ -89,48 +95,59 @@ public class UserService implements IUserService {
         return res;
     }
 
-
+    /**
+     * 이름+전화번호로 사용자 조회
+     */
     @Override
     public UserDTO getUserByNameAndPhone(String name, String tel) throws Exception {
-        UserDTO pDto = new UserDTO();
-        pDto.setName(name);
-        pDto.setTel(tel);
+        log.info("getUserByNameAndPhone start!");
 
-        return userMapper.getUserByNameAndPhone(pDto);
+        UserDTO pDto = new UserDTO();
+        pDto.setName(CmmUtil.nvl(name));
+        pDto.setTel(CmmUtil.nvl(tel));
+
+        UserDTO rDto = userMapper.getUserByNameAndPhone(pDto);
+
+        log.info("getUserByNameAndPhone end!");
+        return rDto;
     }
 
+    /**
+     * 이메일 마스킹
+     */
     @Override
     public String maskEmail(String email) {
-        int idx = email.indexOf("@");
+        String safeEmail = CmmUtil.nvl(email);
+        int idx = safeEmail.indexOf("@");
+
         if (idx > 3) {
-            return email.substring(0, 4) + "****" + email.substring(idx);
+            return safeEmail.substring(0, 4) + "****" + safeEmail.substring(idx);
         } else {
-            return "****" + email.substring(idx);
+            return "****" + safeEmail.substring(idx);
         }
     }
 
-    // ✅ 이메일 찾기용 인증코드 생성 + 세션 저장 + SMS 발송
+    /**
+     * 이메일 찾기용 인증코드 생성 + SMS 발송 (세션은 Controller에서 처리)
+     */
     @Override
-    public void sendFindEmailCode(HttpServletRequest request, String name, String tel) {
+    public String sendFindEmailCode(String name, String tel) {
         log.info("sendFindEmailCode start!");
 
         // 6자리 인증번호 생성
         String code = String.format("%06d", (int) (Math.random() * 1000000));
 
-        // 세션 저장
-        HttpSession session = request.getSession();
-        session.setAttribute("findEmailCode", code);
-        session.setAttribute("findEmailTel", tel);
-        session.setAttribute("findEmailName", name);
-        session.setAttribute("findEmailExpire", System.currentTimeMillis() + 5 * 60 * 1000);
-
         // CoolSMS 발송
-        coolSmsUtil.sendVerificationCode(tel, code);
+        coolSmsUtil.sendVerificationCode(CmmUtil.nvl(tel), code);
 
-        log.info("✅ 이메일 찾기 인증코드 생성 및 전송 완료: {}", code);
+        log.info("✅ 이메일 찾기 인증코드 발송 완료");
         log.info("sendFindEmailCode end!");
+
+        // 세션 저장은 Controller에서 하기 때문에, 코드만 반환
+        return code;
     }
 
 }
+
 
 
