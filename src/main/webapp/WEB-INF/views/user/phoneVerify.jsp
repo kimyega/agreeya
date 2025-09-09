@@ -93,7 +93,7 @@
                 이메일: <span id="resultEmail" class="font-bold"></span>
             </p>
 
-            <a href="/login"
+            <a href="user/login"
                class="inline-block bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-6 rounded-full transition">
                 로그인 화면으로 돌아가기
             </a>
