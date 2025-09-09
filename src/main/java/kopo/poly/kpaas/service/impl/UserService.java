@@ -1,7 +1,9 @@
 package kopo.poly.kpaas.service.impl;
 
+import kopo.poly.kpaas.dto.MailDTO;
 import kopo.poly.kpaas.dto.UserDTO;
 import kopo.poly.kpaas.mapper.IUserMapper;
+import kopo.poly.kpaas.service.IEmailService;
 import kopo.poly.kpaas.service.IUserService;
 import kopo.poly.kpaas.util.CmmUtil;
 import kopo.poly.kpaas.util.CoolSmsUtil;
@@ -9,6 +11,9 @@ import kopo.poly.kpaas.util.EncryptUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
+import java.util.concurrent.ThreadLocalRandom;
 
 
 @Slf4j
@@ -20,6 +25,8 @@ public class UserService implements IUserService {
     private final IUserMapper userMapper;
 
     private final CoolSmsUtil coolSmsUtil;
+
+    private final IEmailService emailService;
 
 
 
@@ -170,6 +177,62 @@ public class UserService implements IUserService {
         log.info("✅ 이메일 찾기 인증코드 발송 완료");
         log.info("sendFindEmailCode end!");
         return code;
+    }
+
+    @Override
+    public int insertUser(UserDTO pDTO) throws Exception {
+
+        log.info("{}.insertUserInfo Start!", this.getClass().getName());
+
+        int res = 0;
+
+        int success = userMapper.insertUser(pDTO);
+
+        if (success > 0) {
+            res = 1;
+
+            MailDTO mDto = new MailDTO();
+
+            mDto.setToMail(EncryptUtil.encAES128BCBC(CmmUtil.nvl(pDTO.getEmail())));
+            mDto.setTitle("회원가입을 축하드립니다.");
+            mDto.setContents(CmmUtil.nvl(pDTO.getName()) + "님의 회원가입을 진심으로 축하드립니다.");
+
+            emailService.doSendMail(mDto);
+        }
+
+        log.info("{}.insertUserInfo End!", this.getClass().getName());
+
+        return res;
+    }
+
+    @Override
+    public UserDTO getEmailExists(UserDTO pDTO) throws Exception {
+
+        log.info("{}.getEmailExists Start!", this.getClass().getName());
+
+        UserDTO rDTO = Optional.ofNullable(userMapper.getUserEmailExists(pDTO)).orElseGet(UserDTO::new);
+
+        if (CmmUtil.nvl(rDTO.getExistsYn()).equals("N")) {
+
+            int authNumber = ThreadLocalRandom.current().nextInt(100000, 1000000);
+
+            log.info("authNumber : {}", authNumber);
+
+            MailDTO dto = new MailDTO();
+
+            dto.setTitle("이메일 중복확인 발송메일");
+            dto.setContents("인증번호는 " + authNumber + " 입니다.");
+            dto.setToMail(EncryptUtil.decAES128BCBC(CmmUtil.nvl(pDTO.getEmail())));
+
+            emailService.doSendMail(dto);
+            dto = null;
+
+            rDTO.setAuthNumber(authNumber);
+        }
+
+        log.info("{}.getUserEmailExists End!", this.getClass().getName());
+
+        return rDTO;
     }
 
 }

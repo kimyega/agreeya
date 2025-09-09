@@ -17,5 +17,10 @@ public interface IUserService {
 
     UserDTO getUserByNameAndPhone(UserDTO pDTO) throws Exception;
 
+
+    UserDTO getEmailExists (UserDTO pDTO) throws Exception;
+
     String sendFindEmailCode(UserDTO pDTO); // name, tel도 DTO에서 받음
+
+    int insertUser(UserDTO pDTO) throws Exception;
 }
