@@ -34,7 +34,7 @@ $(document).ready(function () {
 
         // ✅ Ajax 요청
         $.ajax({
-            url: "/user/userFindEmail",
+            url: "/email/userFindEmail",
             type: "post",
             dataType: "json",
             data: { name: name, tel: tel },

@@ -26,7 +26,7 @@ $("#code-form").on("submit", function (e) {
     }
 
     $.ajax({
-        url: "/user/verifyResetCode",
+        url: "/email/verifyResetCode",
         type: "post",
         dataType: "json",
         data: { code: code },

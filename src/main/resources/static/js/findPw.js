@@ -42,14 +42,14 @@ $("#find-password-form").on("submit", function (e) {
 
     // Ajax 요청
     $.ajax({
-        url: "/user/sendResetCode",
+        url: "/email/sendResetCode",
         type: "post",
         dataType: "json",
         data: { email: email }, // serialize 대신 email만 명확히 전송
         success: function (json) {
             if (json.result === 1) {
                 alert(json.msg);
-                location.href = "/user/emailVerify"; // 인증코드 입력 화면으로 이동
+                location.href = "/email/emailVerify"; // 인증코드 입력 화면으로 이동
             } else {
                 alert(json.msg);
             }

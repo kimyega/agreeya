@@ -102,6 +102,7 @@ public class UserService implements IUserService {
         pDTO.setEmail(CmmUtil.nvl(pDTO.getEmail())); // 이메일 기준 삭제
         int res = (userMapper.deleteUser(pDTO.getEmail()) != null) ? 1 : 0;
 
+
         log.info("deleteUser result={}", res);
         log.info("deleteUser end!");
         return res;
