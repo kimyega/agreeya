@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.util.Map;
+import java.util.Optional;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -31,10 +31,12 @@ public class UserController {
     @PostMapping("/loginProc")
     public UserDTO loginProc(HttpServletRequest request, HttpSession session) throws Exception {
         log.info("🟢 loginProc 실행");
+        String email = CmmUtil.nvl(request.getParameter("email"));
+        String password = CmmUtil.nvl(request.getParameter("password"));
 
         UserDTO pDTO = new UserDTO();
-        pDTO.setEmail(CmmUtil.nvl(request.getParameter("email")));
-        pDTO.setPassword(CmmUtil.nvl(request.getParameter("password")));
+        pDTO.setEmail(EncryptUtil.encAES128BCBC(email));   // AES 암호화
+        pDTO.setPassword(EncryptUtil.encHashSHA256(password)); // SHA256 해시
 
         UserDTO rDTO = userService.getUserLogin(pDTO);
 
@@ -76,9 +78,22 @@ public class UserController {
         UserDTO pDTO = new UserDTO();
         pDTO.setUserId(userId);
 
-        UserDTO rDTO = userService.getUserProfile(pDTO);
-        log.info("📌 프로필 조회 결과: {}", rDTO);
+        UserDTO rDTO = Optional.ofNullable(userService.getUserProfile(pDTO))
+                .orElseGet(UserDTO::new);
 
+        if (rDTO.getUserId() != null) {
+            // ✅ 이메일만 복호화
+            if (rDTO.getEmail() != null && !rDTO.getEmail().isEmpty()) {
+                try {
+                    rDTO.setEmail(EncryptUtil.decAES128BCBC(rDTO.getEmail()));
+                } catch (Exception e) {
+                    log.warn("⚠️ 이메일 복호화 실패 → 원본 그대로 반환: {}", rDTO.getEmail());
+                }
+            }
+            // ❌ 비밀번호는 복호화 불가 (화면에 표시하지도 않음)
+        }
+
+        log.info("📌 마이페이지 반환 데이터(이메일 복호화 후): {}", rDTO);
         return rDTO;
     }
 
@@ -224,7 +239,7 @@ public class UserController {
                     .nickname(nickname)
                     .password(EncryptUtil.encHashSHA256(password))
                     .birthDate(birthDate)
-                    .tel(tel)
+                    .tel(EncryptUtil.encAES128BCBC(tel))
                     .isForeigner(Integer.parseInt(isForeigner))
                     .build();
 

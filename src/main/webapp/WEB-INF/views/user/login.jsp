@@ -91,9 +91,9 @@
         </form>
 
         <div class="flex justify-between text-sm text-gray-500 mt-6">
-            <a href="/findPw" class="hover:underline">비밀번호 찾기</a>
-            <a href="/findEmail" class="hover:underline">이메일 찾기</a>
-            <a href="/signup" class="hover:underline">회원가입</a>
+            <a href="/user/findPw" class="hover:underline">비밀번호 찾기</a>
+            <a href="/user/findEmail" class="hover:underline">이메일 찾기</a>
+            <a href="/user/signup" class="hover:underline">회원가입</a>
         </div>
     </div>
 
