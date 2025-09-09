@@ -5,94 +5,95 @@ function toggleDropdown() {
 }
 
 // 외부 클릭 시 드롭다운 닫기
-window.addEventListener('click', function (e) {
-    const wrapper = document.getElementById('profileDropdownWrapper');
-    const dropdown = document.getElementById('profileDropdown');
-    if (wrapper && dropdown && !wrapper.contains(e.target)) {
-        dropdown.classList.add('hidden');
+$(document).on("click", function (e) {
+    const wrapper = $("#profileDropdownWrapper");
+    const dropdown = $("#profileDropdown");
+    if (wrapper.length && dropdown.length && !wrapper[0].contains(e.target)) {
+        dropdown.addClass("hidden");
     }
 });
 
 // 로그인 모달 열기/닫기
 function simulateLogin() {
-    document.getElementById("loginModal")?.classList.remove("hidden");
+    $("#loginModal").removeClass("hidden");
 }
 function closeLoginModal() {
-    document.getElementById("loginModal")?.classList.add("hidden");
+    $("#loginModal").addClass("hidden");
 }
 
 // 성공 모달
-const successModal = document.getElementById("successModal");
 function showSuccessModal() {
-    if (!successModal) return;
-    successModal.classList.remove("hidden");
-    setTimeout(() => successModal.classList.add("hidden"), 1500);
+    const successModal = $("#successModal");
+    if (!successModal.length) return;
+
+    successModal.removeClass("hidden");
+    setTimeout(() => successModal.addClass("hidden"), 1500);
 }
 
-// 로그아웃 (✅ GET 방식으로 복구)
+// 로그아웃 (✅ GET 방식)
 function logout() {
-    fetch("/user/logout", { method: "GET", credentials: "include" })
-        .then(() => {
-            location.href = "/";
-        })
-        .catch((e) => {
-            console.error("로그아웃 실패:", e);
+    $.ajax({
+        url: contextPath + "/user/logout", // ✅ contextPath 변수 사용
+        type: "GET",
+        xhrFields: { withCredentials: true },
+        success: function () {
+            location.href = contextPath + "/";
+        },
+        error: function (xhr, status, error) {
+            console.error("로그아웃 실패:", error);
             alert("로그아웃 실패");
-        });
+        }
+    });
 }
 
 // 로그인 처리
-document.addEventListener("DOMContentLoaded", () => {
-    const form = document.getElementById("login-form");
-    form?.addEventListener("submit", async (e) => {
+$(document).ready(function () {
+    $("#login-form").on("submit", function (e) {
         e.preventDefault();
 
-        const email = document.getElementById("email").value.trim();
-        const password = document.getElementById("password").value.trim();
-        const emailMsgEl = document.getElementById("email-msg");
-        const passwordMsgEl = document.getElementById("password-msg");
+        const email = $("#email").val().trim();
+        const password = $("#password").val().trim();
+        const emailMsgEl = $("#email-msg");
+        const passwordMsgEl = $("#password-msg");
 
-        emailMsgEl.classList.add("hidden");
-        passwordMsgEl.classList.add("hidden");
+        emailMsgEl.addClass("hidden");
+        passwordMsgEl.addClass("hidden");
 
         if (!email) {
-            emailMsgEl.textContent = "이메일을 입력해주세요.";
-            emailMsgEl.classList.remove("hidden");
+            emailMsgEl.text("이메일을 입력해주세요.").removeClass("hidden");
             return;
         }
         if (!password) {
-            passwordMsgEl.textContent = "비밀번호를 입력해주세요.";
-            passwordMsgEl.classList.remove("hidden");
+            passwordMsgEl.text("비밀번호를 입력해주세요.").removeClass("hidden");
             return;
         }
 
-        try {
-            const res = await fetch("/user/loginProc", {
-                method: "POST",
-                headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                body: new URLSearchParams({ email, password }),
-                credentials: "include"   // ✅ 세션 유지
-            });
+        $.ajax({
+            url: contextPath + "/user/loginProc", // ✅ contextPath 변수 사용
+            type: "POST",
+            data: { email: email, password: password },
+            xhrFields: { withCredentials: true }, // ✅ 세션 유지
+            success: function (data) {
+                // ✅ UserDTO 반환 시 userId가 존재하면 성공
+                if (data && data.userId) {
+                    showSuccessModal();
 
-            const data = await res.json();
-            if (data.res === 1) {
-                showSuccessModal();
+                    // 상단바 갱신
+                    $("#loginButton").addClass("hidden");
+                    const profileWrapper = $("#profileDropdownWrapper");
+                    profileWrapper.removeClass("hidden");
+                    profileWrapper.find("span").text(data.name || data.userId || "User");
 
-                // 상단바 갱신
-                document.getElementById("loginButton")?.classList.add("hidden");
-                const profileWrapper = document.getElementById("profileDropdownWrapper");
-                profileWrapper?.classList.remove("hidden");
-                profileWrapper.querySelector("span").textContent =
-                    data.user?.name || data.user?.userId || "User";
-
-                setTimeout(() => (location.href = "/"), 1500);
-            } else {
-                emailMsgEl.textContent = data.msg || "로그인 실패";
-                emailMsgEl.classList.remove("hidden");
+                    setTimeout(() => (location.href = contextPath + "/"), 1500);
+                } else {
+                    // 실패 시 null 반환
+                    emailMsgEl.text("이메일 또는 비밀번호가 일치하지 않습니다.").removeClass("hidden");
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error("로그인 요청 오류:", error);
+                alert("로그인 요청 중 문제가 발생했습니다.");
             }
-        } catch (err) {
-            console.error("로그인 요청 오류:", err);
-            alert("로그인 요청 중 문제가 발생했습니다.");
-        }
+        });
     });
 });
