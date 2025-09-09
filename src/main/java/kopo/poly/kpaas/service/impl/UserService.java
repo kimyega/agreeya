@@ -1,18 +1,15 @@
 package kopo.poly.kpaas.service.impl;
 
-import jakarta.mail.internet.MimeMessage;
 import kopo.poly.kpaas.dto.MailDTO;
 import kopo.poly.kpaas.dto.UserDTO;
 import kopo.poly.kpaas.mapper.IUserMapper;
+import kopo.poly.kpaas.service.IEmailService;
 import kopo.poly.kpaas.service.IUserService;
 import kopo.poly.kpaas.util.CmmUtil;
 import kopo.poly.kpaas.util.CoolSmsUtil;
 import kopo.poly.kpaas.util.EncryptUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -28,6 +25,8 @@ public class UserService implements IUserService {
     private final IUserMapper userMapper;
 
     private final CoolSmsUtil coolSmsUtil;
+
+    private final IEmailService emailService;
 
 
 
@@ -196,7 +195,7 @@ public class UserService implements IUserService {
             dto.setContents("인증번호는 " + authNumber + " 입니다.");
             dto.setToMail(EncryptUtil.decAES128BCBC(CmmUtil.nvl(pDTO.getEmail())));
 
-//            mailService.doSendMail(dto);
+            emailService.doSendMail(dto);
             dto = null;
 
             rDTO.setAuthNumber(authNumber);
