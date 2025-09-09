@@ -48,11 +48,11 @@ public class EmailController {
                         .build();
             }
 
-            String code = userService.sendFindEmailCode(pDTO);
+            String code = userService.sendFindEmailCode(rDto);
 
             HttpSession session = request.getSession();
             session.setAttribute("findEmailCode", code);
-            session.setAttribute("findEmailTel", pDTO.getTel());
+            session.setAttribute("findEmailTel", rDto.getTel());
             session.setAttribute("findEmailName", pDTO.getName());
             session.setAttribute("findEmailExpire", System.currentTimeMillis() + 5 * 60 * 1000);
 
@@ -136,10 +136,10 @@ public class EmailController {
             HttpSession session = request.getSession();
             session.setAttribute("resetCode", code);
             session.setAttribute("resetCodeExpire", System.currentTimeMillis() + 5 * 60 * 1000);
-            session.setAttribute("resetEmail", pDTO.getEmail());
+            session.setAttribute("resetEmail", user.getEmail());
 
             emailService.doSendMail(MailDTO.builder()
-                    .toMail(pDTO.getEmail())
+                    .toMail(user.getEmail())
                     .title("비밀번호 재설정 인증코드")
                     .contents("인증코드: " + code + " (5분 이내 유효)")
                     .build());

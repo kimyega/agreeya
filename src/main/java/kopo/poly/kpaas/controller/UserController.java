@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.util.Map;
+import java.util.Optional;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -224,7 +224,7 @@ public class UserController {
                     .nickname(nickname)
                     .password(EncryptUtil.encHashSHA256(password))
                     .birthDate(birthDate)
-                    .tel(tel)
+                    .tel(EncryptUtil.encAES128BCBC(tel))
                     .isForeigner(Integer.parseInt(isForeigner))
                     .build();
 

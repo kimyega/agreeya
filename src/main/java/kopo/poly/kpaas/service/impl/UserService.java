@@ -105,13 +105,11 @@ public class UserService implements IUserService {
         // MyBatis delete → 삭제된 행 수(int) 반환
         int res = userMapper.deleteUser(pDTO);
 
+
         log.info("deleteUser result={}", res);
         log.info("deleteUser end!");
         return res;
     }
-
-
-
 
     /**
      * 이메일로 사용자 조회
@@ -119,9 +117,15 @@ public class UserService implements IUserService {
     @Override
     public UserDTO getUserByEmail(UserDTO pDTO) throws Exception {
         log.info("getUserByEmail start!");
-        pDTO.setEmail(CmmUtil.nvl(pDTO.getEmail())); // null 방지
+        // 조회 조건 암호화
+        pDTO.setEmail(EncryptUtil.encAES128BCBC(CmmUtil.nvl(pDTO.getEmail())));
 
         UserDTO rDTO = userMapper.getUserByEmail(pDTO);
+
+        // 조회 결과 복호화
+        if (rDTO != null && rDTO.getEmail() != null) {
+            rDTO.setEmail(EncryptUtil.decAES128BCBC(rDTO.getEmail()));
+        }
 
         log.info("getUserByEmail end!");
         return rDTO;
@@ -138,6 +142,11 @@ public class UserService implements IUserService {
         String hashPw = EncryptUtil.encHashSHA256(rawPw); // SHA256 암호화
         pDto.setPassword(hashPw);
 
+        // 이메일 조건 암호화 (세션에서 가져온 이메일이 평문일 가능성 있음)
+        if (pDto.getEmail() != null) {
+            pDto.setEmail(EncryptUtil.encAES128BCBC(pDto.getEmail()));
+        }
+
         int res = userMapper.updatePassword(pDto);
 
         log.info("updatePassword result: {}", res);
@@ -151,15 +160,25 @@ public class UserService implements IUserService {
     @Override
     public UserDTO getUserByNameAndPhone(UserDTO pDTO) throws Exception {
         log.info("getUserByNameAndPhone start!");
-        pDTO.setName(CmmUtil.nvl(pDTO.getName()));
-        pDTO.setTel(CmmUtil.nvl(pDTO.getTel()));
+
+        // 조건 암호화
+        pDTO.setTel(EncryptUtil.encAES128BCBC(CmmUtil.nvl(pDTO.getTel())));
 
         UserDTO rDTO = userMapper.getUserByNameAndPhone(pDTO);
+
+        // 결과 복호화
+        if (rDTO != null) {
+            if (rDTO.getTel() != null) {
+                rDTO.setTel(EncryptUtil.decAES128BCBC(rDTO.getTel()));
+            }
+            if (rDTO.getEmail() != null) {
+                rDTO.setEmail(EncryptUtil.decAES128BCBC(rDTO.getEmail()));
+            }
+        }
 
         log.info("getUserByNameAndPhone end!");
         return rDTO;
     }
-
 
     /**
      * 이메일 찾기용 인증코드 생성 + SMS 발송 (세션은 Controller에서 처리)
