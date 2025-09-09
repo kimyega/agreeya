@@ -24,58 +24,105 @@ import java.util.concurrent.ThreadLocalRandom;
 @RequiredArgsConstructor
 public class UserService implements IUserService {
 
-    private final JavaMailSender mailSender;
 
     private final IUserMapper userMapper;
 
     private final CoolSmsUtil coolSmsUtil;
 
-    @Value("${spring.mail.username}")
-    private String fromMail;
+
 
     /**
-     * 메일 발송
+     * 로그인 처리
      */
     @Override
-    public int doSendMail(MailDTO pDTO) {
-        log.info("doSendMail start!");
-        int res = 1;
+    public UserDTO getUserLogin(UserDTO pDTO) throws Exception {
+        log.info("getUserLogin start!");
 
-        try {
-            MimeMessage message = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+        // null 방지
+        pDTO.setEmail(CmmUtil.nvl(pDTO.getEmail()));
+        pDTO.setPassword(CmmUtil.nvl(pDTO.getPassword()));
 
-            helper.setTo(CmmUtil.nvl(pDTO.getToMail())); // null 방지
-            helper.setFrom(fromMail);
-            helper.setSubject(CmmUtil.nvl(pDTO.getTitle()));
-            helper.setText(CmmUtil.nvl(pDTO.getContents()), true);
+        // DB에서 사용자 조회
+        UserDTO rDTO = userMapper.getUserLogin(pDTO);
 
-            mailSender.send(message);
-
-            log.info("메일 발송 성공!");
-        } catch (Exception e) {
-            res = 0;
-            log.error("메일 발송 실패: {}", e.getMessage(), e);
-        } finally {
-            log.info("doSendMail end!");
+        if (rDTO == null) {
+            log.warn("❌ 사용자 없음 - email={}", pDTO.getEmail());
+            return null;
         }
+
+        // DB 저장된 비밀번호
+        String dbPw = CmmUtil.nvl(rDTO.getPassword());
+        String inputPw = CmmUtil.nvl(pDTO.getPassword());
+        String hashPw = EncryptUtil.encHashSHA256(inputPw);
+
+        // 평문 또는 해시 비교
+        if (dbPw.equals(inputPw) || dbPw.equals(hashPw)) {
+            log.info("✅ 로그인 성공 - userId={}, name={}", rDTO.getUserId(), rDTO.getName());
+            return rDTO;
+        }
+
+        log.warn("❌ 비밀번호 불일치 - email={}", pDTO.getEmail());
+        return null;
+    }
+
+    /**
+     * 프로필 조회 (userId 기준)
+     */
+    @Override
+    public UserDTO getUserProfile(UserDTO pDTO) throws Exception {
+        log.info("getUserProfile start!");
+
+        pDTO.setUserId(CmmUtil.nvl(pDTO.getUserId())); // null 방지
+        UserDTO rDTO = userMapper.getUserProfile(pDTO);
+
+        log.info("getUserProfile end! result={}", rDTO);
+        return rDTO;
+    }
+
+    /**
+     * 휴대폰으로 사용자 조회
+     */
+    @Override
+    public UserDTO getUserByPhone(UserDTO pDTO) throws Exception {
+        log.info("getUserByPhone start!");
+
+        pDTO.setTel(CmmUtil.nvl(pDTO.getTel())); // null 방지
+        UserDTO rDTO = userMapper.getUserByPhone(pDTO.getTel());
+
+        log.info("getUserByPhone end!");
+        return rDTO;
+    }
+
+    /**
+     * 회원 탈퇴
+     */
+    @Override
+    public int deleteUser(UserDTO pDTO) throws Exception {
+        log.info("deleteUser start!");
+
+        pDTO.setEmail(CmmUtil.nvl(pDTO.getEmail())); // 이메일 기준 삭제
+        int res = (userMapper.deleteUser(pDTO.getEmail()) != null) ? 1 : 0;
+
+        log.info("deleteUser result={}", res);
+        log.info("deleteUser end!");
         return res;
     }
+
+
+
 
     /**
      * 이메일로 사용자 조회
      */
     @Override
-    public UserDTO getUserByEmail(String email) throws Exception {
+    public UserDTO getUserByEmail(UserDTO pDTO) throws Exception {
         log.info("getUserByEmail start!");
+        pDTO.setEmail(CmmUtil.nvl(pDTO.getEmail())); // null 방지
 
-        UserDTO pDto = new UserDTO();
-        pDto.setEmail(CmmUtil.nvl(email)); // null 방지
-
-        UserDTO rDto = userMapper.getUserByEmail(pDto);
+        UserDTO rDTO = userMapper.getUserByEmail(pDTO);
 
         log.info("getUserByEmail end!");
-        return rDto;
+        return rDTO;
     }
 
     /**
@@ -100,51 +147,33 @@ public class UserService implements IUserService {
      * 이름+전화번호로 사용자 조회
      */
     @Override
-    public UserDTO getUserByNameAndPhone(String name, String tel) throws Exception {
+    public UserDTO getUserByNameAndPhone(UserDTO pDTO) throws Exception {
         log.info("getUserByNameAndPhone start!");
+        pDTO.setName(CmmUtil.nvl(pDTO.getName()));
+        pDTO.setTel(CmmUtil.nvl(pDTO.getTel()));
 
-        UserDTO pDto = new UserDTO();
-        pDto.setName(CmmUtil.nvl(name));
-        pDto.setTel(CmmUtil.nvl(tel));
-
-        UserDTO rDto = userMapper.getUserByNameAndPhone(pDto);
+        UserDTO rDTO = userMapper.getUserByNameAndPhone(pDTO);
 
         log.info("getUserByNameAndPhone end!");
-        return rDto;
+        return rDTO;
     }
 
-    /**
-     * 이메일 마스킹
-     */
-    @Override
-    public String maskEmail(String email) {
-        String safeEmail = CmmUtil.nvl(email);
-        int idx = safeEmail.indexOf("@");
 
-        if (idx > 3) {
-            return safeEmail.substring(0, 4) + "****" + safeEmail.substring(idx);
-        } else {
-            return "****" + safeEmail.substring(idx);
-        }
-    }
 
     /**
      * 이메일 찾기용 인증코드 생성 + SMS 발송 (세션은 Controller에서 처리)
      */
     @Override
-    public String sendFindEmailCode(String name, String tel) {
+    public String sendFindEmailCode(UserDTO pDTO) {
         log.info("sendFindEmailCode start!");
 
-        // 6자리 인증번호 생성
-        String code = String.format("%06d", (int) (Math.random() * 1000000));
+        String tel = CmmUtil.nvl(pDTO.getTel());
 
-        // CoolSMS 발송
-        coolSmsUtil.sendVerificationCode(CmmUtil.nvl(tel), code);
+        String code = String.format("%06d", (int) (Math.random() * 1000000));
+        coolSmsUtil.sendVerificationCode(tel, code);
 
         log.info("✅ 이메일 찾기 인증코드 발송 완료");
         log.info("sendFindEmailCode end!");
-
-        // 세션 저장은 Controller에서 하기 때문에, 코드만 반환
         return code;
     }
 
