@@ -1,7 +1,5 @@
 package kopo.poly.kpaas.service.impl;
 
-import jakarta.mail.internet.MimeMessage;
-import kopo.poly.kpaas.dto.MailDTO;
 import kopo.poly.kpaas.dto.UserDTO;
 import kopo.poly.kpaas.mapper.IUserMapper;
 import kopo.poly.kpaas.service.IUserService;
@@ -10,9 +8,6 @@ import kopo.poly.kpaas.util.CoolSmsUtil;
 import kopo.poly.kpaas.util.EncryptUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
 
