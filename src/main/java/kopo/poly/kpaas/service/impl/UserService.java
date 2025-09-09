@@ -1,11 +1,9 @@
 package kopo.poly.kpaas.service.impl;
 
 import jakarta.mail.internet.MimeMessage;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
 import kopo.poly.kpaas.dto.MailDTO;
 import kopo.poly.kpaas.dto.UserDTO;
-import kopo.poly.kpaas.mapper.UserMapper;
+import kopo.poly.kpaas.mapper.IUserMapper;
 import kopo.poly.kpaas.service.IUserService;
 import kopo.poly.kpaas.util.CmmUtil;
 import kopo.poly.kpaas.util.CoolSmsUtil;
@@ -23,14 +21,12 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class UserService implements IUserService {
 
-    private final JavaMailSender mailSender;
 
-    private final UserMapper userMapper;
+    private final IUserMapper userMapper;
 
     private final CoolSmsUtil coolSmsUtil;
 
-    @Value("${spring.mail.username}")
-    private String fromMail;
+
 
     /**
      * 로그인 처리
@@ -111,49 +107,20 @@ public class UserService implements IUserService {
     }
 
 
-    /**
-     * 메일 발송
-     */
-    @Override
-    public int doSendMail(MailDTO pDTO) {
-        log.info("doSendMail start!");
-        int res = 1;
 
-        try {
-            MimeMessage message = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-
-            helper.setTo(CmmUtil.nvl(pDTO.getToMail())); // null 방지
-            helper.setFrom(fromMail);
-            helper.setSubject(CmmUtil.nvl(pDTO.getTitle()));
-            helper.setText(CmmUtil.nvl(pDTO.getContents()), true);
-
-            mailSender.send(message);
-
-            log.info("메일 발송 성공!");
-        } catch (Exception e) {
-            res = 0;
-            log.error("메일 발송 실패: {}", e.getMessage(), e);
-        } finally {
-            log.info("doSendMail end!");
-        }
-        return res;
-    }
 
     /**
      * 이메일로 사용자 조회
      */
     @Override
-    public UserDTO getUserByEmail(String email) throws Exception {
+    public UserDTO getUserByEmail(UserDTO pDTO) throws Exception {
         log.info("getUserByEmail start!");
+        pDTO.setEmail(CmmUtil.nvl(pDTO.getEmail())); // null 방지
 
-        UserDTO pDto = new UserDTO();
-        pDto.setEmail(CmmUtil.nvl(email)); // null 방지
-
-        UserDTO rDto = userMapper.getUserByEmail(pDto);
+        UserDTO rDTO = userMapper.getUserByEmail(pDTO);
 
         log.info("getUserByEmail end!");
-        return rDto;
+        return rDTO;
     }
 
     /**
@@ -178,51 +145,33 @@ public class UserService implements IUserService {
      * 이름+전화번호로 사용자 조회
      */
     @Override
-    public UserDTO getUserByNameAndPhone(String name, String tel) throws Exception {
+    public UserDTO getUserByNameAndPhone(UserDTO pDTO) throws Exception {
         log.info("getUserByNameAndPhone start!");
+        pDTO.setName(CmmUtil.nvl(pDTO.getName()));
+        pDTO.setTel(CmmUtil.nvl(pDTO.getTel()));
 
-        UserDTO pDto = new UserDTO();
-        pDto.setName(CmmUtil.nvl(name));
-        pDto.setTel(CmmUtil.nvl(tel));
-
-        UserDTO rDto = userMapper.getUserByNameAndPhone(pDto);
+        UserDTO rDTO = userMapper.getUserByNameAndPhone(pDTO);
 
         log.info("getUserByNameAndPhone end!");
-        return rDto;
+        return rDTO;
     }
 
-    /**
-     * 이메일 마스킹
-     */
-    @Override
-    public String maskEmail(String email) {
-        String safeEmail = CmmUtil.nvl(email);
-        int idx = safeEmail.indexOf("@");
 
-        if (idx > 3) {
-            return safeEmail.substring(0, 4) + "****" + safeEmail.substring(idx);
-        } else {
-            return "****" + safeEmail.substring(idx);
-        }
-    }
 
     /**
      * 이메일 찾기용 인증코드 생성 + SMS 발송 (세션은 Controller에서 처리)
      */
     @Override
-    public String sendFindEmailCode(String name, String tel) {
+    public String sendFindEmailCode(UserDTO pDTO) {
         log.info("sendFindEmailCode start!");
 
-        // 6자리 인증번호 생성
-        String code = String.format("%06d", (int) (Math.random() * 1000000));
+        String tel = CmmUtil.nvl(pDTO.getTel());
 
-        // CoolSMS 발송
-        coolSmsUtil.sendVerificationCode(CmmUtil.nvl(tel), code);
+        String code = String.format("%06d", (int) (Math.random() * 1000000));
+        coolSmsUtil.sendVerificationCode(tel, code);
 
         log.info("✅ 이메일 찾기 인증코드 발송 완료");
         log.info("sendFindEmailCode end!");
-
-        // 세션 저장은 Controller에서 하기 때문에, 코드만 반환
         return code;
     }
 
