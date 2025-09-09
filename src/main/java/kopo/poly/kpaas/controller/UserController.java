@@ -26,87 +26,82 @@ public class UserController {
     // ===== 로그인 처리 =====
     @ResponseBody
     @PostMapping("/loginProc")
-    public ResponseEntity<?> loginProc(HttpServletRequest request, HttpSession session) {
-        try {
-            String email = CmmUtil.nvl(request.getParameter("email"));
-            String password = CmmUtil.nvl(request.getParameter("password"));
+    public UserDTO loginProc(HttpServletRequest request, HttpSession session) throws Exception {
+        log.info("🟢 loginProc 실행");
 
-            UserDTO rDTO = userService.login(email, password);
+        String email = CmmUtil.nvl(request.getParameter("email"));
+        String password = CmmUtil.nvl(request.getParameter("password"));
 
-            if (rDTO != null) {
-                // 세션 저장
-                session.setAttribute("LOGIN_USER_ID", rDTO.getUserId());
-                session.setAttribute("LOGIN_USER_NAME", rDTO.getName());
+        UserDTO rDTO = userService.getUserlogin(email, password);
 
-                // ✅ 로그 확인용 출력
-                log.info("✅ 로그인 성공 - 세션 저장 완료");
-                log.info("   LOGIN_USER_ID   = {}", rDTO.getUserId());
-                log.info("   LOGIN_USER_NAME = {}", rDTO.getName());
+        if (rDTO != null) {
+            session.setAttribute("LOGIN_USER_ID", rDTO.getUserId());
+            session.setAttribute("LOGIN_USER_NAME", rDTO.getName());
 
-                return ResponseEntity.ok(Map.of(
-                        "res", 1,
-                        "msg", "로그인 성공",
-                        "user", rDTO
-                ));
-            } else {
-                return ResponseEntity.ok(Map.of(
-                        "res", 0,
-                        "msg", "이메일 또는 비밀번호가 올바르지 않습니다."
-                ));
-            }
-
-        } catch (Exception e) {
-            log.error("❌ 로그인 에러: ", e);
-            return ResponseEntity.status(500).body(Map.of(
-                    "res", 2,
-                    "msg", "시스템 오류"
-            ));
+            log.info("✅ 로그인 성공 - userId={}, name={}", rDTO.getUserId(), rDTO.getName());
+            return rDTO; // JSON 변환되어 응답됨
         }
+
+        log.warn("❌ 로그인 실패 - email={}", email);
+        return null; // 실패 시 null 반환
     }
 
-
+    /**
+     * 마이페이지 뷰
+     */
     @GetMapping("/mypage")
     public String mypage() {
-        return "user/mypage";  // ✅ 여기서 user/mypage.jsp 를 뷰로 찾아야 함
+        log.info("🟢 mypage 진입");
+        return "user/mypage";
     }
 
-
-    // ===== 마이페이지 프로필 조회 =====
+    /**
+     * 마이페이지 프로필 조회
+     */
     @ResponseBody
     @GetMapping("/mypage/profile")
     public UserDTO getProfile(HttpSession session) throws Exception {
+        log.info("🟢 getProfile 실행");
+
         String userId = CmmUtil.nvl((String) session.getAttribute("LOGIN_USER_ID"));
         if (userId.isEmpty()) {
-            log.warn("⚠️ 세션 만료 또는 로그인 안됨");
+            log.warn("⚠️ 세션 없음 → 로그인 필요");
             return null;
         }
-        UserDTO dto = userService.getUserProfile(userId);
-        log.info("📌 프로필 조회 결과: {}", dto);
-        return dto;
+
+        UserDTO rDTO = userService.getUserProfile(userId);
+        log.info("📌 프로필 조회 결과: {}", rDTO);
+
+        return rDTO;
     }
 
-    // ===== 회원 탈퇴 =====
+    /**
+     * 회원 탈퇴
+     */
     @ResponseBody
     @DeleteMapping("/delete")
-    public ResponseEntity<?> deleteUser(HttpSession session) throws Exception {
-        log.info("🔥 회원탈퇴 컨트롤러 진입");
+    public int deleteUser(HttpSession session) throws Exception {
+        log.info("🟢 deleteUser 실행");
 
         String userId = CmmUtil.nvl((String) session.getAttribute("LOGIN_USER_ID"));
-        log.info("회원탈퇴 요청 - 세션 userId={}", userId);
-
         if (userId.isEmpty()) {
-            return ResponseEntity.ok(Map.of("res", 0, "msg", "로그인 필요"));
+            log.warn("⚠️ 로그인 안됨 - 탈퇴 불가");
+            return 0;
         }
 
         int res = userService.deleteUser(userId);
-        log.info("회원탈퇴 결과 - 삭제된 행 수={}", res);
 
-        session.invalidate();
-        return ResponseEntity.ok(Map.of(
-                "res", res,
-                "msg", res == 1 ? "탈퇴 성공" : "탈퇴 실패"
-        ));
+        if (res > 0) {
+            session.invalidate();
+            log.info("✅ 회원 탈퇴 성공 - userId={}", userId);
+        } else {
+            log.warn("❌ 회원 탈퇴 실패 - userId={}", userId);
+        }
+
+        return res; // 1=성공, 0=실패
     }
+
+
 
 
     // ===== 로그아웃 =====
