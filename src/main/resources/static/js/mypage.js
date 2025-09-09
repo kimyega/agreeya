@@ -76,4 +76,5 @@ document.addEventListener('DOMContentLoaded', async () => {
       alert('탈퇴 요청 실패');
     }
   });
+
 });
