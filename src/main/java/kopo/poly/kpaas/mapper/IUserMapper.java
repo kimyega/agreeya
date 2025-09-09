@@ -22,4 +22,6 @@ public interface IUserMapper {
 
     UserDTO getUserEmailExists(UserDTO pDto) throws Exception;
 
+    int insertUser(UserDTO pDTO) throws Exception;
+
 }

@@ -16,7 +16,7 @@ public class UserDTO {
         private String password;
         private String birthDate;
         private String tel;
-        private String isForeigner;
+        private int isForeigner;
         private String createdAt;  // ✅ 가입일
 
         private String existsYn;

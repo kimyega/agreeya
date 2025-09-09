@@ -178,6 +178,32 @@ public class UserService implements IUserService {
     }
 
     @Override
+    public int insertUser(UserDTO pDTO) throws Exception {
+
+        log.info("{}.insertUserInfo Start!", this.getClass().getName());
+
+        int res = 0;
+
+        int success = userMapper.insertUser(pDTO);
+
+        if (success > 0) {
+            res = 1;
+
+            MailDTO mDto = new MailDTO();
+
+            mDto.setToMail(EncryptUtil.encAES128BCBC(CmmUtil.nvl(pDTO.getEmail())));
+            mDto.setTitle("회원가입을 축하드립니다.");
+            mDto.setContents(CmmUtil.nvl(pDTO.getName()) + "님의 회원가입을 진심으로 축하드립니다.");
+
+            emailService.doSendMail(mDto);
+        }
+
+        log.info("{}.insertUserInfo End!", this.getClass().getName());
+
+        return res;
+    }
+
+    @Override
     public UserDTO getEmailExists(UserDTO pDTO) throws Exception {
 
         log.info("{}.getEmailExists Start!", this.getClass().getName());
