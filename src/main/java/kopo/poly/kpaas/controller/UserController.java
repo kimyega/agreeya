@@ -79,11 +79,9 @@ public class UserController {
         return rDTO;
     }
 
-    /**
-     * 회원 탈퇴
-     */
+    // ===== 회원 탈퇴 =====
     @ResponseBody
-    @DeleteMapping("/delete")
+    @PostMapping("/delete")
     public int deleteUser(HttpSession session) throws Exception {
         log.info("🟢 deleteUser 실행");
 
