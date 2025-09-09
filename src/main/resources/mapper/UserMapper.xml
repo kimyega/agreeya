@@ -89,4 +89,34 @@
         WHERE user_id = #{userId}
     </delete>
 
+    <!-- 이메일 중복 체크 -->
+    <select id="getUserEmailExists" parameterType="UserDTO" resultType="UserDTO">
+        SELECT IF(COUNT(USER_ID) > 0, 'Y', 'N') AS EXISTS_YN
+        FROM users
+        WHERE EMAIL = #{email}
+    </select>
+
+    <!-- 회원가입 -->
+    <insert id="insertUser" parameterType="UserDTO">
+        INSERT INTO users
+        (
+            NAME,
+            EMAIL,
+            NICKNAME,
+            PASSWORD,
+            BIRTH_DATE,
+            TEL,
+            IS_FOREIGNER
+        )
+        VALUES
+            (
+                #{name},
+                #{email},
+                #{nickname},
+                #{password},
+                #{birthDate},
+                #{tel},
+                #{isForeigner}
+            )
+    </insert>
 </mapper>
