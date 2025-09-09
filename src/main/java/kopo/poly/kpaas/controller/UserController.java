@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.util.Optional;
+import java.util.Map;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -82,11 +82,9 @@ public class UserController {
         return rDTO;
     }
 
-    /**
-     * 회원 탈퇴
-     */
+    // ===== 회원 탈퇴 =====
     @ResponseBody
-//    @DeleteMapping("/delete")
+    @PostMapping("/delete")
     public int deleteUser(HttpSession session) throws Exception {
         log.info("🟢 deleteUser 실행");
 
