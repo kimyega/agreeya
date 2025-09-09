@@ -5,7 +5,6 @@
 
 <mapper namespace="kopo.poly.kpaas.mapper.IUserMapper">
 
-
     <!-- 이메일로 사용자 조회 -->
     <select id="getUserByEmail" parameterType="UserDTO" resultType="UserDTO">
         SELECT user_id,
@@ -15,13 +14,14 @@
                password,
                birth_date,
                is_foreigner,
-               tel
+               tel,
+               DATE_FORMAT(created_at, '%Y-%m-%d') AS createdAt
         FROM users
         WHERE email = #{email}
             LIMIT 1
     </select>
 
-    <!---전화번호 조회-->
+    <!-- 이름 + 전화번호 조회 -->
     <select id="getUserByNameAndPhone" parameterType="UserDTO" resultType="UserDTO">
         SELECT user_id, name, email, tel
         FROM users
@@ -36,5 +36,57 @@
         SET password = #{password}
         WHERE email = #{email}
     </update>
+
+    <!-- 로그인 (이메일 + 비밀번호) -->
+    <select id="getUserLogin" parameterType="UserDTO" resultType="UserDTO">
+        SELECT user_id,
+               name,
+               email,
+               nickname,
+               password,
+               birth_date,
+               is_foreigner,
+               tel
+        FROM users
+        WHERE email = #{email}
+          AND password = #{password}
+            LIMIT 1
+    </select>
+
+    <!-- 프로필 조회 (userId 기반) -->
+    <select id="getUserProfile" parameterType="UserDTO" resultType="UserDTO">
+        SELECT user_id,
+               name,
+               email,
+               nickname,
+               tel,
+               birth_date,
+               is_foreigner,
+               DATE_FORMAT(created_at, '%Y-%m-%d') AS createdAt
+        FROM users
+        WHERE user_id = #{userId}
+            LIMIT 1
+    </select>
+
+    <!-- 휴대폰으로 사용자 조회 -->
+    <select id="getUserByPhone" parameterType="UserDTO" resultType="UserDTO">
+        SELECT user_id,
+               name,
+               email,
+               nickname,
+               password,
+               birth_date,
+               is_foreigner,
+               tel
+        FROM users
+        WHERE REPLACE(tel, '-', '') = REPLACE(#{tel}, '-', '')
+            LIMIT 1
+    </select>
+
+    <!-- 회원 탈퇴 -->
+    <delete id="deleteUser" parameterType="UserDTO">
+        DELETE FROM users
+        WHERE user_id = #{userId}
+    </delete>
 
 </mapper>

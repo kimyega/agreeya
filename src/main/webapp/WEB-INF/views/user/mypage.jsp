@@ -148,6 +148,14 @@
 </a>
 
 <!-- ✅ 페이지 전용 JS -->
-<script src="/js/mypage.js"></script>
+<!-- contextPath 전역 변수 선언 -->
+<script>
+  const contextPath = "${pageContext.request.contextPath}";
+</script>
+
+<!-- mypage.js 불러오기 -->
+<script src="${pageContext.request.contextPath}/js/mypage.js"></script>
+
+
 </body>
 </html>

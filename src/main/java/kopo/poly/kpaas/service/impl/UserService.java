@@ -28,6 +28,89 @@ public class UserService implements IUserService {
 
 
 
+    /**
+     * 로그인 처리
+     */
+    @Override
+    public UserDTO getUserLogin(UserDTO pDTO) throws Exception {
+        log.info("getUserLogin start!");
+
+        // null 방지
+        pDTO.setEmail(CmmUtil.nvl(pDTO.getEmail()));
+        pDTO.setPassword(CmmUtil.nvl(pDTO.getPassword()));
+
+        // DB에서 사용자 조회
+        UserDTO rDTO = userMapper.getUserLogin(pDTO);
+
+        if (rDTO == null) {
+            log.warn("❌ 사용자 없음 - email={}", pDTO.getEmail());
+            return null;
+        }
+
+        // DB 저장된 비밀번호
+        String dbPw = CmmUtil.nvl(rDTO.getPassword());
+        String inputPw = CmmUtil.nvl(pDTO.getPassword());
+        String hashPw = EncryptUtil.encHashSHA256(inputPw);
+
+        // 평문 또는 해시 비교
+        if (dbPw.equals(inputPw) || dbPw.equals(hashPw)) {
+            log.info("✅ 로그인 성공 - userId={}, name={}", rDTO.getUserId(), rDTO.getName());
+            return rDTO;
+        }
+
+        log.warn("❌ 비밀번호 불일치 - email={}", pDTO.getEmail());
+        return null;
+    }
+
+    /**
+     * 프로필 조회 (userId 기준)
+     */
+    @Override
+    public UserDTO getUserProfile(UserDTO pDTO) throws Exception {
+        log.info("getUserProfile start!");
+
+        pDTO.setUserId(CmmUtil.nvl(pDTO.getUserId())); // null 방지
+        UserDTO rDTO = userMapper.getUserProfile(pDTO);
+
+        log.info("getUserProfile end! result={}", rDTO);
+        return rDTO;
+    }
+
+    /**
+     * 휴대폰으로 사용자 조회
+     */
+    @Override
+    public UserDTO getUserByPhone(UserDTO pDTO) throws Exception {
+        log.info("getUserByPhone start!");
+
+        pDTO.setTel(CmmUtil.nvl(pDTO.getTel())); // null 방지
+        UserDTO rDTO = userMapper.getUserByPhone(pDTO.getTel());
+
+        log.info("getUserByPhone end!");
+        return rDTO;
+    }
+
+    /**
+     * 회원 탈퇴
+     */
+    @Override
+    public int deleteUser(UserDTO pDTO) throws Exception {
+        log.info("deleteUser start!");
+
+        pDTO.setEmail(CmmUtil.nvl(pDTO.getEmail())); // 이메일 기준 삭제
+        int res = (userMapper.deleteUser(pDTO.getEmail()) != null) ? 1 : 0;
+
+        log.info("deleteUser result={}", res);
+        log.info("deleteUser end!");
+        return res;
+    }
+
+
+
+
+    /**
+     * 이메일로 사용자 조회
+     */
     @Override
     public UserDTO getUserByEmail(UserDTO pDTO) throws Exception {
         log.info("getUserByEmail start!");
@@ -71,6 +154,7 @@ public class UserService implements IUserService {
         log.info("getUserByNameAndPhone end!");
         return rDTO;
     }
+
 
 
     /**

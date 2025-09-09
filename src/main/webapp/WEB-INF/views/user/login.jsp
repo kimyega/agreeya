@@ -8,6 +8,8 @@
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- jQuery CDN (head나 body 맨 위쪽에 추가) -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
@@ -137,6 +139,15 @@
 </main>
 
 <!-- 페이지 전용 JS -->
-<script src="/js/login.js"></script>
+<script>
+    const contextPath = "${pageContext.request.contextPath}";
+</script>
+
+<!-- ✅ login.js 불러오기 -->
+<script src="${pageContext.request.contextPath}/js/login.js"></script>
+
+
+
+
 </body>
 </html>
