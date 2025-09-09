@@ -23,27 +23,27 @@ public class UserController {
     private final IUserService userService;
 
     // ===== 로그인 처리 =====
-    // ===== 로그인 처리 =====
     @ResponseBody
     @PostMapping("/loginProc")
     public UserDTO loginProc(HttpServletRequest request, HttpSession session) throws Exception {
         log.info("🟢 loginProc 실행");
 
-        String email = CmmUtil.nvl(request.getParameter("email"));
-        String password = CmmUtil.nvl(request.getParameter("password"));
+        UserDTO pDTO = new UserDTO();
+        pDTO.setEmail(CmmUtil.nvl(request.getParameter("email")));
+        pDTO.setPassword(CmmUtil.nvl(request.getParameter("password")));
 
-        UserDTO rDTO = userService.getUserlogin(email, password);
+        UserDTO rDTO = userService.getUserLogin(pDTO);
 
         if (rDTO != null) {
             session.setAttribute("LOGIN_USER_ID", rDTO.getUserId());
             session.setAttribute("LOGIN_USER_NAME", rDTO.getName());
 
             log.info("✅ 로그인 성공 - userId={}, name={}", rDTO.getUserId(), rDTO.getName());
-            return rDTO; // JSON 변환되어 응답됨
+            return rDTO;
         }
 
-        log.warn("❌ 로그인 실패 - email={}", email);
-        return null; // 실패 시 null 반환
+        log.warn("❌ 로그인 실패 - email={}", pDTO.getEmail());
+        return null;
     }
 
     /**
@@ -69,7 +69,10 @@ public class UserController {
             return null;
         }
 
-        UserDTO rDTO = userService.getUserProfile(userId);
+        UserDTO pDTO = new UserDTO();
+        pDTO.setUserId(userId);
+
+        UserDTO rDTO = userService.getUserProfile(pDTO);
         log.info("📌 프로필 조회 결과: {}", rDTO);
 
         return rDTO;
@@ -89,7 +92,10 @@ public class UserController {
             return 0;
         }
 
-        int res = userService.deleteUser(userId);
+        UserDTO pDTO = new UserDTO();
+        pDTO.setUserId(userId);
+
+        int res = userService.deleteUser(pDTO);
 
         if (res > 0) {
             session.invalidate();
@@ -98,10 +104,8 @@ public class UserController {
             log.warn("❌ 회원 탈퇴 실패 - userId={}", userId);
         }
 
-        return res; // 1=성공, 0=실패
+        return res;
     }
-
-
 
 
     // ===== 로그아웃 =====

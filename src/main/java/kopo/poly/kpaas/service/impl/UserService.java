@@ -32,33 +32,33 @@ public class UserService implements IUserService {
      * 로그인 처리
      */
     @Override
-    public UserDTO getUserlogin(String email, String password) throws Exception {
-        log.info("login start!");
+    public UserDTO getUserLogin(UserDTO pDTO) throws Exception {
+        log.info("getUserLogin start!");
 
-        UserDTO pDTO = new UserDTO();
-        pDTO.setEmail(CmmUtil.nvl(email));
-        pDTO.setPassword(CmmUtil.nvl(password));
+        // null 방지
+        pDTO.setEmail(CmmUtil.nvl(pDTO.getEmail()));
+        pDTO.setPassword(CmmUtil.nvl(pDTO.getPassword()));
 
         // DB에서 사용자 조회
         UserDTO rDTO = userMapper.getUserLogin(pDTO);
 
         if (rDTO == null) {
-            log.warn("❌ 사용자 없음 - email={}", email);
+            log.warn("❌ 사용자 없음 - email={}", pDTO.getEmail());
             return null;
         }
 
         // DB 저장된 비밀번호
         String dbPw = CmmUtil.nvl(rDTO.getPassword());
-        String rawPw = CmmUtil.nvl(password);
-        String hashPw = EncryptUtil.encHashSHA256(rawPw);
+        String inputPw = CmmUtil.nvl(pDTO.getPassword());
+        String hashPw = EncryptUtil.encHashSHA256(inputPw);
 
         // 평문 또는 해시 비교
-        if (dbPw.equals(rawPw) || dbPw.equals(hashPw)) {
+        if (dbPw.equals(inputPw) || dbPw.equals(hashPw)) {
             log.info("✅ 로그인 성공 - userId={}, name={}", rDTO.getUserId(), rDTO.getName());
             return rDTO;
         }
 
-        log.warn("❌ 비밀번호 불일치 - email={}", email);
+        log.warn("❌ 비밀번호 불일치 - email={}", pDTO.getEmail());
         return null;
     }
 
@@ -66,12 +66,10 @@ public class UserService implements IUserService {
      * 프로필 조회 (userId 기준)
      */
     @Override
-    public UserDTO getUserProfile(String userId) throws Exception {
+    public UserDTO getUserProfile(UserDTO pDTO) throws Exception {
         log.info("getUserProfile start!");
 
-        UserDTO pDTO = new UserDTO();
-        pDTO.setUserId(CmmUtil.nvl(userId));
-
+        pDTO.setUserId(CmmUtil.nvl(pDTO.getUserId())); // null 방지
         UserDTO rDTO = userMapper.getUserProfile(pDTO);
 
         log.info("getUserProfile end! result={}", rDTO);
@@ -84,7 +82,10 @@ public class UserService implements IUserService {
     @Override
     public UserDTO getUserByPhone(UserDTO pDTO) throws Exception {
         log.info("getUserByPhone start!");
-        UserDTO rDTO = userMapper.getUserByPhone(pDTO);
+
+        pDTO.setTel(CmmUtil.nvl(pDTO.getTel())); // null 방지
+        UserDTO rDTO = userMapper.getUserByPhone(pDTO.getTel());
+
         log.info("getUserByPhone end!");
         return rDTO;
     }
@@ -93,13 +94,11 @@ public class UserService implements IUserService {
      * 회원 탈퇴
      */
     @Override
-    public int deleteUser(String userId) throws Exception {
+    public int deleteUser(UserDTO pDTO) throws Exception {
         log.info("deleteUser start!");
 
-        UserDTO pDTO = new UserDTO();
-        pDTO.setUserId(CmmUtil.nvl(userId));
-
-        int res = userMapper.deleteUser(pDTO);
+        pDTO.setEmail(CmmUtil.nvl(pDTO.getEmail())); // 이메일 기준 삭제
+        int res = (userMapper.deleteUser(pDTO.getEmail()) != null) ? 1 : 0;
 
         log.info("deleteUser result={}", res);
         log.info("deleteUser end!");

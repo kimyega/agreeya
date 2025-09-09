@@ -4,11 +4,13 @@ import kopo.poly.kpaas.dto.UserDTO;
 
 public interface IUserService {
 
-    UserDTO getUserlogin(String email, String password) throws Exception;
+    UserDTO getUserLogin(UserDTO pDTO) throws Exception;
 
-    UserDTO getUserProfile(String userId) throws Exception;
+    UserDTO getUserProfile(UserDTO pDTO) throws Exception;
 
-    int deleteUser(String userId) throws Exception;
+    int deleteUser(UserDTO pDTO) throws Exception;
+
+    UserDTO getUserByPhone (UserDTO pDTO) throws Exception;
 
 
     UserDTO getUserByEmail(UserDTO pDTO) throws Exception;
