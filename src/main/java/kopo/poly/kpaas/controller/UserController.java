@@ -8,11 +8,13 @@ import kopo.poly.kpaas.util.CmmUtil;
 import kopo.poly.kpaas.util.EncryptUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.util.Map;
+import java.util.Optional;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -22,91 +24,91 @@ public class UserController {
 
     private final IUserService userService;
 
-    // ===== 로그인 처리 =====
-    // ===== 로그인 처리 =====
-    @ResponseBody
-    @PostMapping("/loginProc")
-    public ResponseEntity<?> loginProc(HttpServletRequest request, HttpSession session) {
-        try {
-            String email = CmmUtil.nvl(request.getParameter("email"));
-            String password = CmmUtil.nvl(request.getParameter("password"));
-
-            UserDTO rDTO = userService.login(email, password);
-
-            if (rDTO != null) {
-                // 세션 저장
-                session.setAttribute("LOGIN_USER_ID", rDTO.getUserId());
-                session.setAttribute("LOGIN_USER_NAME", rDTO.getName());
-
-                // ✅ 로그 확인용 출력
-                log.info("✅ 로그인 성공 - 세션 저장 완료");
-                log.info("   LOGIN_USER_ID   = {}", rDTO.getUserId());
-                log.info("   LOGIN_USER_NAME = {}", rDTO.getName());
-
-                return ResponseEntity.ok(Map.of(
-                        "res", 1,
-                        "msg", "로그인 성공",
-                        "user", rDTO
-                ));
-            } else {
-                return ResponseEntity.ok(Map.of(
-                        "res", 0,
-                        "msg", "이메일 또는 비밀번호가 올바르지 않습니다."
-                ));
-            }
-
-        } catch (Exception e) {
-            log.error("❌ 로그인 에러: ", e);
-            return ResponseEntity.status(500).body(Map.of(
-                    "res", 2,
-                    "msg", "시스템 오류"
-            ));
-        }
-    }
-
-
-    @GetMapping("/mypage")
-    public String mypage() {
-        return "user/mypage";  // ✅ 여기서 user/mypage.jsp 를 뷰로 찾아야 함
-    }
-
-
-    // ===== 마이페이지 프로필 조회 =====
-    @ResponseBody
-    @GetMapping("/mypage/profile")
-    public UserDTO getProfile(HttpSession session) throws Exception {
-        String userId = CmmUtil.nvl((String) session.getAttribute("LOGIN_USER_ID"));
-        if (userId.isEmpty()) {
-            log.warn("⚠️ 세션 만료 또는 로그인 안됨");
-            return null;
-        }
-        UserDTO dto = userService.getUserProfile(userId);
-        log.info("📌 프로필 조회 결과: {}", dto);
-        return dto;
-    }
-
-    // ===== 회원 탈퇴 =====
-    @ResponseBody
-    @DeleteMapping("/delete")
-    public ResponseEntity<?> deleteUser(HttpSession session) throws Exception {
-        log.info("🔥 회원탈퇴 컨트롤러 진입");
-
-        String userId = CmmUtil.nvl((String) session.getAttribute("LOGIN_USER_ID"));
-        log.info("회원탈퇴 요청 - 세션 userId={}", userId);
-
-        if (userId.isEmpty()) {
-            return ResponseEntity.ok(Map.of("res", 0, "msg", "로그인 필요"));
-        }
-
-        int res = userService.deleteUser(userId);
-        log.info("회원탈퇴 결과 - 삭제된 행 수={}", res);
-
-        session.invalidate();
-        return ResponseEntity.ok(Map.of(
-                "res", res,
-                "msg", res == 1 ? "탈퇴 성공" : "탈퇴 실패"
-        ));
-    }
+//    // ===== 로그인 처리 =====
+//    // ===== 로그인 처리 =====
+//    @ResponseBody
+//    @PostMapping("/loginProc")
+//    public ResponseEntity<?> loginProc(HttpServletRequest request, HttpSession session) {
+//        try {
+//            String email = CmmUtil.nvl(request.getParameter("email"));
+//            String password = CmmUtil.nvl(request.getParameter("password"));
+//
+//            UserDTO rDTO = userService.login(email, password);
+//
+//            if (rDTO != null) {
+//                // 세션 저장
+//                session.setAttribute("LOGIN_USER_ID", rDTO.getUserId());
+//                session.setAttribute("LOGIN_USER_NAME", rDTO.getName());
+//
+//                // ✅ 로그 확인용 출력
+//                log.info("✅ 로그인 성공 - 세션 저장 완료");
+//                log.info("   LOGIN_USER_ID   = {}", rDTO.getUserId());
+//                log.info("   LOGIN_USER_NAME = {}", rDTO.getName());
+//
+//                return ResponseEntity.ok(Map.of(
+//                        "res", 1,
+//                        "msg", "로그인 성공",
+//                        "user", rDTO
+//                ));
+//            } else {
+//                return ResponseEntity.ok(Map.of(
+//                        "res", 0,
+//                        "msg", "이메일 또는 비밀번호가 올바르지 않습니다."
+//                ));
+//            }
+//
+//        } catch (Exception e) {
+//            log.error("❌ 로그인 에러: ", e);
+//            return ResponseEntity.status(500).body(Map.of(
+//                    "res", 2,
+//                    "msg", "시스템 오류"
+//            ));
+//        }
+//    }
+//
+//
+//    @GetMapping("/mypage")
+//    public String mypage() {
+//        return "user/mypage";  // ✅ 여기서 user/mypage.jsp 를 뷰로 찾아야 함
+//    }
+//
+//
+//    // ===== 마이페이지 프로필 조회 =====
+//    @ResponseBody
+//    @GetMapping("/mypage/profile")
+//    public UserDTO getProfile(HttpSession session) throws Exception {
+//        String userId = CmmUtil.nvl((String) session.getAttribute("LOGIN_USER_ID"));
+//        if (userId.isEmpty()) {
+//            log.warn("⚠️ 세션 만료 또는 로그인 안됨");
+//            return null;
+//        }
+//        UserDTO dto = userService.getUserProfile(userId);
+//        log.info("📌 프로필 조회 결과: {}", dto);
+//        return dto;
+//    }
+//
+//    // ===== 회원 탈퇴 =====
+//    @ResponseBody
+//    @DeleteMapping("/delete")
+//    public ResponseEntity<?> deleteUser(HttpSession session) throws Exception {
+//        log.info("🔥 회원탈퇴 컨트롤러 진입");
+//
+//        String userId = CmmUtil.nvl((String) session.getAttribute("LOGIN_USER_ID"));
+//        log.info("회원탈퇴 요청 - 세션 userId={}", userId);
+//
+//        if (userId.isEmpty()) {
+//            return ResponseEntity.ok(Map.of("res", 0, "msg", "로그인 필요"));
+//        }
+//
+//        int res = userService.deleteUser(userId);
+//        log.info("회원탈퇴 결과 - 삭제된 행 수={}", res);
+//
+//        session.invalidate();
+//        return ResponseEntity.ok(Map.of(
+//                "res", res,
+//                "msg", res == 1 ? "탈퇴 성공" : "탈퇴 실패"
+//        ));
+//    }
 
 
     // ===== 로그아웃 =====
@@ -120,6 +122,29 @@ public class UserController {
         return "redirect:/"; // ✅ 홈으로 리다이렉트
     }
 
+
+    /*
+     *  이메일 중복체크
+     * */
+    @ResponseBody
+    @PostMapping(value = "getEmailExists")
+    public UserDTO getEmailExists(HttpServletRequest request) throws Exception {
+
+        log.info("{}.getEmailExists Start!", this.getClass().getName());
+
+        String email = CmmUtil.nvl(request.getParameter("email"));
+
+        log.info("email : {}", email);
+
+        UserDTO pDTO = new UserDTO();
+        pDTO.setEmail(EncryptUtil.encAES128BCBC(email));
+
+        UserDTO rDTO = Optional.ofNullable(userService.getEmailExists(pDTO)).orElseGet(UserDTO::new);
+
+        log.info("{}.getEmailExists End!", this.getClass().getName());
+
+        return rDTO;
+    }
 
     // ===== 화면 이동 =====
     @GetMapping("/login")

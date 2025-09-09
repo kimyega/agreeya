@@ -13,6 +13,8 @@
     <!-- Font Awesome (아이콘용) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 
+    <script type="text/javascript" src="/js/jquery-3.6.0.min.js"></script>
+
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/table.css"/>
     <script src="${pageContext.request.contextPath}/js/table.js"></script>
 
@@ -201,6 +203,6 @@
 </main>
 
 <!-- ✅ 페이지 전용 JS -->
-<script src="/js/signup.js"></script>
+<script src="${pageContext.request.contextPath}/js/signup.js"></script>
 </body>
 </html>

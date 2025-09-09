@@ -17,4 +17,6 @@ public interface IUserService {
 
     String sendFindEmailCode(String name, String tel);
 
+    UserDTO getEmailExists (UserDTO pDTO) throws Exception;
+
 }

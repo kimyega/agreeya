@@ -1,11 +1,9 @@
 package kopo.poly.kpaas.service.impl;
 
 import jakarta.mail.internet.MimeMessage;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
 import kopo.poly.kpaas.dto.MailDTO;
 import kopo.poly.kpaas.dto.UserDTO;
-import kopo.poly.kpaas.mapper.UserMapper;
+import kopo.poly.kpaas.mapper.IUserMapper;
 import kopo.poly.kpaas.service.IUserService;
 import kopo.poly.kpaas.util.CmmUtil;
 import kopo.poly.kpaas.util.CoolSmsUtil;
@@ -17,6 +15,9 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+import java.util.concurrent.ThreadLocalRandom;
+
 
 @Slf4j
 @Service
@@ -25,7 +26,7 @@ public class UserService implements IUserService {
 
     private final JavaMailSender mailSender;
 
-    private final UserMapper userMapper;
+    private final IUserMapper userMapper;
 
     private final CoolSmsUtil coolSmsUtil;
 
@@ -145,6 +146,36 @@ public class UserService implements IUserService {
 
         // 세션 저장은 Controller에서 하기 때문에, 코드만 반환
         return code;
+    }
+
+    @Override
+    public UserDTO getEmailExists(UserDTO pDTO) throws Exception {
+
+        log.info("{}.getEmailExists Start!", this.getClass().getName());
+
+        UserDTO rDTO = Optional.ofNullable(userMapper.getUserEmailExists(pDTO)).orElseGet(UserDTO::new);
+
+        if (CmmUtil.nvl(rDTO.getExistsYn()).equals("N")) {
+
+            int authNumber = ThreadLocalRandom.current().nextInt(100000, 1000000);
+
+            log.info("authNumber : {}", authNumber);
+
+            MailDTO dto = new MailDTO();
+
+            dto.setTitle("이메일 중복확인 발송메일");
+            dto.setContents("인증번호는 " + authNumber + " 입니다.");
+            dto.setToMail(EncryptUtil.decAES128BCBC(CmmUtil.nvl(pDTO.getEmail())));
+
+//            mailService.doSendMail(dto);
+            dto = null;
+
+            rDTO.setAuthNumber(authNumber);
+        }
+
+        log.info("{}.getUserEmailExists End!", this.getClass().getName());
+
+        return rDTO;
     }
 
 }

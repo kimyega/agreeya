@@ -5,7 +5,7 @@ import kopo.poly.kpaas.dto.UserDTO;
 import org.apache.ibatis.annotations.Mapper;
 
 @Mapper
-public interface UserMapper {
+public interface IUserMapper {
 
     UserDTO getUserByEmail(UserDTO pDTO) throws Exception;
 
@@ -28,4 +28,6 @@ public interface UserMapper {
 
     /** 휴대폰으로 사용자 조회 */
     UserDTO getUserByPhone(String phone);
+
+    UserDTO getUserEmailExists(UserDTO pDTO) throws Exception;
 }

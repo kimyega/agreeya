@@ -19,4 +19,8 @@ public class UserDTO {
         private String isForeigner;
         private String createdAt;  // ✅ 가입일
 
+        private String existsYn;
+        private int authNumber;
+
+
 }

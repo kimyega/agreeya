@@ -3,7 +3,7 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="kopo.poly.kpaas.mapper.UserMapper">
+<mapper namespace="kopo.poly.kpaas.mapper.IUserMapper">
 
 
     <!-- 이메일로 사용자 조회 -->
@@ -37,4 +37,10 @@
         WHERE email = #{email}
     </update>
 
+    <!-- 이메일 중복 체크 -->
+    <select id="getUserEmailExists" parameterType="UserDTO" resultType="UserDTO">
+        SELECT IF(COUNT(USER_ID) > 0, 'Y', 'N') AS EXISTS_YN
+        FROM users
+        WHERE EMAIL = #{email}
+    </select>
 </mapper>

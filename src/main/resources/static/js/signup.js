@@ -118,58 +118,84 @@ document.addEventListener("DOMContentLoaded", function () {
     day?.addEventListener("blur", validateBirth);
     month?.addEventListener("change", validateBirth);
 
-    // 이메일 중복확인 + 인증메일 전송 모달
-    const checkEmail = (isSubmit = false) => {
+    const $signupForm = $("#signupForm");
+
+    let userIdCheck = "Y";
+    let emailAuthNumber = ""; // 서버에서 받은 인증번호 저장
+
+// 이메일 중복 확인 + 인증번호 발송
+    function checkEmail() {
+        const input = document.getElementById("email");
         const msg = document.getElementById("email-msg");
-        const value = email.value.trim();
-        if (!value) return setError(email, msg, "이메일을 입력해 주세요.");
+        const value = input.value.trim();
+
+        if (!value) return setError(input, msg, "이메일을 입력해 주세요.");
+
         const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!regex.test(value)) return setError(email, msg, "이메일 주소 형식이 맞지 않습니다.");
+        if (!regex.test(value)) return setError(input, msg, "이메일 주소 형식이 맞지 않습니다.");
 
-        const isDuplicated = TEST_EMAILS.has(value);
-        if (isDuplicated) return setError(email, msg, "중복된 이메일 입니다.");
-
-        setSuccess(email, msg, "사용 가능한 이메일입니다.");
-
-        if (!isSubmit) {
-            const modal = document.getElementById("emailSentModal");
-            if (modal) modal.classList.remove("hidden");
-        }
-    };
-    email?.addEventListener("blur", checkEmail);
-    // 외부에서 버튼 onclick으로 쓰니 export
-    window.checkEmail = checkEmail;
+        // ✅ 서버에 AJAX 요청
+        $.ajax({
+            url: "/user/getEmailExists",
+            type: "POST",
+            dataType: "JSON",
+            data: $signupForm.serialize(),
+            success: function (json) {
+                if (json.existsYn === "Y") {
+                    setError(input, msg, "중복된 이메일 입니다.");
+                    setTimeout(() => input.focus(), 0);
+                } else {
+                    setSuccess(input, msg, "인증번호가 발송되었습니다.");
+                    alert("인증번호: " + json.authNumber); // 개발용: 실제 서비스에서는 alert 제거
+                    emailAuthNumber = json.authNumber; // 전역변수에 인증번호 저장
+                }
+            },
+            error: function () {
+                setError(input, msg, "서버 요청 중 오류가 발생했습니다.");
+            }
+        });
+    }
 
     // 이메일 인증번호 확인
-    const verifyEmailCode = () => {
+    function verifyEmailCode() {
+        const code = document.getElementById("email-code");
         const msg = document.getElementById("email-code-msg");
-        const expected = "123456";
-        const inputCode = emailCode.value.trim();
+        const emailInput = document.getElementById("email");
+        const emailBtn = emailInput.nextElementSibling;
+        const emailCodeBtn = code.nextElementSibling;
 
-        if (!inputCode) return setError(emailCode, msg, "인증번호를 입력해 주세요.");
-        if (inputCode !== expected) return setError(emailCode, msg, "인증번호가 일치하지 않습니다.");
+        const expected = (emailAuthNumber + "").trim();
+        const inputCode = code.value.trim();
 
-        setSuccess(emailCode, msg, "인증되었습니다.");
+        if (!inputCode) {
+            return setError(code, msg, "인증번호를 입력해 주세요.");
+        }
 
-        email.readOnly = true;
-        emailCode.readOnly = true;
+        if (inputCode !== expected) {
+            return setError(code, msg, "인증번호가 일치하지 않습니다.");
+        }
 
-        email.nextElementSibling.disabled = true;
-        emailCode.nextElementSibling.disabled = true;
+        // ✅ 인증번호 일치
+        setSuccess(code, msg, "인증되었습니다.");
 
-        email.style.opacity = 0.5;
-        emailCode.style.opacity = 0.5;
-        email.nextElementSibling.style.opacity = 0.5;
-        emailCode.nextElementSibling.style.opacity = 0.5;
+        // 입력창/버튼 비활성화
+        emailInput.readOnly = true;
+        code.readOnly = true;
 
-        email.style.cursor = "not-allowed";
-        emailCode.style.cursor = "not-allowed";
-        email.nextElementSibling.style.cursor = "not-allowed";
-        emailCode.nextElementSibling.style.cursor = "not-allowed";
+        emailBtn.disabled = true;
+        emailCodeBtn.disabled = true;
 
-    };
-    emailCode?.addEventListener("blur", verifyEmailCode);
-    window.verifyEmailCode = verifyEmailCode;
+        // 비활성화 스타일
+        [emailInput, code, emailBtn, emailCodeBtn].forEach(el => {
+            el.style.opacity = 0.5;
+            el.style.cursor = "not-allowed";
+        });
+    }
+
+    // 이벤트 연결
+    $("#email").on("blur", checkEmail);
+    $("#email-code").on("blur", verifyEmailCode);
+
 
     // 폼 제출
     signupForm?.addEventListener("submit", function (e) {
@@ -211,7 +237,7 @@ function closeEmailSentModal() {
 window.closeEmailSentModal = closeEmailSentModal;
 
 function goToLogin() {
-    window.location.href = "/login";
+    window.location.href = "/user/login";
 }
 window.goToLogin = goToLogin;
 
