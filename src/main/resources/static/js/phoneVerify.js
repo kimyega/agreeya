@@ -51,7 +51,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         $.ajax({
-            url: "/user/userVerifyFindEmail",
+            url: "/email/userVerifyFindEmail",
             type: "post",
             dataType: "json",
             data: { tel: savedTel, code: v },
