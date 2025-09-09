@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @Slf4j
 @RequiredArgsConstructor
 @Controller
-@RequestMapping("/user")
+@RequestMapping("/email")
 public class EmailController {
 
     private final IUserService userService;
@@ -190,40 +190,4 @@ public class EmailController {
         }
     }
 
-    /**
-     * 비밀번호 재설정
-     */
-    @PostMapping("/resetPassword")
-    @ResponseBody
-    public ResultDTO resetPassword(UserDTO pDTO, HttpServletRequest request) {
-        log.info("resetPassword start!");
-
-        String newPw = CmmUtil.nvl(pDTO.getPassword());
-        String email = (String) request.getSession().getAttribute("resetEmail");
-
-        try {
-            if (email == null) {
-                return ResultDTO.builder()
-                        .result(0)
-                        .msg("세션이 만료되었습니다. 다시 시도해주세요.")
-                        .build();
-            }
-
-            int res = userService.updatePassword(
-                    UserDTO.builder().email(email).password(newPw).build()
-            );
-
-            if (res > 0) {
-                return ResultDTO.builder().result(1).msg("비밀번호가 성공적으로 변경되었습니다.").build();
-            } else {
-                return ResultDTO.builder().result(0).msg("비밀번호 변경 실패").build();
-            }
-
-        } catch (Exception e) {
-            log.error("resetPassword Error : {}", e.getMessage(), e);
-            return ResultDTO.builder().result(-1).msg("비밀번호 재설정 중 오류 발생").build();
-        } finally {
-            log.info("resetPassword end!");
-        }
-    }
 }

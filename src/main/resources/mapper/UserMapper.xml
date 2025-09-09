@@ -5,6 +5,7 @@
 
 <mapper namespace="kopo.poly.kpaas.mapper.IUserMapper">
 
+
     <!-- 이메일로 사용자 조회 -->
     <select id="getUserByEmail" parameterType="UserDTO" resultType="UserDTO">
         SELECT user_id,
