@@ -2,6 +2,7 @@ package kopo.poly.kpaas.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import kopo.poly.kpaas.dto.MsgDTO;
 import kopo.poly.kpaas.dto.ResultDTO;
 import kopo.poly.kpaas.dto.UserDTO;
 import kopo.poly.kpaas.service.IUserService;
@@ -9,9 +10,11 @@ import kopo.poly.kpaas.util.CmmUtil;
 import kopo.poly.kpaas.util.EncryptUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.Map;
 
@@ -152,6 +155,106 @@ public class UserController {
 
         log.info("로그아웃 완료 → 메인 페이지로 이동");
         return "redirect:/"; // ✅ 홈으로 리다이렉트
+    }
+
+
+    /*
+     *  이메일 중복체크
+     * */
+    @ResponseBody
+    @PostMapping(value = "getEmailExists")
+    public UserDTO getEmailExists(HttpServletRequest request) throws Exception {
+
+        log.info("{}.getEmailExists Start!", this.getClass().getName());
+
+        String email = CmmUtil.nvl(request.getParameter("email"));
+
+        log.info("email : {}", email);
+
+        UserDTO pDTO = new UserDTO();
+        pDTO.setEmail(EncryptUtil.encAES128BCBC(email));
+
+        UserDTO rDTO = Optional.ofNullable(userService.getEmailExists(pDTO)).orElseGet(UserDTO::new);
+
+        log.info("{}.getEmailExists End!", this.getClass().getName());
+
+        return rDTO;
+    }
+
+    /*
+     *  회원가입
+     * */
+    @ResponseBody
+    @PostMapping(value = "insertUser")
+    public MsgDTO insertUser(HttpServletRequest request) {
+
+        log.info("{}.insertUserInfo Start!", this.getClass().getName());
+
+        int res = 0;
+        String msg = "";
+        MsgDTO dto;
+
+        UserDTO pDTO;
+
+        try {
+            String name = CmmUtil.nvl(request.getParameter("name"));
+            String email = CmmUtil.nvl(request.getParameter("email"));
+            String nickname = CmmUtil.nvl(request.getParameter("nickname"));
+            String password = CmmUtil.nvl(request.getParameter("password"));
+
+            String birthYear = CmmUtil.nvl(request.getParameter("birthYear"));
+            String birthMonth = CmmUtil.nvl(request.getParameter("birthMonth"));
+            String birthDay = CmmUtil.nvl(request.getParameter("birthDay"));
+            String birthDate = birthYear + "-" + birthMonth + "-" + birthDay;
+
+            String tel = CmmUtil.nvl(request.getParameter("tel"));
+            String isForeigner = CmmUtil.nvl(request.getParameter("isForeigner"));
+
+            log.info("name : {}", name);
+            log.info("email : {}", email);
+            log.info("nickname : {}", nickname);
+            log.info("password : {}", password);
+            log.info("birthDate : {}", birthDate);
+            log.info("tel : {}", tel);
+            log.info("isForeigner : {}", isForeigner);
+
+            pDTO = UserDTO.builder()
+                    .name(name)
+                    .email(EncryptUtil.encAES128BCBC(email))
+                    .nickname(nickname)
+                    .password(EncryptUtil.encHashSHA256(password))
+                    .birthDate(birthDate)
+                    .tel(tel)
+                    .isForeigner(Integer.parseInt(isForeigner))
+                    .build();
+
+            log.info("암호화 email : {}", pDTO.getEmail());
+
+            res = userService.insertUser(pDTO);
+
+            log.info("회원가입 결과 (res) : " + res);
+
+            if(res == 1) {
+                msg = "회원가입 되었습니다.";
+            } else if (res == 2) {
+                msg = "이미 가입된 아이디 입니다.";
+            } else {
+                msg = "오류로 인해 회원가입이 실패하였습니다.";
+            }
+
+        } catch (Exception e) {
+            msg = "실패하였습니다." + e;
+            log.info(e.toString());
+        } finally {
+
+            dto = new MsgDTO();
+            dto.setResult(res);
+            dto.setMsg(msg);
+
+            log.info("{}.insertUserInfo End!", this.getClass().getName());
+        }
+
+        return dto;
     }
 
 
