@@ -97,8 +97,11 @@ public class UserService implements IUserService {
     public int deleteUser(UserDTO pDTO) throws Exception {
         log.info("deleteUser start!");
 
-        pDTO.setEmail(CmmUtil.nvl(pDTO.getEmail())); // 이메일 기준 삭제
-        int res = (userMapper.deleteUser(pDTO.getEmail()) != null) ? 1 : 0;
+        // null 방지
+        pDTO.setUserId(CmmUtil.nvl(pDTO.getUserId()));
+
+        // MyBatis delete → 삭제된 행 수(int) 반환
+        int res = userMapper.deleteUser(pDTO);
 
         log.info("deleteUser result={}", res);
         log.info("deleteUser end!");

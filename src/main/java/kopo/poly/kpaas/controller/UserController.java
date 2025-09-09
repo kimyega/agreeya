@@ -82,7 +82,7 @@ public class UserController {
      * 회원 탈퇴
      */
     @ResponseBody
-    @DeleteMapping("/delete")
+    @PostMapping("/delete")
     public int deleteUser(HttpSession session) throws Exception {
         log.info("🟢 deleteUser 실행");
 
@@ -106,7 +106,6 @@ public class UserController {
 
         return res;
     }
-
 
     // ===== 로그아웃 =====
     @GetMapping("/logout") // ✅ 중복 제거

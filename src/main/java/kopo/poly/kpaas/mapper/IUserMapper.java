@@ -13,7 +13,7 @@ public interface IUserMapper {
 
     UserDTO getUserByPhone(String phone) throws Exception;
 
-    UserDTO deleteUser(String email) throws Exception;
+    int deleteUser(UserDTO pDTO) throws Exception; // ✅ 반환타입 UserDTO → int
 
     UserDTO getUserByEmail(UserDTO pDTO) throws Exception;
 

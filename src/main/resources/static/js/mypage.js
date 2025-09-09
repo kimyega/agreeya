@@ -47,7 +47,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('confirmWithdraw')?.addEventListener('click', async () => {
     try {
       const res = await fetch(contextPath + '/user/delete', {
-        method: 'DELETE',
+        method: 'POST',
         credentials: 'include'
       });
 
