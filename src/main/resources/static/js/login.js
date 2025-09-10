@@ -1,18 +1,3 @@
-// 공통: 드롭다운
-function toggleDropdown() {
-    const dropdown = document.getElementById('profileDropdown');
-    dropdown.classList.toggle('hidden');
-}
-
-// 외부 클릭 시 드롭다운 닫기
-$(document).on("click", function (e) {
-    const wrapper = $("#profileDropdownWrapper");
-    const dropdown = $("#profileDropdown");
-    if (wrapper.length && dropdown.length && !wrapper[0].contains(e.target)) {
-        dropdown.addClass("hidden");
-    }
-});
-
 // 로그인 모달 열기/닫기
 function simulateLogin() {
     $("#loginModal").removeClass("hidden");
