@@ -43,8 +43,9 @@ public class UserController {
         if (rDTO != null) {
             session.setAttribute("LOGIN_USER_ID", rDTO.getUserId());
             session.setAttribute("LOGIN_USER_NAME", rDTO.getName());
+            session.setAttribute("LOGIN_USER_NICKNAME", rDTO.getNickname());
 
-            log.info("✅ 로그인 성공 - userId={}, name={}", rDTO.getUserId(), rDTO.getName());
+            log.info("✅ 로그인 성공 - userId={}, name={}, nickname={}", rDTO.getUserId(), rDTO.getName(), rDTO.getNickname());
             return rDTO;
         }
 
