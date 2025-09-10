@@ -1,20 +1,3 @@
-// ===== 헤더 유틸 =====
-function simulateLogin() {
-    const btn = document.getElementById("loginButton");
-    const wrap = document.getElementById("profileDropdownWrapper");
-    btn?.classList.add("hidden");
-    wrap?.classList.remove("hidden");
-}
-function toggleDropdown() {
-    const dd = document.getElementById("profileDropdown");
-    dd?.classList.toggle("hidden");
-}
-function logout() {
-    document.getElementById("profileDropdown")?.classList.add("hidden");
-    document.getElementById("profileDropdownWrapper")?.classList.add("hidden");
-    document.getElementById("loginButton")?.classList.remove("hidden");
-}
-
 // ===== 본문 로직 =====
 $("#find-password-form").on("submit", function (e) {
     e.preventDefault();

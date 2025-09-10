@@ -1,18 +1,3 @@
-// ===== 상단 메뉴용 (공통 기능) =====
-function simulateLogin() {
-    const modal = document.getElementById("loginModal");
-    if (modal) modal.classList.remove("hidden");
-}
-function toggleDropdown() {
-    const dropdown = document.getElementById("profileDropdown");
-    dropdown?.classList.toggle("hidden");
-}
-function logout() {
-    document.getElementById("profileDropdown")?.classList.add("hidden");
-    document.getElementById("profileDropdownWrapper")?.classList.add("hidden");
-    document.getElementById("loginButton")?.classList.remove("hidden");
-}
-
 // ===== 이메일 인증 로직 =====
 $("#code-form").on("submit", function (e) {
     e.preventDefault();
