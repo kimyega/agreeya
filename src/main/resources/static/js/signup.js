@@ -277,7 +277,7 @@ function closeEmailSentModal() {
 window.closeEmailSentModal = closeEmailSentModal;
 
 function goToLogin() {
-    window.location.href = "/login";
+    window.location.href = "/user/login";
 }
 window.goToLogin = goToLogin;
 
