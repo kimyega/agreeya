@@ -8,7 +8,7 @@ function toggleDropdown() {
 window.addEventListener('click', function (e) {
   const wrapper = document.getElementById('profileDropdownWrapper');
   const dropdown = document.getElementById('profileDropdown');
-  if (wrapper && !wrapper.contains(e.target)) {
+  if (!wrapper.contains(e.target) && !dropdown.contains(e.target)) {
     dropdown.classList.add('hidden');
   }
 });

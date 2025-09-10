@@ -192,6 +192,8 @@ public class UserController {
 
         UserDTO rDTO = Optional.ofNullable(userService.getEmailExists(pDTO)).orElseGet(UserDTO::new);
 
+        log.info("existsYn : {}", rDTO.getExistsYn());
+
         log.info("{}.getEmailExists End!", this.getClass().getName());
 
         return rDTO;

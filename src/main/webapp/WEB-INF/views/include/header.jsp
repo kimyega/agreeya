@@ -11,7 +11,7 @@
 </div>
 
 <!-- 헤더 -->
-<header class="bg-white/90 backdrop-blur-md shadow-sm sticky top-0 z-10">
+<header class="bg-white/90 backdrop-blur-md shadow-sm sticky top-0 z-[999]">
     <div class="w-full flex items-center justify-between py-1 px-6">
         <!-- 로고 -->
         <div class="flex-shrink-0">
