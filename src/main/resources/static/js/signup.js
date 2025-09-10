@@ -65,7 +65,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const validatePasswordCheck = () => {
         const msg = document.getElementById("password-check-msg");
         if (!passwordCheck.value) return setError(passwordCheck, msg, "비밀번호를 다시 입력해 주세요.");
-        if (passwordCheck.value !== password.value) return setError(passwordCheck, msg, "비밀번호가 일치하지 않습니다.");
+        if (passwordCheck.value.trim() !== password.value.trim()) return setError(passwordCheck, msg, "비밀번호가 일치하지 않습니다.");
         setSuccess(passwordCheck, msg, "비밀번호가 일치합니다.");
     };
     passwordCheck?.addEventListener("input", validatePasswordCheck);
@@ -138,7 +138,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // 이메일 중복 AJAX 요청
-    function checkEmail() {
+    window.checkEmail = function() {
         const input = document.getElementById("email");
         const msg = document.getElementById("email-msg");
 
@@ -268,3 +268,36 @@ document.addEventListener("DOMContentLoaded", function () {
 
     });
 });
+
+// ===== 모달 유틸 =====
+function closeEmailSentModal() {
+    const modal = document.getElementById("emailSentModal");
+    if (modal) modal.classList.add("hidden");
+}
+window.closeEmailSentModal = closeEmailSentModal;
+
+function goToLogin() {
+    window.location.href = "/login";
+}
+window.goToLogin = goToLogin;
+
+function togglePassword(inputId, iconEl) {
+    const input = document.getElementById(inputId);
+    if (!input) return;
+    const isHidden = input.type === "password";
+    input.type = isHidden ? "text" : "password";
+    if (iconEl && iconEl.classList) {
+        iconEl.classList.toggle("fa-eye-slash", !isHidden);
+        iconEl.classList.toggle("fa-eye", isHidden);
+    }
+}
+window.togglePassword = togglePassword;
+
+function simulateLogin() {
+    const toast = document.getElementById("loginMessage");
+    toast?.classList.remove("hidden");
+    setTimeout(() => toast?.classList.add("hidden"), 1200);
+    document.getElementById("loginButton")?.classList.add("hidden");
+    document.getElementById("profileDropdownWrapper")?.classList.remove("hidden");
+}
+window.simulateLogin = simulateLogin;
