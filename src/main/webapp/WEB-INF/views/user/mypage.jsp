@@ -8,65 +8,20 @@
 
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
-  <!-- ✅ static 폴더 기준 절대경로 -->
 
-
-  <!-- Font Awesome -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-
-  <!-- 정적 리소스 (절대경로) -->
-  <link rel="stylesheet" href="/css/table.css"/>
-  <script src="/js/table.js"></script>
+  <!-- Table CSS JS -->
+  <link rel="stylesheet" href="${pageContext.request.contextPath}/css/table.css"/>
+  <script src="${pageContext.request.contextPath}/js/table.js"></script>
 </head>
 
-<!-- ✅ 헤더 높이를 제외하고 본문을 중앙 정렬할 수 있게 flex-col로 변경 -->
 <body class="min-h-screen flex flex-col bg-slate-100 text-gray-800 font-sans">
 
-
-  </div>
-<!-- 로그인 알림 -->
-<div id="loginMessage" class="hidden fixed inset-0 flex items-center justify-center bg-black/30 z-50">
-  <div class="bg-white text-green-600 font-bold text-2xl px-6 py-4 rounded-xl shadow-lg">로그인되었습니다.</div>
-</div>
-
 <!-- 헤더 -->
-<header class="bg-white/90 backdrop-blur-md shadow-sm sticky top-0 z-10">
-  <div class="w-full flex items-center justify-between py-1 px-6">
-    <div class="flex-shrink-0">
-      <img src="/images/logo.png" alt="Agreeya 로고" class="h-24" />
-    </div>
+<jsp:include page="${pageContext.request.contextPath}/WEB-INF/views/include/header.jsp" />
 
-    <nav class="flex items-center space-x-8 text-xl font-semibold text-gray-800 pr-4">
-      <a href="/" class="hover:text-blue-600">홈</a>
-      <a href="/chatbot/aiSimulationMain" class="hover:text-blue-600">AI 모의 협상</a>
-      <a href="/contract/upload" class="hover:text-blue-600">계약서 분석</a>
-      <a href="/chatbot/qnaChatbot" class="hover:text-blue-600">Q&A 챗봇</a>
+<main class="flex flex-col items-center justify-center flex-1 bg-[#f9fafb]">
 
-      <!-- 로그인 버튼 (개발용) -->
-      <a id="loginButton" href="#" onclick="simulateLogin()"
-         class="bg-blue-500 text-white px-6 py-3 rounded-full hover:bg-blue-600 transition text-lg font-bold">
-        로그인
-      </a>
-
-      <!-- 로그인 후 드롭다운 -->
-      <div id="profileDropdownWrapper" class="relative hidden">
-        <button onclick="toggleDropdown()" class="flex items-center space-x-2 text-xl font-bold text-gray-800 focus:outline-none">
-          <i class="fa-solid fa-user-circle text-2xl"></i>
-          <span id="headerNick">User</span>
-        </button>
-        <div id="profileDropdown" class="absolute right-0 mt-2 w-40 bg-white border border-gray-300 rounded-md shadow-lg hidden z-50">
-          <a href="/user/mypage" class="block px-4 py-3 text-center text-gray-800 hover:bg-gray-100">내 정보</a>
-          <a href="#" onclick="logout()" class="block px-4 py-3 text-center text-red-600 hover:bg-red-100 border-t border-gray-300">로그아웃</a>
-        </div>
-      </div>
-    </nav>
-  </div>
-</header>
-
-<main class="flex flex-col items-center justify-center min-h-screen bg-[#f9fafb]">
-
-<!-- ✅ 본문: 헤더 제외 영역을 채우도록 변경 -->
-  <!-- 내 정보 -->
+  <!-- ✅ 내 정보 -->
   <section class="w-[900px] p-10 bg-white rounded-2xl shadow-md mb-10">
     <h2 class="text-xl font-bold mb-6">내 정보</h2>
     <div class="flex justify-between items-center">
@@ -76,15 +31,11 @@
         <p><span class="font-semibold">가입일:</span> <span id="pfRegDt">-</span></p>
       </div>
       <div class="flex space-x-4">
-        <button id="btnChangePw" class="px-4 py-2 text-sm text-gray-700 bg-gray-100 rounded-full">비밀번호 변경</button>
-        <button id="btnWithdraw" class="px-4 py-2 text-sm text-red-600 border border-red-400 rounded-full">회원 탈퇴</button>
-        <!-- 비밀번호 변경: 확실한 링크 -->
-        <a href="/changePw"
+        <a href="/user/changePw"
            class="px-4 py-2 text-sm text-gray-700 bg-gray-100 rounded-full hover:bg-gray-200">
           비밀번호 변경
         </a>
-
-        <button onclick="showWithdrawModal()"
+        <button id="btnWithdraw"
                 class="px-4 py-2 text-sm text-red-600 border border-red-400 rounded-full hover:bg-red-50">
           회원 탈퇴
         </button>
@@ -92,8 +43,7 @@
     </div>
   </section>
 
-  <!-- 업로드한 계약서(예시, 나중에 API 연결) -->
-  <!-- 업로드한 계약서 -->
+  <!-- ✅ 업로드한 계약서 (예시) -->
   <section class="w-[900px] p-10 bg-white rounded-2xl shadow-md">
     <h2 class="text-xl font-bold mb-6">업로드한 계약서</h2>
     <table class="w-full text-center" id="analysisTable">
@@ -105,31 +55,26 @@
       </tr>
       </thead>
       <tbody>
-      <!-- JS로 채움 -->
       <tr class="border-b">
         <td class="py-3">2025-06-25</td>
         <td class="text-red-500">2건</td>
-        <!-- ✅ 임시 링크 연결 -->
         <td><a href="/contract/result" class="text-blue-600 hover:underline">리포트</a></td>
       </tr>
       <tr>
         <td class="py-3">2025-07-25</td>
         <td class="text-green-500">0건</td>
-        <!-- ✅ 임시 링크 연결 -->
         <td><a href="/contract/result" class="text-blue-600 hover:underline">리포트</a></td>
       </tr>
       </tbody>
-
     </table>
   </section>
-</main>
 
   <div class="mt-10 mb-20">
     <button onclick="location.href='/'" class="px-6 py-3 bg-blue-600 text-white rounded-full">홈으로 돌아가기</button>
   </div>
 </main>
 
-<!-- 회원탈퇴 모달 (단일) -->
+<!-- ✅ 회원탈퇴 모달 -->
 <div id="withdrawModal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-50">
   <div class="bg-white p-8 rounded-lg shadow-lg w-[300px] text-center">
     <h2 class="text-lg font-semibold mb-2">회원 탈퇴</h2>
@@ -141,7 +86,15 @@
   </div>
 </div>
 
-<!-- JS -->
+<!-- ✅ 탈퇴 완료 모달 -->
+<div id="withdrawDoneModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
+  <div class="bg-white p-8 rounded-xl shadow-md w-80 text-center">
+    <h2 class="text-lg font-bold mb-2">탈퇴 완료</h2>
+    <p class="text-gray-600 mb-6">메인으로 이동합니다...</p>
+    <button onclick="location.href='/'" class="px-5 py-2 bg-blue-600 text-white rounded-full">확인</button>
+  </div>
+</div>
+
 <!-- ✅ 우하단 홈(FAB) 버튼 -->
 <a href="/"
    aria-label="홈으로 이동"
@@ -154,28 +107,15 @@
   <span class="sr-only">홈으로 이동</span>
 </a>
 
-<!-- 회원 탈퇴 모달 -->
-<div id="withdrawModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
-  <div class="bg-white p-8 rounded-xl shadow-md w-80 text-center">
-    <h2 class="text-lg font-bold mb-4">회원 탈퇴</h2>
-    <p class="text-red-500 mb-6">정말로 하시겠습니까?</p>
-    <div class="flex justify-center space-x-6">
-      <button onclick="confirmWithdraw()" class="px-5 py-2 bg-blue-600 text-white rounded-full">예</button>
-      <button onclick="hideWithdrawModal()" class="px-5 py-2 bg-gray-100 text-gray-700 rounded-full">아니요</button>
-    </div>
-  </div>
-</div>
+<!-- ✅ 페이지 전용 JS -->
+<!-- contextPath 전역 변수 선언 -->
+<script>
+  const contextPath = "${pageContext.request.contextPath}";
+</script>
 
-<!-- 탈퇴 완료 모달 -->
-<div id="withdrawDoneModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
-  <div class="bg-white p-8 rounded-xl shadow-md w-80 text-center">
-    <h2 class="text-lg font-bold mb-2">탈퇴 완료</h2>
-    <p class="text-gray-600 mb-6">메인으로 이동합니다...</p>
-    <button onclick="goHomeNow()" class="px-5 py-2 bg-blue-600 text-white rounded-full">확인</button>
-  </div>
-</div>
+<!-- mypage.js 불러오기 -->
+<script src="${pageContext.request.contextPath}/js/mypage.js"></script>
 
-<!-- 페이지 전용 JS -->
-<script src="/js/mypage.js"></script>
+
 </body>
 </html>

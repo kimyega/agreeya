@@ -3,92 +3,121 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="kopo.poly.kpaas.mapper.UserMapper">
+<mapper namespace="kopo.poly.kpaas.mapper.IUserMapper">
 
-    <!-- ===== users ===== -->
-    <select id="getUserByEmail" parameterType="string" resultType="kopo.poly.kpaas.dto.UserDTO">
-        SELECT
-            user_id      AS userId,
-            name         AS name,
-            email        AS email,
-            nickname     AS nickname,
-            password     AS password,
-            birth_date   AS birthDate,
-            tel          AS tel,
-            is_foreigner AS isForeigner
+
+    <!-- 이메일로 사용자 조회 -->
+    <select id="getUserByEmail" parameterType="UserDTO" resultType="UserDTO">
+        SELECT user_id,
+               name,
+               email,
+               nickname,
+               password,
+               birth_date,
+               is_foreigner,
+               tel,
+               DATE_FORMAT(created_at, '%Y-%m-%d') AS createdAt
         FROM users
-        WHERE LOWER(email) = LOWER(#{email})
+        WHERE email = #{email}
             LIMIT 1
     </select>
 
-    <update id="updatePasswordByEmail" parameterType="kopo.poly.kpaas.dto.UserDTO">
+    <!-- 이름 + 전화번호 조회 -->
+    <select id="getUserByNameAndPhone" parameterType="UserDTO" resultType="UserDTO">
+        SELECT user_id, name, email, tel
+        FROM users
+        WHERE name = #{name}
+          AND REPLACE(tel, '-', '') = REPLACE(#{tel}, '-', '')
+            LIMIT 1
+    </select>
+
+    <!-- 이메일 기준 비밀번호 업데이트 -->
+    <update id="updatePassword" parameterType="UserDTO">
         UPDATE users
         SET password = #{password}
-        WHERE LOWER(email) = LOWER(#{email})
+        WHERE email = #{email}
     </update>
 
-    <!-- ===== email_verify (SQL-side hashing & expiry) ===== -->
+    <!-- 로그인 (이메일 + 비밀번호) -->
+    <select id="getUserLogin" parameterType="UserDTO" resultType="UserDTO">
+        SELECT user_id,
+               name,
+               email,
+               nickname,
+               password,
+               birth_date,
+               is_foreigner,
+               tel
+        FROM users
+        WHERE email = #{email}
+          AND password = #{password}
+            LIMIT 1
+    </select>
 
-    <!-- 인증코드 업서트: DB가 해시/만료 계산 -->
-    <insert id="upsertEmailVerifySqlSide">
-        INSERT INTO email_verify (email, purpose, code_hash, expires_at)
-        VALUES (
-                   #{email},
-                   #{purpose},
-                   SHA2(#{plainCode}, 256),
-                   DATE_ADD(NOW(), INTERVAL #{expireMin} MINUTE)
-               )
-            ON DUPLICATE KEY UPDATE
-                                 code_hash  = VALUES(code_hash),
-                                 expires_at = VALUES(expires_at),
-                                 created_at = NOW()
-    </insert>
+    <!-- 프로필 조회 (userId 기반) -->
+    <select id="getUserProfile" parameterType="UserDTO" resultType="UserDTO">
+        SELECT user_id,
+               name,
+               email,
+               nickname,
+               tel,
+               birth_date,
+               is_foreigner,
+               DATE_FORMAT(created_at, '%Y-%m-%d') AS createdAt
+        FROM users
+        WHERE user_id = #{userId}
+            LIMIT 1
+    </select>
 
-    <!-- 인증코드 검증 + 1회성 소모(삭제) -->
-    <delete id="verifyAndConsumeSqlSide">
-        DELETE FROM email_verify
-        WHERE LOWER(email) = LOWER(#{email})
-          AND purpose      = #{purpose}
-          AND code_hash    = SHA2(#{inputCode}, 256)
-          AND expires_at  >= NOW()
+    <!-- 휴대폰으로 사용자 조회 -->
+    <select id="getUserByPhone" parameterType="UserDTO" resultType="UserDTO">
+        SELECT user_id,
+               name,
+               email,
+               nickname,
+               password,
+               birth_date,
+               is_foreigner,
+               tel
+        FROM users
+        WHERE REPLACE(tel, '-', '') = REPLACE(#{tel}, '-', '')
+            LIMIT 1
+    </select>
+
+    <!-- 회원 탈퇴 -->
+    <delete id="deleteUser" parameterType="UserDTO">
+        DELETE FROM users
+        WHERE user_id = #{userId}
     </delete>
 
-    <!-- (옵션) 조회/디버깅용: 필요 시 함께 사용하세요 -->
-    <select id="getEmailVerify" resultType="kopo.poly.kpaas.dto.EmailVerifyDTO">
-        SELECT
-            email,
-            purpose,
-            code_hash  AS codeHash,
-            expires_at AS expiresAt,
-            created_at AS createdAt
-        FROM email_verify
-        WHERE LOWER(email) = LOWER(#{email})
-          AND purpose      = #{purpose}
-            LIMIT 1
+    <!-- 이메일 중복 체크 -->
+    <select id="getUserEmailExists" parameterType="UserDTO" resultType="UserDTO">
+        SELECT IF(COUNT(USER_ID) > 0, 'Y', 'N') AS EXISTS_YN
+        FROM users
+        WHERE EMAIL = #{email}
     </select>
 
-    <select id="hasValidCode" resultType="int">
-        SELECT EXISTS(
-            SELECT 1 FROM email_verify
-            WHERE LOWER(email) = LOWER(#{email})
-              AND purpose      = #{purpose}
-              AND expires_at  >= NOW()
-            LIMIT 1
+    <!-- 회원가입 -->
+    <insert id="insertUser" parameterType="UserDTO">
+        INSERT INTO users
+        (
+            NAME,
+            EMAIL,
+            NICKNAME,
+            PASSWORD,
+            BIRTH_DATE,
+            TEL,
+            IS_FOREIGNER
         )
-    </select>
-
-    <select id="getVerifyRemainingSeconds" resultType="int">
-        SELECT
-            CASE
-                WHEN expires_at >= NOW()
-                    THEN TIMESTAMPDIFF(SECOND, NOW(), expires_at)
-                ELSE NULL
-                END AS remainingSeconds
-        FROM email_verify
-        WHERE LOWER(email) = LOWER(#{email})
-          AND purpose      = #{purpose}
-            LIMIT 1
-    </select>
-
-
+        VALUES
+            (
+                #{name},
+                #{email},
+                #{nickname},
+                #{password},
+                #{birthDate},
+                #{tel},
+                #{isForeigner}
+            )
+    </insert>
 </mapper>

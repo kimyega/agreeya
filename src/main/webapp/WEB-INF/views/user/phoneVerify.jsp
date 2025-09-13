@@ -12,51 +12,18 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 
-    <!-- 정적 리소스: 절대경로 -->
-    <link rel="stylesheet" href="/css/table.css"/>
-    <script src="/js/table.js"></script>
+    <!--j쿼리-->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- Table CSS JS -->
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/table.css"/>
+    <script src="${pageContext.request.contextPath}/js/table.js"></script>
 </head>
 
 <body class="min-h-screen flex flex-col bg-slate-100 text-gray-800 font-sans">
 
-<!-- 로그인 알림 -->
-<div id="loginMessage" class="hidden fixed inset-0 flex items-center justify-center bg-black/30 z-50">
-    <div class="bg-white text-green-600 font-bold text-2xl px-6 py-4 rounded-xl shadow-lg">로그인되었습니다.</div>
-</div>
-
 <!-- 헤더 -->
-<header class="bg-white/90 backdrop-blur-md shadow-sm sticky top-0 z-10">
-    <div class="w-full flex items-center justify-between py-1 px-6">
-        <!-- 로고 -->
-        <div class="flex-shrink-0">
-            <img src="/images/logo.png" alt="Agreeya 로고" class="h-24" />
-        </div>
-
-        <!-- 메뉴 -->
-        <nav class="flex items-center space-x-8 text-xl font-semibold text-gray-800 pr-4">
-            <a href="/" class="hover:text-blue-600">홈</a>
-            <a href="/chatbot/aiSimulationMain" class="hover:text-blue-600">AI 모의 협상</a>
-            <a href="/contract/upload" class="hover:text-blue-600">계약서 분석</a>
-            <a href="/chatbot/qnaChatbot" class="hover:text-blue-600">Q&A 챗봇</a>
-
-            <!-- 로그인 버튼(데모) -->
-            <a id="loginButton" href="#" onclick="simulateLogin()"
-               class="bg-blue-500 text-white px-6 py-3 rounded-full hover:bg-blue-600 transition text-lg font-bold">로그인</a>
-
-            <!-- 로그인 후 드롭다운 -->
-            <div id="profileDropdownWrapper" class="relative hidden">
-                <button onclick="toggleDropdown()" class="flex items-center space-x-2 text-xl font-bold text-gray-800 focus:outline-none">
-                    <i class="fa-solid fa-user-circle text-2xl"></i>
-                    <span>Hong</span>
-                </button>
-                <div id="profileDropdown" class="absolute right-0 mt-2 w-40 bg-white border border-gray-300 rounded-md shadow-lg hidden z-50">
-                    <a href="/mypage" class="block px-4 py-3 text-center text-gray-800 hover:bg-gray-100">내 정보</a>
-                    <a href="#" onclick="logout()" class="block px-4 py-3 text-center text-red-600 hover:bg-red-100 border-t border-gray-300">로그아웃</a>
-                </div>
-            </div>
-        </nav>
-    </div>
-</header>
+<jsp:include page="${pageContext.request.contextPath}/WEB-INF/views/include/header.jsp" />
 
 <!-- 본문: 중앙정렬 -->
 <main class="flex-1 flex items-center justify-center px-4">
@@ -68,7 +35,7 @@
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <i class="fa-solid fa-key text-gray-400 text-[16px]"></i>
                 </div>
-                <input id="code" type="text" placeholder="인증번호 (6자리 숫자)"
+                <input id="code" name="code" type="text" placeholder="인증번호 (6자리 숫자)"
                        class="w-full h-full pl-10 pr-4 border rounded-full focus:outline-none focus:ring-2 focus:ring-blue-300 text-base placeholder-gray-400 text-gray-800" />
                 <p id="message" class="text-sm mt-1 ml-2 text-red-500 hidden"></p>
             </div>
@@ -83,11 +50,14 @@
     <!-- 이메일 찾기 결과 모달 -->
     <div id="resultModal" class="hidden fixed inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm z-50">
         <div class="bg-white rounded-2xl shadow-xl p-10 w-full max-w-md text-center border border-gray-300">
-            <h2 class="text-xl font-semibold mb-4">홍길동님의 이메일을 찾았습니다!</h2>
+            <h2 class="text-xl font-semibold mb-4">
+                <span id="resultName"></span>님의 이메일을 찾았습니다!
+            </h2>
             <p class="mb-6 text-lg">
-                이메일: <span class="font-bold">HongGildong@naver.com</span>
+                이메일: <span id="resultEmail" class="font-bold"></span>
             </p>
-            <a href="/login"
+
+            <a href="user/login"
                class="inline-block bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-6 rounded-full transition">
                 로그인 화면으로 돌아가기
             </a>
@@ -99,39 +69,6 @@
 <script src="/js/phoneVerify.js"></script>
 
 <!-- 🔧 최소 동작 스크립트(외부 JS 없어도 작동) -->
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const form = document.getElementById('verify-form');
-        const code = document.getElementById('code');
-        const msg  = document.getElementById('message');
-        const modal = document.getElementById('resultModal');
 
-        function showErr(text){
-            msg.textContent = text;
-            msg.classList.remove('hidden');
-            code.classList.add('border-red-400');
-        }
-        function clearErr(){
-            msg.textContent = '';
-            msg.classList.add('hidden');
-            code.classList.remove('border-red-400');
-        }
-
-        form?.addEventListener('submit', (e) => {
-            e.preventDefault();
-            clearErr();
-
-            const v = code.value.trim();
-
-            if (!/^\d{6}$/.test(v)) {
-                showErr('인증번호는 6자리 숫자여야 합니다.');
-                return;
-            }
-
-            // TODO: 실제 서버 검증(fetch/axios) 후 성공 시 모달 오픈
-            modal.classList.remove('hidden');
-        });
-    });
-</script>
 </body>
 </html>

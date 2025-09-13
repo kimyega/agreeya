@@ -1,62 +1,322 @@
 package kopo.poly.kpaas.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
+import kopo.poly.kpaas.dto.MsgDTO;
+import kopo.poly.kpaas.dto.ResultDTO;
+import kopo.poly.kpaas.dto.UserDTO;
+import kopo.poly.kpaas.service.IUserService;
+import kopo.poly.kpaas.util.CmmUtil;
+import kopo.poly.kpaas.util.EncryptUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import java.util.Optional;
 
 @Slf4j
 @RequiredArgsConstructor
-@RequestMapping("/") // 기본 루트
+@RequestMapping("/user") // ✅ user 영역으로 고정
 @Controller
 public class UserController {
 
+    private final IUserService userService;
 
-    // ===== 사용자 영역 =====
-    @GetMapping("login")
-    public String login() {
-        log.info("GET /login");
-        return "user/login"; // /WEB-INF/views/user/login.jsp
+    // ===== 로그인 처리 =====
+    @ResponseBody
+    @PostMapping("/loginProc")
+    public UserDTO loginProc(HttpServletRequest request, HttpSession session) throws Exception {
+        log.info("🟢 loginProc 실행");
+        String email = CmmUtil.nvl(request.getParameter("email"));
+        String password = CmmUtil.nvl(request.getParameter("password"));
+
+        UserDTO pDTO = new UserDTO();
+        pDTO.setEmail(EncryptUtil.encAES128BCBC(email));   // AES 암호화
+        pDTO.setPassword(EncryptUtil.encHashSHA256(password)); // SHA256 해시
+
+        UserDTO rDTO = userService.getUserLogin(pDTO);
+
+        if (rDTO != null) {
+            session.setAttribute("LOGIN_USER_ID", rDTO.getUserId());
+            session.setAttribute("LOGIN_USER_NAME", rDTO.getName());
+            session.setAttribute("LOGIN_USER_NICKNAME", rDTO.getNickname());
+
+            log.info("✅ 로그인 성공 - userId={}, name={}, nickname={}", rDTO.getUserId(), rDTO.getName(), rDTO.getNickname());
+            return rDTO;
+        }
+
+        log.warn("❌ 로그인 실패 - email={}", pDTO.getEmail());
+        return null;
     }
 
-    @GetMapping("signup")
+    /**
+     * 마이페이지 뷰
+     */
+    @GetMapping("/mypage")
+    public String mypage() {
+        log.info("🟢 mypage 진입");
+        return "user/mypage";
+    }
+
+    /**
+     * 마이페이지 프로필 조회
+     */
+    @ResponseBody
+    @GetMapping("/mypage/profile")
+    public UserDTO getProfile(HttpSession session) throws Exception {
+        log.info("🟢 getProfile 실행");
+
+        String userId = CmmUtil.nvl((String) session.getAttribute("LOGIN_USER_ID"));
+        if (userId.isEmpty()) {
+            log.warn("⚠️ 세션 없음 → 로그인 필요");
+            return null;
+        }
+
+        UserDTO pDTO = new UserDTO();
+        pDTO.setUserId(userId);
+
+        UserDTO rDTO = Optional.ofNullable(userService.getUserProfile(pDTO))
+                .orElseGet(UserDTO::new);
+
+        if (rDTO.getUserId() != null) {
+            // ✅ 이메일만 복호화
+            if (rDTO.getEmail() != null && !rDTO.getEmail().isEmpty()) {
+                try {
+                    rDTO.setEmail(EncryptUtil.decAES128BCBC(rDTO.getEmail()));
+                } catch (Exception e) {
+                    log.warn("⚠️ 이메일 복호화 실패 → 원본 그대로 반환: {}", rDTO.getEmail());
+                }
+            }
+            // ❌ 비밀번호는 복호화 불가 (화면에 표시하지도 않음)
+        }
+
+        log.info("📌 마이페이지 반환 데이터(이메일 복호화 후): {}", rDTO);
+        return rDTO;
+    }
+
+    // ===== 회원 탈퇴 =====
+    @ResponseBody
+    @PostMapping("/delete")
+    public int deleteUser(HttpSession session) throws Exception {
+        log.info("🟢 deleteUser 실행");
+
+        String userId = CmmUtil.nvl((String) session.getAttribute("LOGIN_USER_ID"));
+        if (userId.isEmpty()) {
+            log.warn("⚠️ 로그인 안됨 - 탈퇴 불가");
+            return 0;
+        }
+
+        UserDTO pDTO = new UserDTO();
+        pDTO.setUserId(userId);
+
+        int res = userService.deleteUser(pDTO);
+
+        if (res > 0) {
+            session.invalidate();
+            log.info("✅ 회원 탈퇴 성공 - userId={}", userId);
+        } else {
+            log.warn("❌ 회원 탈퇴 실패 - userId={}", userId);
+        }
+
+        return res;
+    }
+
+    /**
+     * 비밀번호 재설정
+     */
+    @PostMapping("/resetPassword")
+    @ResponseBody
+    public ResultDTO resetPassword(UserDTO pDTO, HttpServletRequest request) {
+        log.info("resetPassword start!");
+
+        String newPw = CmmUtil.nvl(pDTO.getPassword());
+        String email = (String) request.getSession().getAttribute("resetEmail");
+
+        try {
+            if (email == null) {
+                return ResultDTO.builder()
+                        .result(0)
+                        .msg("세션이 만료되었습니다. 다시 시도해주세요.")
+                        .build();
+            }
+
+            int res = userService.updatePassword(
+                    UserDTO.builder().email(email).password(newPw).build()
+            );
+
+            if (res > 0) {
+                return ResultDTO.builder().result(1).msg("비밀번호가 성공적으로 변경되었습니다.").build();
+            } else {
+                return ResultDTO.builder().result(0).msg("비밀번호 변경 실패").build();
+            }
+
+        } catch (Exception e) {
+            log.error("resetPassword Error : {}", e.getMessage(), e);
+            return ResultDTO.builder().result(-1).msg("비밀번호 재설정 중 오류 발생").build();
+        } finally {
+            log.info("resetPassword end!");
+        }
+    }
+
+    // ===== 로그아웃 =====
+    @GetMapping("/logout") // ✅ 중복 제거
+    public String logout(HttpSession session) {
+        log.info("로그아웃 시작");
+
+        session.invalidate(); // 세션 전체 제거
+
+        log.info("로그아웃 완료 → 메인 페이지로 이동");
+        return "redirect:/"; // ✅ 홈으로 리다이렉트
+    }
+
+
+    /*
+     *  이메일 중복체크
+     * */
+    @ResponseBody
+    @PostMapping(value = "getEmailExists")
+    public UserDTO getEmailExists(HttpServletRequest request) throws Exception {
+
+        log.info("{}.getEmailExists Start!", this.getClass().getName());
+
+        String email = CmmUtil.nvl(request.getParameter("email"));
+
+        log.info("email : {}", email);
+
+        UserDTO pDTO = new UserDTO();
+        pDTO.setEmail(EncryptUtil.encAES128BCBC(email));
+
+        UserDTO rDTO = Optional.ofNullable(userService.getEmailExists(pDTO)).orElseGet(UserDTO::new);
+
+        log.info("existsYn : {}", rDTO.getExistsYn());
+
+        log.info("{}.getEmailExists End!", this.getClass().getName());
+
+        return rDTO;
+    }
+
+    /*
+     *  회원가입
+     * */
+    @ResponseBody
+    @PostMapping(value = "insertUser")
+    public MsgDTO insertUser(HttpServletRequest request) {
+
+        log.info("{}.insertUserInfo Start!", this.getClass().getName());
+
+        int res = 0;
+        String msg = "";
+        MsgDTO dto;
+
+        UserDTO pDTO;
+
+        try {
+            String name = CmmUtil.nvl(request.getParameter("name"));
+            String email = CmmUtil.nvl(request.getParameter("email"));
+            String nickname = CmmUtil.nvl(request.getParameter("nickname"));
+            String password = CmmUtil.nvl(request.getParameter("password"));
+
+            String birthYear = CmmUtil.nvl(request.getParameter("birthYear"));
+            String birthMonth = CmmUtil.nvl(request.getParameter("birthMonth"));
+            String birthDay = CmmUtil.nvl(request.getParameter("birthDay"));
+            String birthDate = birthYear + "-" + birthMonth + "-" + birthDay;
+
+            String tel = CmmUtil.nvl(request.getParameter("tel"));
+            String isForeigner = CmmUtil.nvl(request.getParameter("isForeigner"));
+
+            log.info("name : {}", name);
+            log.info("email : {}", email);
+            log.info("nickname : {}", nickname);
+            log.info("password : {}", password);
+            log.info("birthDate : {}", birthDate);
+            log.info("tel : {}", tel);
+            log.info("isForeigner : {}", isForeigner);
+
+            pDTO = UserDTO.builder()
+                    .name(name)
+                    .email(EncryptUtil.encAES128BCBC(email))
+                    .nickname(nickname)
+                    .password(EncryptUtil.encHashSHA256(password))
+                    .birthDate(birthDate)
+                    .tel(EncryptUtil.encAES128BCBC(tel))
+                    .isForeigner(Integer.parseInt(isForeigner))
+                    .build();
+
+            log.info("암호화 email : {}", pDTO.getEmail());
+
+            res = userService.insertUser(pDTO);
+
+            log.info("회원가입 결과 (res) : " + res);
+
+            if(res == 1) {
+                msg = "회원가입 되었습니다.";
+            } else if (res == 2) {
+                msg = "이미 가입된 아이디 입니다.";
+            } else {
+                msg = "오류로 인해 회원가입이 실패하였습니다.";
+            }
+
+        } catch (Exception e) {
+            msg = "실패하였습니다." + e;
+            log.info(e.toString());
+        } finally {
+
+            dto = new MsgDTO();
+            dto.setResult(res);
+            dto.setMsg(msg);
+
+            log.info("{}.insertUserInfo End!", this.getClass().getName());
+        }
+
+        return dto;
+    }
+
+
+    // ===== 화면 이동 =====
+    @GetMapping("/login")
+    public String login() {
+        log.info("GET /user/login");
+        return "user/login";
+    }
+
+    @GetMapping("/signup")
     public String signup() {
-        log.info("GET /signup");
+        log.info("GET /user/signup");
         return "user/signup";
     }
 
-    @GetMapping("findEmail")
+    @GetMapping("/findEmail")
     public String findEmail() {
-        log.info("GET /findEmail");
+        log.info("GET /user/findEmail");
         return "user/findEmail";
     }
 
-    @GetMapping("findPw")
+    @GetMapping("/findPw")
     public String findPw() {
-        log.info("GET /findPw");
+        log.info("GET /user/findPw");
         return "user/findPw";
     }
 
-    @GetMapping("phoneVerify")
+    @GetMapping("/phoneVerify")
     public String phoneVerify() {
-        log.info("GET /phoneVerify");
+        log.info("GET /user/phoneVerify");
         return "user/phoneVerify";
     }
 
-    @GetMapping("emailVerify")
+    @GetMapping("/emailVerify")
     public String emailVerify() {
-        log.info("GET /emailVerify");
+        log.info("GET /user/emailVerify");
         return "user/emailVerify";
     }
 
-    @GetMapping("changePw")
+    @GetMapping("/changePw")
     public String changePw() {
-        log.info("GET /changePw");
+        log.info("GET /user/changePw");
         return "user/changePw";
     }
 
-
-
 }
-
