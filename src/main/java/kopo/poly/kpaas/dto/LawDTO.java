@@ -10,14 +10,11 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class LawDTO {
-    private Integer id;
-    private Integer countryId;       // countries 테이블 FK
-    private String countryCode;      // 선택적으로 표시
+    private int lawId;
+    private int countryId;
     private String title;
     private String articleNumber;
     private String content;
-    private double[] lawVector;
-    private String lawVectorJson;
-    private double similarity;       // 검색 시 사용
+    private String updatedAt;
+    private String lawVector;
 }
-
