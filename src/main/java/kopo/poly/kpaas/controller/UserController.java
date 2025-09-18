@@ -41,10 +41,9 @@ public class UserController {
         UserDTO rDTO = userService.getUserLogin(pDTO);
 
         if (rDTO != null) {
-            session.setAttribute("LOGIN_USER_ID", rDTO.getUserId());
-            session.setAttribute("LOGIN_USER_NAME", rDTO.getName());
-            session.setAttribute("LOGIN_USER_NICKNAME", rDTO.getNickname());
-
+            session.setAttribute("SS_USER_ID", rDTO.getUserId());
+            session.setAttribute("SS_USER_NAME", rDTO.getName());
+            session.setAttribute("SS_USER_NICKNAME", rDTO.getNickname());
             log.info("✅ 로그인 성공 - userId={}, name={}, nickname={}", rDTO.getUserId(), rDTO.getName(), rDTO.getNickname());
             return rDTO;
         }
@@ -70,7 +69,7 @@ public class UserController {
     public UserDTO getProfile(HttpSession session) throws Exception {
         log.info("🟢 getProfile 실행");
 
-        String userId = CmmUtil.nvl((String) session.getAttribute("LOGIN_USER_ID"));
+        String userId = CmmUtil.nvl((String) session.getAttribute("SS_USER_ID"));
         if (userId.isEmpty()) {
             log.warn("⚠️ 세션 없음 → 로그인 필요");
             return null;
