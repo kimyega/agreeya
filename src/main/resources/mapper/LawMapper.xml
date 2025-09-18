@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kopo.poly.kpaas.mapper.ILawMapper">
+
+    <!-- 법령 INSERT -->
+    <insert id="insertLaw" parameterType="LawDTO">
+        INSERT INTO laws (country_id, title, article_number, content, law_vector, updated_at)
+        VALUES (#{countryId}, #{title}, #{articleNumber}, #{content}, #{lawVector}, NOW())
+    </insert>
+</mapper>
