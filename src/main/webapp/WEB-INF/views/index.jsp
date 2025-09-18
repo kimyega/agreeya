@@ -12,6 +12,10 @@
 
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
+    <!-- Table CSS JS -->
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/table.css"/>
+    <script src="${pageContext.request.contextPath}/js/table.js"></script>
 </head>
 
 <body class="bg-slate-100 text-gray-800 font-sans">
