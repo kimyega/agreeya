@@ -19,11 +19,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('pfName').textContent  = d.name ?? '-';
     document.getElementById('pfEmail').textContent = d.email ?? '-';
     document.getElementById('pfRegDt').textContent = d.createdAt ?? '-';
-    document.getElementById('headerNick').textContent = d.name || 'User';
-
-    // ✅ 상단바 토글
-    document.getElementById('loginButton')?.classList.add('hidden');
-    document.getElementById('profileDropdownWrapper')?.classList.remove('hidden');
 
   } catch (e) {
     console.error(e);
