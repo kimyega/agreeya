@@ -20,7 +20,7 @@
 
         <!-- 메뉴 -->
         <nav class="flex items-center space-x-8 text-xl font-semibold text-gray-800 pr-4">
-            <a href="#"id="homeLink" class="hover:text-blue-600">홈</a>
+            <a href="/" id="homeLink" class="hover:text-blue-600">홈</a>
             <a href="/chatbot/aiSimulationMain" class="hover:text-blue-600">AI 모의 협상</a>
             <a href="/contract/upload" class="hover:text-blue-600">계약서 분석</a>
             <a href="/chatbot/qnaChatbot" class="hover:text-blue-600">Q&A 챗봇</a>

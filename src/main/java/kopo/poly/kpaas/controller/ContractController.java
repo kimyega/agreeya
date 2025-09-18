@@ -6,6 +6,7 @@ import kopo.poly.kpaas.dto.ContractDTO;
 import kopo.poly.kpaas.dto.ContractUploadDTO;
 import kopo.poly.kpaas.dto.ResultDTO;
 import kopo.poly.kpaas.service.IContractService;
+import kopo.poly.kpaas.util.CmmUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -66,39 +67,43 @@ public class ContractController {
     @PostMapping("/uploadFile")
     @ResponseBody
     public ResultDTO uploadContract(HttpServletRequest request, HttpSession session) {
+        log.info("📄 /uploadFile 요청 시작");
         try {
-            // 1. Multipart 캐스팅
             MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
 
-            // 2. 파일 및 userId 가져오기
             MultipartFile file = multipartRequest.getFile("file");
             String userId = multipartRequest.getParameter("userId");
 
+            log.info("사용자 [{}] 파일 업로드 시도: {}", userId, (file != null ? file.getOriginalFilename() : "파일 없음"));
+
             if (file == null || file.isEmpty()) {
+                log.warn("⚠️ 파일이 업로드되지 않음");
                 return ResultDTO.builder()
                         .result(0)
                         .msg("파일이 업로드되지 않았습니다.")
                         .build();
             }
 
-            // 3. ContractUploadDTO 생성
             ContractUploadDTO uploadDTO = new ContractUploadDTO();
             uploadDTO.setFile(file);
             uploadDTO.setUserId(userId);
 
-            // 4. 파일 저장
+            log.info("파일 저장 시작");
             String fileUrl = contractService.saveFile(uploadDTO);
+            log.info("파일 저장 완료 → URL: {}", fileUrl);
 
-            // 5. OCR 실행
+            log.info("OCR 실행 시작");
             String ocrText = contractService.extractTextFromImage(uploadDTO);
+            log.info("OCR 완료 → 추출 텍스트 길이: {}", ocrText.length());
 
-            // 6. ContractDTO 생성 후 세션 저장
             ContractDTO dto = ContractDTO.builder()
                     .userId(userId)
                     .originalFileUrl(fileUrl)
                     .ocrText(ocrText)
                     .build();
+
             session.setAttribute("contractDraft", dto);
+            log.info("세션에 contractDraft 저장 완료");
 
             return ResultDTO.builder()
                     .result(1)
@@ -117,16 +122,15 @@ public class ContractController {
 
     @PostMapping("/saveCountry")
     @ResponseBody
-    public ResponseEntity<ResultDTO> saveCountry(HttpServletRequest request,
-                                                 HttpSession session) {
-
-        // 1. 요청에서 countryId 가져오기
+    public ResponseEntity<ResultDTO> saveCountry(HttpServletRequest request, HttpSession session) {
+        log.info("📄 /saveCountry 요청 시작");
         String countryId = request.getParameter("countryId");
+        log.info("선택 국가 ID: {}", countryId);
 
-        // 2. 세션에서 contractDraft 가져오기
         ContractDTO dto = (ContractDTO) session.getAttribute("contractDraft");
 
         if (dto == null) {
+            log.warn("⚠️ 세션에 contractDraft 없음");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(ResultDTO.builder()
                             .result(0)
@@ -135,14 +139,14 @@ public class ContractController {
         }
 
         try {
-            // 3. countryId 세팅
             dto.setCountryId(countryId);
+            log.info("세션 contractDraft에 countryId 세팅 완료");
 
-            // 4. DB 저장
             contractService.saveContract(dto);
+            log.info("DB 저장 완료");
 
-            // 5. 세션 정리
             session.removeAttribute("contractDraft");
+            log.info("세션 contractDraft 제거 완료");
 
             return ResponseEntity.ok(ResultDTO.builder()
                     .result(1)
@@ -158,6 +162,34 @@ public class ContractController {
                             .msg("계약서 저장 중 오류: " + e.getMessage())
                             .build());
         }
+    }
+
+    @PostMapping("/selectNation")
+    @ResponseBody
+    public String selectNation(HttpServletRequest request, HttpSession session) {
+        log.info("📄 /selectNation 요청 시작");
+        String userId = CmmUtil.nvl((String) session.getAttribute("SS_USER_ID"));
+        if (userId.isEmpty()) {
+            log.warn("⚠️ 로그인 세션 없음 → 국가 선택 불가");
+            return "login_required";
+        }
+
+        String countryId = CmmUtil.nvl(request.getParameter("countryId"));
+        log.info("사용자 [{}] → 선택 국가 [{}]", userId, countryId);
+
+        session.setAttribute("SELECTED_COUNTRY_ID", countryId);
+        log.info("세션 SELECTED_COUNTRY_ID 저장 완료");
+
+        return "success";
+    }
+
+    @PostMapping("/cancelNation")
+    @ResponseBody
+    public String cancelNation(HttpSession session) {
+        log.info("📄 /cancelNation 요청 시작");
+        session.removeAttribute("SELECTED_COUNTRY_ID");
+        log.info("세션 SELECTED_COUNTRY_ID 제거 완료");
+        return "success";
     }
 
 }
