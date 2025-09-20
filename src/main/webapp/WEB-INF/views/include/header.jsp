@@ -20,20 +20,20 @@
 
         <!-- 메뉴 -->
         <nav class="flex items-center space-x-8 text-xl font-semibold text-gray-800 pr-4">
-            <a href="/" class="hover:text-blue-600">홈</a>
+            <a href="/" id="homeLink" class="hover:text-blue-600">홈</a>
             <a href="/chatbot/aiSimulationMain" class="hover:text-blue-600">AI 모의 협상</a>
             <a href="/contract/upload" class="hover:text-blue-600">계약서 분석</a>
             <a href="/chatbot/qnaChatbot" class="hover:text-blue-600">Q&A 챗봇</a>
 
             <!-- 로그인 여부 확인 -->
             <c:choose>
-                <c:when test="${not empty sessionScope.LOGIN_USER_ID}">
+                <c:when test="${not empty sessionScope.SS_USER_ID}">
                     <!-- 로그인 후 드롭다운 -->
                     <div id="profileDropdownWrapper" class="relative">
                         <button onclick="toggleDropdown()"
                                 class="flex items-center space-x-2 text-xl font-bold text-gray-800 focus:outline-none">
                             <i class="fa-solid fa-user-circle text-2xl"></i>
-                            <span id="headerNick">${sessionScope.LOGIN_USER_NICKNAME}</span>
+                            <span id="headerNick">${sessionScope.SS_USER_NICKNAME}</span>
                         </button>
                         <div id="profileDropdown"
                              class="absolute right-0 mt-2 w-40 bg-white border border-gray-300 rounded-md shadow-lg hidden z-50">

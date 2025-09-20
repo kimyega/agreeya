@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kopo.poly.kpaas.mapper.IContractMapper">
+
+    <!-- 계약서 정보 저장 -->
+    <insert id="insertContract" parameterType="ContractDTO">
+        INSERT INTO contracts (user_id, country_id, original_file_url, ocr_text)
+        VALUES (#{userId}, #{countryId}, #{originalFileUrl}, #{ocrText})
+    </insert>
+</mapper>
