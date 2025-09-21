@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class ContractDTO {
+
     private Long contractId;
     private Long userId;
     private Long countryId;

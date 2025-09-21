@@ -1,6 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
          pageEncoding="UTF-8" %>
-<!DOCTYPE html >
+<!DOCTYPE html>
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
@@ -16,6 +16,9 @@
   <!-- Table CSS JS -->
   <link rel="stylesheet" href="${pageContext.request.contextPath}/css/table.css"/>
   <script src="${pageContext.request.contextPath}/js/table.js"></script>
+
+  <!-- ✅ jQuery 추가 -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 
 <body class="bg-slate-100 text-gray-800 font-sans">
@@ -49,20 +52,29 @@
     <p class="text-center text-gray-600 text-base mb-10">근무 국가에 따라서 기준이 다르게 적용됩니다</p>
 
     <!-- 국가 카드 -->
-    <div class="flex justify-center gap-20 mb-6">
-      <div class="flex flex-col items-center cursor-pointer country-card" data-country="대한민국">
-        <img src="../images/kor.png" class="w-28 h-28 object-contain mb-2" />
-        <span class="text-xl font-semibold">대한민국</span>
+    <!-- 국가 카드 -->
+    <form id="countryForm" method="post">
+      <div class="flex justify-center gap-20 mb-6">
+        <button type="button" class="flex flex-col items-center cursor-pointer country-card" value="KR">
+          <img src="${pageContext.request.contextPath}/images/kor.png" class="w-28 h-28 object-contain mb-2" />
+          <span class="text-xl font-semibold">대한민국</span>
+        </button>
+
+        <button type="button" class="flex flex-col items-center cursor-pointer country-card" value="EU">
+          <img src="${pageContext.request.contextPath}/images/eu.png" class="w-28 h-28 object-contain mb-2" />
+          <span class="text-xl font-semibold">EU</span>
+        </button>
+
+        <button type="button" class="flex flex-col items-center cursor-pointer country-card" value="JP">
+          <img src="${pageContext.request.contextPath}/images/jp.png" class="w-28 h-28 object-contain mb-2" />
+          <span class="text-xl font-semibold">일본</span>
+        </button>
       </div>
-      <div class="flex flex-col items-center cursor-pointer country-card" data-country="E U">
-        <img src="../images/eu.png" class="w-28 h-28 object-contain mb-2" />
-        <span class="text-xl font-semibold">E U</span>
-      </div>
-      <div class="flex flex-col items-center cursor-pointer country-card" data-country="일본">
-        <img src="../images/jp.png" class="w-28 h-28 object-contain mb-2" />
-        <span class="text-xl font-semibold">일본</span>
-      </div>
-    </div>
+
+      <!-- 선택된 국가 코드 저장용 -->
+      <input type="hidden" name="countryCode" id="countryCode" value="">
+    </form>
+
 
     <!-- 체크박스 -->
     <div class="text-center mb-3">
@@ -117,11 +129,28 @@
       </div>
     </div>
   </div>
+
+  <!-- 홈 이동 확인 모달 -->
+  <div id="homeConfirmModal"
+       class="hidden fixed inset-0 bg-black/50 flex justify-center items-center z-[1000]">
+    <div class="bg-white rounded-lg shadow-xl w-96 p-6 text-center">
+      <h3 class="text-xl font-bold mb-4">정말 나가시겠습니까?</h3>
+      <p class="text-gray-600 mb-6">선택한 내용은 저장되지 않습니다.</p>
+      <div class="flex justify-center space-x-4">
+        <button id="confirmHomeBtn"
+                class="px-5 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+          확인
+        </button>
+        <button id="cancelHomeBtn"
+                class="px-5 py-2 bg-gray-300 rounded hover:bg-gray-400">
+          취소
+        </button>
+      </div>
+    </div>
+  </div>
 </main>
 
-
-
 <!-- ✅ JS -->
-  <script src="../js/country.js"></script>
+<script src="${pageContext.request.contextPath}/js/country.js"></script>
 </body>
 </html>
