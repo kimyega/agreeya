@@ -16,6 +16,4 @@ public class ContractDTO {
     private String originalFileUrl;
     private String ocrText;
     private String createdAt;
-
-
 }
