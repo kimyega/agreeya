@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kopo.poly.kpaas.mapper.IAnalysisMapper">
+
+    <!-- 계약서: 단일 -->
+    <select id="getContractById" parameterType="ContractDTO" resultType="ContractDTO">
+        SELECT contract_id,
+               user_id,
+               country_id,
+               original_file_url,
+               ocr_text,
+               created_at
+        FROM contracts
+        WHERE contract_id = #{contractId}
+    </select>
+
+    <!-- 법령: 다중 -->
+    <select id="getLawsByCountryId" parameterType="LawDTO" resultType="LawDTO">
+        SELECT law_id,
+               country_id,
+               title,
+               article_number,
+               content,
+               updated_at,
+               law_vector
+        FROM laws
+        WHERE country_id = #{countryId}
+    </select>
+
+    <!-- 조항별 분석 결과 저장 -->
+    <insert id="insertClauseResult" parameterType="ContractClauseDTO">
+        INSERT INTO contract_clauses
+        (
+            contract_id,
+            clause_text,
+            risk_score,
+            risk_type,
+            ai_comment
+        )
+        VALUES
+            (
+                #{contractId},
+                #{clauseText},
+                #{riskScore},
+                #{riskType},
+                #{aiComment}
+            )
+    </insert>
+
+    <!-- 계약서 전체 요약 분석 결과 저장 -->
+    <insert id="insertSummaryResult" parameterType="ContractAnalysisSummaryDTO">
+        INSERT INTO contract_analysis_summary
+        (
+            contract_id,
+            risk_chart_data,
+            total_risk_level,
+            translated_text,
+            created_at
+        )
+        VALUES
+            (
+                #{contractId},
+                #{riskChartData},
+                #{totalRiskLevel},
+                #{translatedText},
+                NOW()
+            )
+    </insert>
+
+</mapper>

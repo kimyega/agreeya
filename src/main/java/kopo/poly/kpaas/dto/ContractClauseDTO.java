@@ -9,12 +9,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ContractDTO {
-
+public class ContractClauseDTO {
+    private Integer clauseId;
     private Integer contractId;
-    private Integer userId;
-    private Integer countryId;
-    private String originalFileUrl;
-    private String ocrText;
-    private String createdAt;
+    private String clauseText;
+    private Integer riskScore;
+    private String riskType;
+    private String aiComment;
 }
