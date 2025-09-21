@@ -11,9 +11,9 @@ import lombok.NoArgsConstructor;
 @Builder
 public class ContractClauseDTO {
     private Integer clauseId;
-    private Long contractId;
+    private Integer contractId;
     private String clauseText;
-    private Integer riskScore;   // 🔹 int
+    private Integer riskScore;
     private String riskType;
     private String aiComment;
 }

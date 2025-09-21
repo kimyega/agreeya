@@ -34,7 +34,7 @@ public class AnalysisService implements IAnalysisService {
 
     private final OpenAiEmbeddingModel embeddingModel;
 
-    // ✅ 생성자 주입 (규칙 준수, @Autowired 불필요)
+    // ✅ 생성자 주입 (규칙 준수)
     public AnalysisService(IAnalysisMapper analysisMapper,
                            GptService gptService,
                            @Value("${openai.api.key}") String apiKey) {
@@ -43,7 +43,7 @@ public class AnalysisService implements IAnalysisService {
 
         // OpenAI 임베딩 모델 초기화
         this.embeddingModel = OpenAiEmbeddingModel.builder()
-                .apiKey(apiKey) // application.yaml 값 자동 주입
+                .apiKey(apiKey)
                 .modelName(OpenAiEmbeddingModelName.TEXT_EMBEDDING_3_SMALL)
                 .build();
     }
@@ -51,43 +51,45 @@ public class AnalysisService implements IAnalysisService {
     @Override
     public void analyzeContract(ContractDTO pDTO) throws Exception {
 
-        Long contractId = pDTO.getContractId();
-        Long countryId = pDTO.getCountryId();
-        String userId = String.valueOf(pDTO.getUserId());
+        Integer contractId = pDTO.getContractId();
+        Integer countryId = pDTO.getCountryId();
+        Integer userId = pDTO.getUserId();
 
         log.info("➡️ 분석 시작: userId={}, contractId={}, countryId={}", userId, contractId, countryId);
 
-        // 1. 계약서 OCR 텍스트 조회
+        // 1. 계약서 OCR 텍스트 조회 (단건)
         ContractDTO rDTO = analysisMapper.getContractById(pDTO);
         if (rDTO == null || rDTO.getOcrText() == null) {
             throw new Exception("계약서 OCR 텍스트가 없습니다. contractId=" + contractId);
         }
         String contractText = rDTO.getOcrText();
 
-        // 2. 국가별 법령 조회
-        LawDTO lawDTO = analysisMapper.getLawByCountryId(
+        // 2. 국가별 법령 조회 (여러 건)
+        List<LawDTO> lawList = analysisMapper.getLawsByCountryId(
                 LawDTO.builder().countryId(countryId).build()
         );
-        if (lawDTO == null || lawDTO.getContent() == null) {
+        if (lawList == null || lawList.isEmpty()) {
             throw new Exception("해당 국가 법령이 없습니다. countryId=" + countryId);
         }
-        String lawText = lawDTO.getContent();
 
         // ============================================================
-        // ✅ (랭체인 시작) 법령 내용을 chunk로 나누고 임베딩 저장
+        // ✅ (랭체인 시작) 모든 법령 내용을 chunk로 나누고 임베딩 저장
         // ============================================================
         InMemoryEmbeddingStore<Document> store = new InMemoryEmbeddingStore<>();
-        String[] lawChunks = lawText.split("\\n\\n+"); // 빈 줄 기준 분리
-        for (String chunk : lawChunks) {
-            if (!chunk.isBlank()) {
-                Embedding emb = embeddingModel.embed(chunk).content();
-                store.add(emb, Document.from(chunk));
+        for (LawDTO law : lawList) {
+            if (law.getContent() == null) continue;
+            String[] lawChunks = law.getContent().split("\\n\\n+"); // 빈 줄 기준 분리
+            for (String chunk : lawChunks) {
+                if (!chunk.isBlank()) {
+                    Embedding emb = embeddingModel.embed(chunk).content();
+                    store.add(emb, Document.from(chunk));
+                }
             }
         }
 
-        // ✅ 계약서 OCR 텍스트 임베딩 → 유사한 법령 Top 10 검색
+        // ✅ 계약서 OCR 텍스트 임베딩 → 유사한 법령 Top 50 검색
         Embedding contractEmbedding = embeddingModel.embed(contractText).content();
-        List<EmbeddingMatch<Document>> matches = store.findRelevant(contractEmbedding, 10);
+        List<EmbeddingMatch<Document>> matches = store.findRelevant(contractEmbedding, 50);
 
         StringBuilder similarLaws = new StringBuilder();
         for (EmbeddingMatch<Document> match : matches) {
@@ -98,7 +100,7 @@ public class AnalysisService implements IAnalysisService {
         // ✅ (랭체인 끝)
         // ============================================================
 
-        // 3. GPT 프롬프트 (계약서 + 유사 법령 포함)
+        // 3. GPT 프롬프트 생성
         String prompt = """
         [계약서 전체 내용]
         %s

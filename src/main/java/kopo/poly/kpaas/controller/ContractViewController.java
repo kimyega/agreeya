@@ -149,9 +149,9 @@ public class ContractViewController {
         try {
             // ✅ 샘플 DTO (DB에 미리 넣은 contract_id=4, user_id=5, country_id=2)
             ContractDTO dto = ContractDTO.builder()
-                    .contractId(4L)   // contracts 테이블 contract_id
-                    .userId(6L)       // contracts 테이블 user_id
-                    .countryId(2L)    // contracts 테이블 country_id
+                    .contractId(4)   // contracts 테이블 contract_id
+                    .userId(6)       // contracts 테이블 user_id
+                    .countryId(2)    // contracts 테이블 country_id
                     .build();
 
             // 서비스 호출

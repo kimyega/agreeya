@@ -10,8 +10,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class LawDTO {
-    private Long lawId;
-    private Long countryId;
+    private Integer lawId;
+    private Integer countryId;
     private String title;
     private String articleNumber;
     private String content;
