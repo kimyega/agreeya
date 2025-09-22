@@ -10,9 +10,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class ContractDTO {
-    private String contractId;
-    private String userId;
-    private String countryId;
+
+    private Integer contractId;
+    private Integer userId;
+    private Integer countryId;
     private String originalFileUrl;
     private String ocrText;
     private String createdAt;

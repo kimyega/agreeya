@@ -11,9 +11,9 @@ import lombok.NoArgsConstructor;
 @Builder
 public class ContractAnalysisSummaryDTO {
     private Integer summaryId;
-    private String contractId;
+    private Integer contractId;
     private String riskChartData;
-    private String totalRiskLevel;
+    private Integer totalRiskLevel;
     private String translatedText;
     private String createdAt;
 }

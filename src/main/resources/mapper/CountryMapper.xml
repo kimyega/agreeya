@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kopo.poly.kpaas.mapper.ICountryMapper">
+
+    <!-- 국가id로 countryId 조회 -->
+    <select id="getCountryByCode" parameterType="CountryDTO" resultType="CountryDTO">
+        SELECT country_id,
+               country_name,
+               country_code
+        FROM countries
+        WHERE country_code = #{countryCode}
+            LIMIT 1
+    </select>
+
+
+</mapper>

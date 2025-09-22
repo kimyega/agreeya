@@ -12,7 +12,16 @@ import kopo.poly.kpaas.util.CmmUtil;
 import lombok.RequiredArgsConstructor;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import kopo.poly.kpaas.dto.ContractDTO;
+import kopo.poly.kpaas.dto.CountryDTO;
+import kopo.poly.kpaas.service.IContractService;
+import kopo.poly.kpaas.service.ICountryService;
 import kopo.poly.kpaas.util.CmmUtil;
+import lombok.RequiredArgsConstructor;
+import jakarta.servlet.http.HttpSession;
+import kopo.poly.kpaas.dto.ContractDTO;
+import kopo.poly.kpaas.service.IAnalysisService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Controller;
@@ -20,6 +29,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import java.util.Optional;
 
 import java.util.HashMap;
 import java.util.List;
@@ -31,6 +43,10 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @RequiredArgsConstructor
 @RequestMapping("/contract")
 public class ContractViewController {
+    private final ICountryService countryService;
+    private final IContractService contractService; // ✅ 서비스 주입
+
+    private final IAnalysisService analysisService;
 
     private final IAnalysisService analysisService;
 
@@ -65,40 +81,106 @@ public class ContractViewController {
     }
     @ResponseBody
     @PostMapping("/selectNation")
-    public String selectNation(HttpServletRequest request, HttpSession session) {
-        log.info("{}.selectNation Start!", this.getClass().getName());
+    public String selectNation(HttpServletRequest request, HttpSession session) throws Exception {
+
         String userId = CmmUtil.nvl((String) session.getAttribute("SS_USER_ID"));
         if (userId.isEmpty()) {
-            log.warn("⚠️ 로그인 세션 없음 → 국가 선택 불가");
             return "login_required";
         }
 
-        String countryId = CmmUtil.nvl(request.getParameter("countryId"));
-        log.info("사용자 [{}] → 선택 국가 [{}]", userId, countryId);
+        String countryCode = CmmUtil.nvl(request.getParameter("countryCode"));
+        if (countryCode.isEmpty()) {
+            return "fail";
+        }
 
-        // 👉 DB에는 저장하지 않고 세션에만 유지
-        session.setAttribute("SELECTED_COUNTRY_ID", countryId);
-        log.info("{}.selectNation End!", this.getClass().getName());
+        CountryDTO pDTO = CountryDTO.builder()
+                .countryCode(countryCode) // ✅ 코드로 조회
+                .build();
+
+        CountryDTO rDTO = countryService.getCountryByCode(pDTO); // 새 메서드 필요
+
+        if (rDTO.getCountryId() == null) {
+            return "fail";
+        }
+
+        session.setAttribute("SS_COUNTRY_ID", rDTO.getCountryId().toString());
+        log.info("사용자 [{}] → 국가 [{}]({}) 선택 완료", userId, rDTO.getCountryName(), rDTO.getCountryCode());
 
         return "success";
     }
 
     /**
-     * 국가 선택 취소 → 세션 삭제
+     * 홈화면 이동 시 → 세션 + DB 데이터 삭제
      */
     @ResponseBody
     @PostMapping("/cancelNation")
-    public String cancelNation(HttpSession session) {
-        session.removeAttribute("SELECTED_COUNTRY_ID");
-        log.info("국가 선택 세션값 제거 완료"); //DB에 정보 지우는거(홈화면으로 나가면,세션+DB저장값(샘플))
+    public String cancelNation(HttpServletRequest request, HttpSession session) throws Exception {
+
+        String userId = CmmUtil.nvl((String) session.getAttribute("SS_USER_ID"));
+        if (userId.isEmpty()) {
+            log.warn("⚠️ 로그인 세션 없음 → 삭제 불가");
+            return "login_required";
+        }
+
+        // 세션에서 확인
+        String countryId = CmmUtil.nvl((String) session.getAttribute("SS_COUNTRY_ID"));
+        String countryCode = CmmUtil.nvl(request.getParameter("countryCode"));
+
+        log.info("📌 cancelNation 요청: userId={}, countryId(session)={}, countryCode(param)={}",
+                userId, countryId, countryCode);
+
+        // 세션에 없으면 countryCode로 DB 조회
+        if (countryId.isEmpty() && !countryCode.isEmpty()) {
+            CountryDTO pDTO = CountryDTO.builder()
+                    .countryCode(countryCode)
+                    .build();
+
+            CountryDTO rDTO = countryService.getCountryByCode(pDTO);
+            if (rDTO.getCountryId() != null) {
+                countryId = String.valueOf(rDTO.getCountryId());
+                log.info("📌 DB 조회 결과 → countryId={}", countryId);
+            }
+        }
+
+        if (countryId.isEmpty()) {
+            log.warn("⚠️ countryId 없음 → 삭제 불가");
+            return "fail";
+        }
+
+        ContractDTO pDTO = ContractDTO.builder()
+                .userId(Integer.parseInt(userId))
+                .countryId(Integer.parseInt(countryId))
+                .build();
+
+        contractService.deleteContractByUserAndCountry(pDTO);
+        log.info("✅ 사용자 [{}] → 국가 [{}] 계약서 삭제 완료", userId, countryId);
+
+        session.removeAttribute("SS_COUNTRY_ID");
+
         return "success";
     }
 
 
-    @GetMapping("/draft")
-    public String draft() {
-        log.info("📄 AI 계약서 초안 화면 호출");
-        return "contract/aiContract"; // → contract/aiContract.jsp
+    @PostMapping("/analyzeSample")
+    @ResponseBody
+    public String analyzeSampleContract(HttpSession session) {
+        try {
+            // ✅ 샘플 DTO (DB에 미리 넣은 contract_id=4, user_id=5, country_id=2)
+            ContractDTO dto = ContractDTO.builder()
+                    .contractId(4)   // contracts 테이블 contract_id
+                    .userId(6)       // contracts 테이블 user_id
+                    .countryId(2)    // contracts 테이블 country_id
+                    .build();
+
+            // 서비스 호출
+            analysisService.analyzeContract(dto);
+
+            // ✅ DB 저장까지 끝나면 성공 응답 반환
+            return "success";
+        } catch (Exception e) {
+            log.error("분석 실패", e);
+            return "fail";
+        }
     }
     @PostMapping("/analyze")
     @ResponseBody

@@ -10,10 +10,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class ContractClauseDTO {
-    private String clauseId;
-    private String contractId;
+    private Integer clauseId;
+    private Integer contractId;
     private String clauseText;
-    private String riskScore;
+    private Integer riskScore;
     private String riskType;
     private String aiComment;
 }

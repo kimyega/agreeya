@@ -5,25 +5,26 @@
 
 <mapper namespace="kopo.poly.kpaas.mapper.IAnalysisMapper">
 
-    <!-- 계약서 본문 조회 -->
+    <!-- 계약서: 단일 -->
     <select id="getContractById" parameterType="ContractDTO" resultType="ContractDTO">
         SELECT contract_id,
                user_id,
                country_id,
                original_file_url,
                ocr_text,
-               DATE_FORMAT(created_at, '%Y-%m-%d') AS createdAt
+               created_at
         FROM contracts
         WHERE contract_id = #{contractId}
     </select>
 
-    <!-- 국가별 법령 조회 -->
-    <select id="getLawByCountryId" parameterType="LawDTO" resultType="LawDTO">
+    <!-- 법령: 다중 -->
+    <select id="getLawsByCountryId" parameterType="LawDTO" resultType="LawDTO">
         SELECT law_id,
                country_id,
                title,
                article_number,
                content,
+               updated_at,
                law_vector
         FROM laws
         WHERE country_id = #{countryId}
