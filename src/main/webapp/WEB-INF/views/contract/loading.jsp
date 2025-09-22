@@ -9,6 +9,8 @@
 
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <!--j쿼리-->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
   <!-- Font Awesome (아이콘용) -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />

@@ -1,19 +1,38 @@
 package kopo.poly.kpaas.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.HttpSession;
+import kopo.poly.kpaas.dto.ContractAnalysisSummaryDTO;
+import kopo.poly.kpaas.dto.ContractClauseDTO;
+import kopo.poly.kpaas.dto.ContractDTO;
+import kopo.poly.kpaas.dto.LawDTO;
+import kopo.poly.kpaas.service.IAnalysisService;
+import kopo.poly.kpaas.service.impl.GptService;
+import kopo.poly.kpaas.util.CmmUtil;
+import lombok.RequiredArgsConstructor;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import kopo.poly.kpaas.util.CmmUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import org.springframework.web.bind.annotation.ResponseBody;
+
 @Slf4j
 @Controller
+@RequiredArgsConstructor
 @RequestMapping("/contract")
 public class ContractViewController {
+
+    private final IAnalysisService analysisService;
 
     @GetMapping("/upload")
     public String upload() {
@@ -81,4 +100,25 @@ public class ContractViewController {
         log.info("📄 AI 계약서 초안 화면 호출");
         return "contract/aiContract"; // → contract/aiContract.jsp
     }
+    @PostMapping("/analyze")
+    @ResponseBody
+    public String analyzeContract(HttpServletRequest request, HttpSession session) throws Exception {
+
+        log.info("{}.analyzeContract Start!!", this.getClass().getSimpleName());
+
+        ContractDTO pDTO = ContractDTO.builder()
+                .contractId(CmmUtil.nvl(request.getParameter("contractId")))
+                .countryId(CmmUtil.nvl(session.getAttribute("SELECTED_COUNTRY_ID").toString()))
+                .userId(CmmUtil.nvl(session.getAttribute("SS_USER_ID").toString()))
+                .build();
+
+        analysisService.analyzeContract(pDTO);
+
+        log.info("{}.analyzeContract End!!", this.getClass().getSimpleName());
+
+        return "분석 완료";
+    }
+
+
+
 }

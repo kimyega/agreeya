@@ -1,5 +1,3 @@
-let selectedCountry = '';
-
 document.addEventListener('DOMContentLoaded', function () {
     const countryCards = document.querySelectorAll('.country-card');
     const selectedText = document.getElementById('selectedCountryText');
@@ -10,6 +8,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const homeModal = document.getElementById('homeConfirmModal'); // ✅ 홈 확인 모달
     const confirmBtn = document.getElementById('confirmHomeBtn'); // ✅ 모달 확인 버튼
     const cancelBtn = document.getElementById('cancelHomeBtn');   // ✅ 모달 취소 버튼
+
+    let selectedCountry;
 
     // ==============================
     // 상단바 홈 버튼 → 모달 열기
@@ -36,15 +36,14 @@ document.addEventListener('DOMContentLoaded', function () {
     // ==============================
     countryCards.forEach(card => {
         card.addEventListener('click', () => {
-            const country = card.dataset.country;
-            selectedCountry = country;
+            selectedCountry = card.dataset.country;
 
-            if (country === 'E U') {
+            if (selectedCountry === 'E U') {
                 modal.classList.remove('hidden');
                 return;
             }
 
-            selectedText.textContent = `선택한 국가: ${country}`;
+            selectedText.textContent = `선택한 국가: ${selectedCountry}`;
             nextBtn.disabled = false;
             nextBtn.classList.remove('opacity-50');
         });
@@ -78,10 +77,10 @@ document.addEventListener('DOMContentLoaded', function () {
             data: { countryId: selectedCountry },
             success: function (res) {
                 if (res === "success") {
-                    window.location.href = "/contract/loading";
+                    location.href = `/contract/loading?countryId=${selectedCountry}`;
                 } else if (res === "login_required") {
                     alert("로그인 후 이용 가능합니다.");
-                    window.location.href = "/user/login";
+                    location.href = "/user/login";
                 } else {
                     alert("국가 선택 저장 실패");
                 }
