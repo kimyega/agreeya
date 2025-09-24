@@ -117,6 +117,7 @@ document.addEventListener("DOMContentLoaded", function () {
     let userIdCheck = "Y";
     let emailAuthNumber = ""; // 서버에서 받은 인증번호 저장
     let emailVerified = false; // 이메일 인증 완료 여부
+    let emailSending = false;
 
 // 이메일 검증 함수
     function validateEmailFormat(input, msgEl) {
@@ -139,6 +140,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // 이메일 중복 AJAX 요청
     window.checkEmail = function() {
+        if (emailSending) return; // 이미 발송 중이면 무시
+        emailSending = true;
+
         const input = document.getElementById("email");
         const msg = document.getElementById("email-msg");
 
@@ -162,6 +166,9 @@ document.addEventListener("DOMContentLoaded", function () {
             },
             error: function () {
                 setError(input, msg, "서버 요청 중 오류가 발생했습니다.");
+            },
+            complete: function() {
+                emailSending = false; // AJAX 완료 후 재호출 가능
             }
         });
     }
@@ -203,7 +210,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
 // 이벤트 연결
-    $("#email").on("blur", checkEmail);
+    document.getElementById("sendEmailBtn").addEventListener("click", checkEmail);
     $("#email-code").on("blur", verifyEmailCode);
 
 // 이메일 값이 바뀌면 인증 다시 요구
