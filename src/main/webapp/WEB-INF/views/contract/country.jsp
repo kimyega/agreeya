@@ -52,20 +52,29 @@
     <p class="text-center text-gray-600 text-base mb-10">근무 국가에 따라서 기준이 다르게 적용됩니다</p>
 
     <!-- 국가 카드 -->
-    <div class="flex justify-center gap-20 mb-6">
-      <div class="flex flex-col items-center cursor-pointer country-card" data-country="대한민국">
-        <img src="${pageContext.request.contextPath}/images/kor.png" class="w-28 h-28 object-contain mb-2" />
-        <span class="text-xl font-semibold">대한민국</span>
+    <!-- 국가 카드 -->
+    <form id="countryForm" method="post">
+      <div class="flex justify-center gap-20 mb-6">
+        <button type="button" class="flex flex-col items-center cursor-pointer country-card" value="KR">
+          <img src="${pageContext.request.contextPath}/images/kor.png" class="w-28 h-28 object-contain mb-2" />
+          <span class="text-xl font-semibold">대한민국</span>
+        </button>
+
+        <button type="button" class="flex flex-col items-center cursor-pointer country-card" value="EU">
+          <img src="${pageContext.request.contextPath}/images/eu.png" class="w-28 h-28 object-contain mb-2" />
+          <span class="text-xl font-semibold">EU</span>
+        </button>
+
+        <button type="button" class="flex flex-col items-center cursor-pointer country-card" value="JP">
+          <img src="${pageContext.request.contextPath}/images/jp.png" class="w-28 h-28 object-contain mb-2" />
+          <span class="text-xl font-semibold">일본</span>
+        </button>
       </div>
-      <div class="flex flex-col items-center cursor-pointer country-card" data-country="EU">
-        <img src="${pageContext.request.contextPath}/images/eu.png" class="w-28 h-28 object-contain mb-2" />
-        <span class="text-xl font-semibold">EU</span>
-      </div>
-      <div class="flex flex-col items-center cursor-pointer country-card" data-country="일본">
-        <img src="${pageContext.request.contextPath}/images/jp.png" class="w-28 h-28 object-contain mb-2" />
-        <span class="text-xl font-semibold">일본</span>
-      </div>
-    </div>
+
+      <!-- 선택된 국가 코드 저장용 -->
+      <input type="hidden" name="countryCode" id="countryCode" value="">
+    </form>
+
 
     <!-- 체크박스 -->
     <div class="text-center mb-3">

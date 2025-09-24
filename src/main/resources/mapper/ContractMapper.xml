@@ -10,4 +10,19 @@
         INSERT INTO contracts (user_id, country_id, original_file_url, ocr_text)
         VALUES (#{userId}, #{countryId}, #{originalFileUrl}, #{ocrText})
     </insert>
+    <delete id="deleteContractByUserAndCountry" parameterType="ContractDTO">
+        DELETE FROM contracts
+        WHERE user_id = #{userId}
+          AND country_id = #{countryId}
+    </delete>
+
+    <select id="getLatestContractByUserId" parameterType="ContractDTO" resultType="ContractDTO">
+        SELECT contract_id, user_id, country_id, original_file_url, ocr_text, created_at
+        FROM contracts
+        WHERE user_id = #{userId}
+        ORDER BY contract_id DESC
+            LIMIT 1
+    </select>
+
+
 </mapper>

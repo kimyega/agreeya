@@ -6,6 +6,7 @@ import kopo.poly.kpaas.config.NcosProperties;
 import kopo.poly.kpaas.dto.ContractDTO;
 import kopo.poly.kpaas.dto.ContractUploadDTO;
 import kopo.poly.kpaas.infra.NcosPresignService;
+import kopo.poly.kpaas.mapper.IContractMapper;
 import kopo.poly.kpaas.service.IContractService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +24,7 @@ public class ContractService implements IContractService {
     private final NcosPresignService ncosPresignService; // v2 Presigner 사용
     private final NcosProperties ncosProperties;
 
+    private final IContractMapper contractMapper;
 
     @Override
     public String saveFile(ContractUploadDTO uploadDTO) throws Exception {
@@ -98,7 +100,17 @@ public class ContractService implements IContractService {
         return result.isEmpty() ? "텍스트를 추출하지 못했습니다." : result;
     }
 
+    @Override
+    public ContractDTO getLatestContractByUserId(ContractDTO pDTO) throws Exception {
+        return contractMapper.getLatestContractByUserId(pDTO);
+    }
 
+    @Override
+    public void deleteContractByUserAndCountry(ContractDTO pDTO) throws Exception {
+        log.info("deleteContractByUserAndCountry start, userId={}, countryId={}",
+                pDTO.getUserId(), pDTO.getCountryId());
+        contractMapper.deleteContractByUserAndCountry(pDTO);
+    }
     @Override
     public void saveContract(ContractDTO dto) throws Exception {
         log.info("DB 저장 - userId: {}, file: {}", dto.getUserId(), dto.getOriginalFileUrl());
