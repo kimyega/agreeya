@@ -29,6 +29,11 @@ build/
 !**/src/main/**/build/
 !**/src/test/**/build/
 
+# Google Cloud Service Account Keys
+*.json
+# 만약 keys 폴더 따로 두면
+gcp/keys/
+
 ### VS Code ###
 .vscode/
 src/main/resources/application.yaml
