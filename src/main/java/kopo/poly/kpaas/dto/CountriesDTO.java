@@ -9,12 +9,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class LawDTO {
-    private Integer lawId;
+public class CountriesDTO {
     private Integer countryId;
-    private String title;
-    private String articleNumber;
-    private String content;
-    private String updatedAt;
-    private String lawVector;
+    private String countryName;   // e.g., "European Union"
+    private String countryCode;   // e.g., "EU"
 }
+
