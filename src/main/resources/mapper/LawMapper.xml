@@ -10,4 +10,30 @@
         INSERT INTO laws (country_id, title, article_number, content, law_vector, updated_at)
         VALUES (#{countryId}, #{title}, #{articleNumber}, #{content}, #{lawVector}, NOW())
     </insert>
+
+    <!-- 법령 전체 조회 (벡터 검색용) -->
+    <select id="getAllLaws" resultType="LawDTO">
+        SELECT law_id,
+               country_id,
+               title,
+               article_number,
+               content,
+               law_vector,
+               updated_at
+        FROM laws
+    </select>
+
+    <!-- ✅ 세션 국가 기준 조회 -->
+    <select id="getLawsByCountryId" parameterType="String" resultType="LawDTO">
+        SELECT law_id,
+               country_id,
+               title,
+               article_number,
+               content,
+               law_vector,
+               updated_at
+        FROM laws
+        WHERE country_id = #{countryId}
+    </select>
+
 </mapper>

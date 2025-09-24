@@ -6,7 +6,7 @@ import lombok.Data;
 @Data
 @Builder
 public class LawDTO {
-    private int lawId;
+    private String lawId;
     private int countryId;
     private String title;
     private String articleNumber;
