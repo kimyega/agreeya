@@ -1,5 +1,15 @@
 package kopo.poly.kpaas.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.HttpSession;
+import kopo.poly.kpaas.dto.ContractAnalysisSummaryDTO;
+import kopo.poly.kpaas.dto.ContractClauseDTO;
+import kopo.poly.kpaas.dto.ContractDTO;
+import kopo.poly.kpaas.dto.LawDTO;
+import kopo.poly.kpaas.service.IAnalysisService;
+import kopo.poly.kpaas.service.impl.GptService;
+import kopo.poly.kpaas.util.CmmUtil;
+import lombok.RequiredArgsConstructor;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import kopo.poly.kpaas.dto.ContractDTO;
@@ -13,6 +23,7 @@ import kopo.poly.kpaas.dto.ContractDTO;
 import kopo.poly.kpaas.service.IAnalysisService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,6 +32,11 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.Optional;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 @Slf4j
 @Controller
@@ -31,6 +47,7 @@ public class ContractViewController {
     private final IContractService contractService; // ✅ 서비스 주입
 
     private final IAnalysisService analysisService;
+
 
     @GetMapping("/upload")
     public String upload() {
@@ -143,25 +160,54 @@ public class ContractViewController {
     }
 
 
-    @PostMapping("/analyzeSample")
+    @PostMapping("/analyze")
     @ResponseBody
-    public String analyzeSampleContract(HttpSession session) {
+    public String analyzeContract(HttpSession session) {
         try {
-            // ✅ 샘플 DTO (DB에 미리 넣은 contract_id=4, user_id=5, country_id=2)
-            ContractDTO dto = ContractDTO.builder()
-                    .contractId(4)   // contracts 테이블 contract_id
-                    .userId(6)       // contracts 테이블 user_id
-                    .countryId(2)    // contracts 테이블 country_id
+
+            String userId = CmmUtil.nvl((String) session.getAttribute("SS_USER_ID"));
+            String countryId = CmmUtil.nvl((String) session.getAttribute("SS_COUNTRY_ID"));
+
+            log.info("📌 세션 값 확인: userId={}, countryId={}", userId, countryId);
+
+            if (userId.isEmpty() || countryId.isEmpty()) {
+                log.warn("⚠️ 세션 값 없음 → 분석 불가");
+                return "fail";
+            }
+
+
+            ContractDTO cDTO = ContractDTO.builder()
+                    .userId(Integer.parseInt(userId))
                     .build();
 
-            // 서비스 호출
+            ContractDTO latest = contractService.getLatestContractByUserId(cDTO);
+
+            if (latest == null) {
+                log.warn("⚠️ 업로드된 계약서 없음");
+                return "fail";
+            }
+
+            // 3. 최종 DTO 조립
+            ContractDTO dto = ContractDTO.builder()
+                    .contractId(latest.getContractId())
+                    .userId(Integer.parseInt(userId))
+                    .countryId(Integer.parseInt(countryId))
+                    .build();
+
+            log.info("📌 분석 시작: contractId={}, userId={}, countryId={}",
+                    dto.getContractId(), dto.getUserId(), dto.getCountryId());
+
+            // 4. 서비스 호출
             analysisService.analyzeContract(dto);
 
-            // ✅ DB 저장까지 끝나면 성공 응답 반환
+            log.info("✅ 분석 완료: contractId={}", dto.getContractId());
             return "success";
+
         } catch (Exception e) {
-            log.error("분석 실패", e);
+            log.error("❌ 분석 실패", e);
             return "fail";
         }
     }
+
+
 }

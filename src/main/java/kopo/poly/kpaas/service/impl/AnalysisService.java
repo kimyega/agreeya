@@ -87,9 +87,9 @@ public class AnalysisService implements IAnalysisService {
             }
         }
 
-        // ✅ 계약서 OCR 텍스트 임베딩 → 유사한 법령 Top 50 검색
+        // ✅ 계약서 OCR 텍스트 임베딩 → 유사한 법령 Top 50 검색 TOP의 갯수 가 더 넘어가면 api 토큰 수 한계 넘어감
         Embedding contractEmbedding = embeddingModel.embed(contractText).content();
-        List<EmbeddingMatch<Document>> matches = store.findRelevant(contractEmbedding, 50);
+        List<EmbeddingMatch<Document>> matches = store.findRelevant(contractEmbedding, 30);
 
         StringBuilder similarLaws = new StringBuilder();
         for (EmbeddingMatch<Document> match : matches) {
@@ -131,8 +131,14 @@ public class AnalysisService implements IAnalysisService {
         String gptResponse = gptService.generateText(prompt);
         log.debug("🤖 GPT 전체 응답: {}", gptResponse);
 
-        // 4. JSON 파싱 및 DB 저장
-        JsonNode root = mapper.readTree(gptResponse);
+        // ✅ 전처리: GPT가 줄 수 있는 ```json ... ``` 제거
+        String cleaned = gptResponse
+                .replace("```json", "")
+                .replace("```", "")
+                .trim();
+
+        // ✅ JSON 파싱
+        JsonNode root = mapper.readTree(cleaned);
 
         if (root.has("clauses")) {
             for (JsonNode c : root.get("clauses")) {

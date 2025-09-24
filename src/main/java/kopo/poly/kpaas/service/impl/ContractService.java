@@ -20,6 +20,12 @@ public class ContractService implements IContractService {
                 pDTO.getUserId(), pDTO.getCountryId());
         contractMapper.deleteContractByUserAndCountry(pDTO);
     }
+
+    @Override
+    public ContractDTO getLatestContractByUserId(ContractDTO pDTO) throws Exception {
+        return contractMapper.getLatestContractByUserId(pDTO);
+    }
+
 }
 
 

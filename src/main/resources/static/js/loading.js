@@ -4,7 +4,7 @@ $(document).ready(function () {
 
     // 1. 서버에 분석 요청
     $.ajax({
-        url: "/contract/analyzeSample",
+        url: "/contract/analyze",
         type: "POST",
         success: function (result) {
             if (result === "success") {

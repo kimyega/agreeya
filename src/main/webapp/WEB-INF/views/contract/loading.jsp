@@ -9,6 +9,8 @@
 
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <!--j쿼리-->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
     <!--j쿼리-->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -56,7 +58,7 @@
 
     <!-- 텍스트 -->
     <h2 class="text-xl font-bold text-blue-700 mb-2">AI가 계약서를 분석 중입니다...</h2>
-    <p class="text-gray-600 text-sm mb-6">법률 DB 연동 및 GPT 분석이 진행 중입니다.<br>일반적으로 <strong>5~10초</strong> 정도 소요됩니다.</p>
+    <p class="text-gray-600 text-sm mb-6">법률 DB 연동 및 GPT 분석이 진행 중입니다.<br>일반적으로 <strong>3~5분</strong> 정도 소요됩니다.</p>
 
     <!-- 분석 단계 리스트 -->
     <ul class="space-y-3 text-left text-gray-700 text-base mx-auto w-fit" id="analysisSteps">
