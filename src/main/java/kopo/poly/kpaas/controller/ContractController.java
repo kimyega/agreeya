@@ -14,12 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.multipart.MultipartHttpServletRequest;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -114,101 +109,47 @@ public class ContractController {
         }
     }
 
-    /* -------------------------------
-       2) 업로드 처리 엔드포인트 (하나로 통합)
-       - 프론트가 presigned PUT으로 업로드 완료 후 => 파일 URL 전송(fileUrl)
-       - 또는 프론트가 multipart/form-data로 직접 전송 => 서버에서 처리
-       ------------------------------- */
-    @PostMapping("/uploadFile")
+    @PostMapping("/processOcr")
     @ResponseBody
-    public ResultDTO uploadContract(HttpServletRequest request, HttpSession session) {
-        log.info("📄 /uploadFile 요청 시작");
-
+    public ResultDTO processOcr(HttpServletRequest request, HttpSession session) {
         try {
-            // 1) 프론트에서 Presigned 업로드 후 public URL만 전달한 경우 (fileUrl 파라미터)
-            String fileUrlParam = request.getParameter("fileUrl");
-            String userIdParam = request.getParameter("userId");
-
-            if (fileUrlParam != null && !fileUrlParam.isEmpty()) {
-                log.info("프론트 업로드 방식 - fileUrl 전달됨: userId={}, fileUrl={}", userIdParam, fileUrlParam);
-
-                // **여기서 contractService.extractTextFromImage(String fileUrl) 형태의 메서드를 사용**
-                // (서비스에 해당 시그니처가 없다면 서비스에 추가하세요)
-                ContractUploadDTO uploadDTO = ContractUploadDTO.builder()
-                        .fileUrl(fileUrlParam) // URL 기반 업로드
-                        .userId(userIdParam)
-                        .build();
-
-                String ocrText = contractService.extractTextFromImage(uploadDTO);
-
-                ContractDTO dto = ContractDTO.builder()
-                        .userId(userIdParam)
-                        .originalFileUrl(fileUrlParam)
-                        .ocrText(ocrText)
-                        .build();
-
-                session.setAttribute("contractDraft", dto);
-                log.info("세션에 contractDraft 저장 완료 (presigned flow)");
-
+            String imageUrl = request.getParameter("imageUrl");  // request에서 파라미터 추출
+            if (imageUrl == null || imageUrl.isEmpty()) {
                 return ResultDTO.builder()
-                        .result(1)
-                        .msg("OCR 완료")
-                        .data(ocrText)
+                        .result(0)
+                        .msg("imageUrl 파라미터가 필요합니다.")
                         .build();
             }
 
-            // 2) multipart로 파일이 직접 전송된 경우 (서버에서 처리)
-            if (request instanceof MultipartHttpServletRequest ||
-                    (request.getContentType() != null && request.getContentType().toLowerCase().startsWith("multipart/"))) {
+            log.info("📄 /processOcr 요청: imageUrl={}", imageUrl);
 
-                MultipartHttpServletRequest multi = (MultipartHttpServletRequest) request;
-                MultipartFile file = multi.getFile("file");
-                String userId = multi.getParameter("userId");
+            ContractUploadDTO uploadDTO = ContractUploadDTO.builder()
+                    .fileUrl(imageUrl)
+                    .build();
 
-                log.info("서버 업로드 방식 - multipart로 파일 수신: userId={}, file={}", userId, (file != null ? file.getOriginalFilename() : "null"));
+            String ocrText = contractService.extractTextFromImage(uploadDTO);
 
-                if (file == null || file.isEmpty()) {
-                    log.warn("⚠️ multipart로 전송되었으나 파일이 비어있음");
-                    return ResultDTO.builder().result(0).msg("파일이 업로드되지 않았습니다.").build();
-                }
+            ContractDTO rDTO = ContractDTO.builder()
+                    .originalFileUrl(imageUrl)
+                    .ocrText(ocrText)
+                    .build();
+            session.setAttribute("SS_CONTRACT_DTO", rDTO);
 
-                ContractUploadDTO uploadDTO = new ContractUploadDTO();
-                uploadDTO.setFile(file);
-                uploadDTO.setUserId(userId);
-
-                // saveFile 내부에서 presigned을 사용하거나 amazonS3.putObject로 올리는 구현이 되도록 구성하세요.
-                String fileUrl = contractService.saveFile(uploadDTO); // 서비스가 업로드 후 public URL 반환
-                log.info("파일 저장 완료 → URL: {}", fileUrl);
-
-                String ocrText = contractService.extractTextFromImage(uploadDTO);
-                ContractDTO dto = ContractDTO.builder()
-                        .userId(userId)
-                        .originalFileUrl(fileUrl)
-                        .ocrText(ocrText)
-                        .build();
-
-                session.setAttribute("contractDraft", dto);
-                log.info("세션에 contractDraft 저장 완료 (multipart flow)");
-
-                return ResultDTO.builder()
-                        .result(1)
-                        .msg("OCR 완료")
-                        .data(ocrText)
-                        .build();
-            }
-
-            // 둘 다 아닌 경우
-            log.warn("요청에서 fileUrl도 multipart 파일도 찾지 못함");
-            return ResultDTO.builder().result(0).msg("업로드 방식이 올바르지 않습니다.").build();
+            return ResultDTO.builder()
+                    .result(1)
+                    .msg("OCR 완료")
+                    .data(ocrText)
+                    .build();
 
         } catch (Exception e) {
-            log.error("❌ 파일 처리 실패", e);
+            log.error("❌ OCR 처리 실패", e);
             return ResultDTO.builder()
                     .result(-1)
-                    .msg("파일 처리 중 오류: " + e.getMessage())
+                    .msg("OCR 처리 중 오류: " + e.getMessage())
                     .build();
         }
     }
+
     @PostMapping("/saveCountry")
     @ResponseBody
     public ResponseEntity<ResultDTO> saveCountry(HttpServletRequest request, HttpSession session) {
