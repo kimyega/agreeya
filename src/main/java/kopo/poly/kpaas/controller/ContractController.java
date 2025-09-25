@@ -5,21 +5,19 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import kopo.poly.kpaas.dto.ContractDTO;
 import kopo.poly.kpaas.dto.ContractUploadDTO;
+import kopo.poly.kpaas.dto.CountryDTO;
 import kopo.poly.kpaas.dto.ResultDTO;
 import kopo.poly.kpaas.infra.NcosPresignService;
+import kopo.poly.kpaas.service.IAnalysisService;
 import kopo.poly.kpaas.service.IContractService;
+import kopo.poly.kpaas.service.ICountryService;
 import kopo.poly.kpaas.util.CmmUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.multipart.MultipartHttpServletRequest;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -31,7 +29,10 @@ import java.util.Optional;
 @Controller
 public class ContractController {
 
-    private final IContractService contractService;
+    private final ICountryService countryService;
+    private final IContractService contractService; // ✅ 서비스 주입
+
+    private final IAnalysisService analysisService;
     private final NcosPresignService ncosPresignService;
 
     @GetMapping("/upload")
@@ -114,101 +115,47 @@ public class ContractController {
         }
     }
 
-    /* -------------------------------
-       2) 업로드 처리 엔드포인트 (하나로 통합)
-       - 프론트가 presigned PUT으로 업로드 완료 후 => 파일 URL 전송(fileUrl)
-       - 또는 프론트가 multipart/form-data로 직접 전송 => 서버에서 처리
-       ------------------------------- */
-    @PostMapping("/uploadFile")
+    @PostMapping("/processOcr")
     @ResponseBody
-    public ResultDTO uploadContract(HttpServletRequest request, HttpSession session) {
-        log.info("📄 /uploadFile 요청 시작");
-
+    public ResultDTO processOcr(HttpServletRequest request, HttpSession session) {
         try {
-            // 1) 프론트에서 Presigned 업로드 후 public URL만 전달한 경우 (fileUrl 파라미터)
-            String fileUrlParam = request.getParameter("fileUrl");
-            String userIdParam = request.getParameter("userId");
-
-            if (fileUrlParam != null && !fileUrlParam.isEmpty()) {
-                log.info("프론트 업로드 방식 - fileUrl 전달됨: userId={}, fileUrl={}", userIdParam, fileUrlParam);
-
-                // **여기서 contractService.extractTextFromImage(String fileUrl) 형태의 메서드를 사용**
-                // (서비스에 해당 시그니처가 없다면 서비스에 추가하세요)
-                ContractUploadDTO uploadDTO = ContractUploadDTO.builder()
-                        .fileUrl(fileUrlParam) // URL 기반 업로드
-                        .userId(userIdParam)
-                        .build();
-
-                String ocrText = contractService.extractTextFromImage(uploadDTO);
-
-                ContractDTO dto = ContractDTO.builder()
-                        .userId(userIdParam)
-                        .originalFileUrl(fileUrlParam)
-                        .ocrText(ocrText)
-                        .build();
-
-                session.setAttribute("contractDraft", dto);
-                log.info("세션에 contractDraft 저장 완료 (presigned flow)");
-
+            String imageUrl = request.getParameter("imageUrl");  // request에서 파라미터 추출
+            if (imageUrl == null || imageUrl.isEmpty()) {
                 return ResultDTO.builder()
-                        .result(1)
-                        .msg("OCR 완료")
-                        .data(ocrText)
+                        .result(0)
+                        .msg("imageUrl 파라미터가 필요합니다.")
                         .build();
             }
 
-            // 2) multipart로 파일이 직접 전송된 경우 (서버에서 처리)
-            if (request instanceof MultipartHttpServletRequest ||
-                    (request.getContentType() != null && request.getContentType().toLowerCase().startsWith("multipart/"))) {
+            log.info("📄 /processOcr 요청: imageUrl={}", imageUrl);
 
-                MultipartHttpServletRequest multi = (MultipartHttpServletRequest) request;
-                MultipartFile file = multi.getFile("file");
-                String userId = multi.getParameter("userId");
+            ContractUploadDTO uploadDTO = ContractUploadDTO.builder()
+                    .fileUrl(imageUrl)
+                    .build();
 
-                log.info("서버 업로드 방식 - multipart로 파일 수신: userId={}, file={}", userId, (file != null ? file.getOriginalFilename() : "null"));
+            String ocrText = contractService.extractTextFromImage(uploadDTO);
 
-                if (file == null || file.isEmpty()) {
-                    log.warn("⚠️ multipart로 전송되었으나 파일이 비어있음");
-                    return ResultDTO.builder().result(0).msg("파일이 업로드되지 않았습니다.").build();
-                }
+            ContractDTO rDTO = ContractDTO.builder()
+                    .originalFileUrl(imageUrl)
+                    .ocrText(ocrText)
+                    .build();
+            session.setAttribute("SS_CONTRACT_DTO", rDTO);
 
-                ContractUploadDTO uploadDTO = new ContractUploadDTO();
-                uploadDTO.setFile(file);
-                uploadDTO.setUserId(userId);
-
-                // saveFile 내부에서 presigned을 사용하거나 amazonS3.putObject로 올리는 구현이 되도록 구성하세요.
-                String fileUrl = contractService.saveFile(uploadDTO); // 서비스가 업로드 후 public URL 반환
-                log.info("파일 저장 완료 → URL: {}", fileUrl);
-
-                String ocrText = contractService.extractTextFromImage(uploadDTO);
-                ContractDTO dto = ContractDTO.builder()
-                        .userId(userId)
-                        .originalFileUrl(fileUrl)
-                        .ocrText(ocrText)
-                        .build();
-
-                session.setAttribute("contractDraft", dto);
-                log.info("세션에 contractDraft 저장 완료 (multipart flow)");
-
-                return ResultDTO.builder()
-                        .result(1)
-                        .msg("OCR 완료")
-                        .data(ocrText)
-                        .build();
-            }
-
-            // 둘 다 아닌 경우
-            log.warn("요청에서 fileUrl도 multipart 파일도 찾지 못함");
-            return ResultDTO.builder().result(0).msg("업로드 방식이 올바르지 않습니다.").build();
+            return ResultDTO.builder()
+                    .result(1)
+                    .msg("OCR 완료")
+                    .data(ocrText)
+                    .build();
 
         } catch (Exception e) {
-            log.error("❌ 파일 처리 실패", e);
+            log.error("❌ OCR 처리 실패", e);
             return ResultDTO.builder()
                     .result(-1)
-                    .msg("파일 처리 중 오류: " + e.getMessage())
+                    .msg("OCR 처리 중 오류: " + e.getMessage())
                     .build();
         }
     }
+
     @PostMapping("/saveCountry")
     @ResponseBody
     public ResponseEntity<ResultDTO> saveCountry(HttpServletRequest request, HttpSession session) {
@@ -253,32 +200,135 @@ public class ContractController {
         }
     }
 
-    @PostMapping("/selectNation")
     @ResponseBody
-    public String selectNation(HttpServletRequest request, HttpSession session) {
-        log.info("📄 /selectNation 요청 시작");
+    @PostMapping("/selectNation")
+    public String selectNation(HttpServletRequest request, HttpSession session) throws Exception {
+
         String userId = CmmUtil.nvl((String) session.getAttribute("SS_USER_ID"));
         if (userId.isEmpty()) {
-            log.warn("⚠️ 로그인 세션 없음 → 국가 선택 불가");
             return "login_required";
         }
 
-        String countryId = CmmUtil.nvl(request.getParameter("countryId"));
-        log.info("사용자 [{}] → 선택 국가 [{}]", userId, countryId);
+        String countryCode = CmmUtil.nvl(request.getParameter("countryCode"));
+        if (countryCode.isEmpty()) {
+            return "fail";
+        }
 
-        session.setAttribute("SELECTED_COUNTRY_ID", countryId);
-        log.info("세션 SELECTED_COUNTRY_ID 저장 완료");
+        CountryDTO pDTO = CountryDTO.builder()
+                .countryCode(countryCode) // ✅ 코드로 조회
+                .build();
+
+        CountryDTO rDTO = countryService.getCountryByCode(pDTO); // 새 메서드 필요
+
+        if (rDTO.getCountryId() == null) {
+            return "fail";
+        }
+
+        session.setAttribute("SS_COUNTRY_ID", rDTO.getCountryId().toString());
+        log.info("사용자 [{}] → 국가 [{}]({}) 선택 완료", userId, rDTO.getCountryName(), rDTO.getCountryCode());
 
         return "success";
     }
 
-    @PostMapping("/cancelNation")
+    /**
+     * 홈화면 이동 시 → 세션 + DB 데이터 삭제
+     */
     @ResponseBody
-    public String cancelNation(HttpSession session) {
-        log.info("📄 /cancelNation 요청 시작");
-        session.removeAttribute("SELECTED_COUNTRY_ID");
-        log.info("세션 SELECTED_COUNTRY_ID 제거 완료");
+    @PostMapping("/cancelNation")
+    public String cancelNation(HttpServletRequest request, HttpSession session) throws Exception {
+
+        String userId = CmmUtil.nvl((String) session.getAttribute("SS_USER_ID"));
+        if (userId.isEmpty()) {
+            log.warn("⚠️ 로그인 세션 없음 → 삭제 불가");
+            return "login_required";
+        }
+
+        // 세션에서 확인
+        String countryId = CmmUtil.nvl((String) session.getAttribute("SS_COUNTRY_ID"));
+        String countryCode = CmmUtil.nvl(request.getParameter("countryCode"));
+
+        log.info("📌 cancelNation 요청: userId={}, countryId(session)={}, countryCode(param)={}",
+                userId, countryId, countryCode);
+
+        // 세션에 없으면 countryCode로 DB 조회
+        if (countryId.isEmpty() && !countryCode.isEmpty()) {
+            CountryDTO pDTO = CountryDTO.builder()
+                    .countryCode(countryCode)
+                    .build();
+
+            CountryDTO rDTO = countryService.getCountryByCode(pDTO);
+            if (rDTO.getCountryId() != null) {
+                countryId = String.valueOf(rDTO.getCountryId());
+                log.info("📌 DB 조회 결과 → countryId={}", countryId);
+            }
+        }
+
+        if (countryId.isEmpty()) {
+            log.warn("⚠️ countryId 없음 → 삭제 불가");
+            return "fail";
+        }
+
+        ContractDTO pDTO = ContractDTO.builder()
+                .userId(userId)
+                .countryId(countryId)
+                .build();
+
+        contractService.deleteContractByUserAndCountry(pDTO);
+        log.info("✅ 사용자 [{}] → 국가 [{}] 계약서 삭제 완료", userId, countryId);
+
+        session.removeAttribute("SS_COUNTRY_ID");
+
         return "success";
+    }
+
+
+    @PostMapping("/analyze")
+    @ResponseBody
+    public String analyzeContract(HttpSession session) {
+        try {
+
+            String userId = CmmUtil.nvl((String) session.getAttribute("SS_USER_ID"));
+            String countryId = CmmUtil.nvl((String) session.getAttribute("SS_COUNTRY_ID"));
+
+            log.info("📌 세션 값 확인: userId={}, countryId={}", userId, countryId);
+
+            if (userId.isEmpty() || countryId.isEmpty()) {
+                log.warn("⚠️ 세션 값 없음 → 분석 불가");
+                return "fail";
+            }
+
+
+            ContractDTO cDTO = ContractDTO.builder()
+                    .userId(userId)
+                    .build();
+
+            ContractDTO latest = contractService.getLatestContractByUserId(cDTO);
+
+            if (latest == null) {
+                log.warn("⚠️ 업로드된 계약서 없음");
+                return "fail";
+            }
+
+            // 3. 최종 DTO 조립
+            ContractDTO dto = ContractDTO.builder()
+                    .contractId(latest.getContractId())
+                    .userId(userId)
+                    .countryId(countryId)
+                    .build();
+
+            log.info("📌 분석 시작: contractId={}, userId={}, countryId={}",
+                    dto.getContractId(), dto.getUserId(), dto.getCountryId());
+
+            // 4. 서비스 호출
+            analysisService.analyzeContract(dto);
+
+            log.info("✅ 분석 완료: contractId={}", dto.getContractId());
+            return "success";
+
+        } catch (Exception e) {
+            log.error("❌ 분석 실패", e);
+            return "fail";
+        }
     }
 
 }

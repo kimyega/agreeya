@@ -5,6 +5,7 @@ import kopo.poly.kpaas.dto.ContractUploadDTO;
 
 public interface IContractService {
 
+
     /**
      * 업로드된 ContractUploadDTO를 받아 파일 저장 후 경로 반환
      * @param uploadDTO 업로드 DTO
@@ -12,6 +13,7 @@ public interface IContractService {
      * @throws Exception
      */
     String saveFile(ContractUploadDTO uploadDTO) throws Exception;
+
 
     /**
      * ContractUploadDTO를 받아 OCR 처리
@@ -26,4 +28,8 @@ public interface IContractService {
      * @param dto 저장할 계약서 DTO
      */
     void saveContract(ContractDTO dto) throws Exception;
+
+    void deleteContractByUserAndCountry(ContractDTO pDTO) throws Exception;
+
+    ContractDTO getLatestContractByUserId(ContractDTO pDTO) throws Exception;
 }
