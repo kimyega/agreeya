@@ -51,9 +51,9 @@ public class AnalysisService implements IAnalysisService {
     @Override
     public void analyzeContract(ContractDTO pDTO) throws Exception {
 
-        Integer contractId = pDTO.getContractId();
-        Integer countryId = pDTO.getCountryId();
-        Integer userId = pDTO.getUserId();
+        String contractId = pDTO.getContractId();
+        String countryId = pDTO.getCountryId();
+        String userId = pDTO.getUserId();
 
         log.info("➡️ 분석 시작: userId={}, contractId={}, countryId={}", userId, contractId, countryId);
 
@@ -66,7 +66,7 @@ public class AnalysisService implements IAnalysisService {
 
         // 2. 국가별 법령 조회 (여러 건)
         List<LawDTO> lawList = analysisMapper.getLawsByCountryId(
-                LawDTO.builder().countryId(countryId).build()
+                LawDTO.builder().countryId(Integer.parseInt(countryId)).build()
         );
         if (lawList == null || lawList.isEmpty()) {
             throw new Exception("해당 국가 법령이 없습니다. countryId=" + countryId);
@@ -143,7 +143,7 @@ public class AnalysisService implements IAnalysisService {
         if (root.has("clauses")) {
             for (JsonNode c : root.get("clauses")) {
                 ContractClauseDTO cDTO = ContractClauseDTO.builder()
-                        .contractId(contractId)
+                        .contractId(Integer.parseInt(contractId))
                         .clauseText(c.path("clause_text").asText(""))
                         .riskScore(c.path("risk_score").asInt(0))
                         .riskType(c.path("risk_type").asText("기타"))
@@ -157,7 +157,7 @@ public class AnalysisService implements IAnalysisService {
         if (root.has("summary")) {
             JsonNode summary = root.get("summary");
             ContractAnalysisSummaryDTO sDTO = ContractAnalysisSummaryDTO.builder()
-                    .contractId(contractId)
+                    .contractId(Integer.parseInt(contractId))
                     .riskChartData(summary.path("riskChartData").toString())
                     .totalRiskLevel(summary.path("totalRiskLevel").asInt(0))
                     .translatedText(summary.path("translatedText").asText(""))
