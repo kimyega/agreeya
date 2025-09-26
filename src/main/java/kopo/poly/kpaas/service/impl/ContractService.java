@@ -11,10 +11,10 @@ import kopo.poly.kpaas.service.IContractService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.FileInputStream;
 import java.util.Optional;
-
 
 @Slf4j
 @Service
@@ -32,18 +32,29 @@ public class ContractService implements IContractService {
             throw new Exception("파일이 없습니다.");
         }
 
-        String folder = "contracts"; // 원하는 폴더명
+        String folder = "contracts";
         String contentType = Optional.ofNullable(uploadDTO.getFile().getContentType())
                 .orElse("application/octet-stream");
 
-        log.info("[ContractService] Presigned URL 생성 시도 - userId: {}, file: {}", uploadDTO.getUserId(), uploadDTO.getFile().getOriginalFilename());
+        log.info("[ContractService] Presigned URL 생성 시도 - userId: {}, file: {}",
+                uploadDTO.getUserId(), uploadDTO.getFile().getOriginalFilename());
 
         // Presigned URL 생성
-        NcosPresignService.PresignedUpload presigned = ncosPresignService.createUploadUrl(folder, contentType);
+        NcosPresignService.PresignedUpload presigned =
+                ncosPresignService.createUploadUrl(folder, contentType);
 
-        log.info("[ContractService] Presigned URL 발급 완료 - uploadUrl: {}, publicUrl: {}", presigned.uploadUrl(), presigned.publicUrl());
+        log.info("[ContractService] Presigned URL 발급 완료 - uploadUrl: {}, publicUrl: {}",
+                presigned.uploadUrl(), presigned.publicUrl());
 
-        // 실제 업로드는 프론트엔드에서 URL로 PUT 요청하거나,
+        // ✅ DB에 파일 업로드 이력 저장 (국가ID는 아직 없을 수 있음)
+        ContractDTO pDTO = ContractDTO.builder()
+                .userId(uploadDTO.getUserId())
+                .countryId("") // 국가 선택 전이라 비워둠
+                .originalFileUrl(presigned.publicUrl())
+                .ocrText("") // OCR 전 단계라서 비워둠
+                .build();
+
+        contractMapper.insertContract(pDTO);
 
         return presigned.publicUrl(); // 최종 접근 가능한 URL 반환
     }
@@ -111,9 +122,20 @@ public class ContractService implements IContractService {
                 pDTO.getUserId(), pDTO.getCountryId());
         contractMapper.deleteContractByUserAndCountry(pDTO);
     }
+
+    @Transactional
     @Override
     public void saveContract(ContractDTO dto) throws Exception {
-        log.info("DB 저장 - userId: {}, file: {}", dto.getUserId(), dto.getOriginalFileUrl());
-        // TODO: 실제 DB 저장 구현
+        log.info("DB 저장 실행 - userId={}, countryId={}, file={}",
+                dto.getUserId(), dto.getCountryId(), dto.getOriginalFileUrl());
+
+        // countryId가 없으면 "0"으로 세팅해서 매퍼에서 NULL 처리 가능하게 함
+        if (dto.getCountryId() == null || dto.getCountryId().isEmpty()) {
+            dto.setCountryId("0");
+        }
+
+        contractMapper.insertContract(dto);
+
+        log.info("✅ 계약서 저장 완료: {}", dto);
     }
 }

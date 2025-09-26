@@ -70,7 +70,7 @@ public class CaseService implements ICaseService {
             CaseDTO dto = new CaseDTO();
             dto.setContractId(pDTO.getContractId());   // 요청받은 contractId
             dto.setCountryId(countryId);              // 선택된 국가
-            dto.setLawId(law.getLawId());             // 법령 ID
+            dto.setLawId(String.valueOf(law.getLawId())); // int → String 변환
             dto.setTitle(law.getTitle());
             dto.setArticleNumber(law.getArticleNumber());
             dto.setContent(law.getContent());
