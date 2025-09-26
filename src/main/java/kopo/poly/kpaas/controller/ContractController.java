@@ -3,14 +3,12 @@ package kopo.poly.kpaas.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
-import kopo.poly.kpaas.dto.ContractDTO;
-import kopo.poly.kpaas.dto.ContractUploadDTO;
-import kopo.poly.kpaas.dto.CountryDTO;
-import kopo.poly.kpaas.dto.ResultDTO;
+import kopo.poly.kpaas.dto.*;
 import kopo.poly.kpaas.infra.NcosPresignService;
 import kopo.poly.kpaas.service.IAnalysisService;
 import kopo.poly.kpaas.service.IContractService;
 import kopo.poly.kpaas.service.ICountryService;
+import kopo.poly.kpaas.service.IDraftService;
 import kopo.poly.kpaas.util.CmmUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,6 +32,8 @@ public class ContractController {
 
     private final IAnalysisService analysisService;
     private final NcosPresignService ncosPresignService;
+
+    private final IDraftService draftService;
 
     @GetMapping("/upload")
     public String upload() {
@@ -330,5 +330,37 @@ public class ContractController {
             return "fail";
         }
     }
+
+    @PostMapping("/newDraft")
+    @ResponseBody
+    public ResultDTO generateDraft(@RequestParam("contractId") String contractId) {
+        try {
+            ContractDTO pDTO = ContractDTO.builder()
+                    .contractId("1")
+                    .build();
+
+            DraftDTO draft = draftService.generateDraftContract(pDTO);
+
+            log.info("✅ 초안 생성 완료: contractId={}", contractId);
+
+            // DraftDTO → JSON 변환
+            ObjectMapper mapper = new ObjectMapper();
+            String draftJson = mapper.writeValueAsString(draft);
+
+            return ResultDTO.builder()
+                    .result(1)
+                    .msg("초안 생성 성공")
+                    .data(draftJson) // JSON String 반환
+                    .build();
+
+        } catch (Exception e) {
+            log.error("❌ 초안 생성 실패", e);
+            return ResultDTO.builder()
+                    .result(-1)
+                    .msg("초안 생성 중 오류 발생: " + e.getMessage())
+                    .build();
+        }
+    }
+
 
 }

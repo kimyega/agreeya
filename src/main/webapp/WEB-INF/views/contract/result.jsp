@@ -75,7 +75,7 @@
 
     <!-- 버튼 -->
     <div class="flex justify-center mt-10 gap-6">
-      <button onclick="location.href ='/contract/draft' " class="bg-blue-600 text-white text-sm px-6 py-2 rounded-full hover:bg-blue-700 transition">계약서 초안 자동 생성</button>
+      <button onclick="location.href ='../contract/draft' " class="bg-blue-600 text-white text-sm px-6 py-2 rounded-full hover:bg-blue-700 transition">계약서 초안 자동 생성</button>
       <button onclick="location.href ='/' " class="bg-gray-200 text-gray-800 text-sm px-6 py-2 rounded-full hover:bg-gray-300 transition">홈으로 돌아가기</button>
     </div>
 
