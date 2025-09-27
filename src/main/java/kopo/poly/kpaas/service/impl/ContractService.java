@@ -46,18 +46,11 @@ public class ContractService implements IContractService {
         log.info("[ContractService] Presigned URL 발급 완료 - uploadUrl: {}, publicUrl: {}",
                 presigned.uploadUrl(), presigned.publicUrl());
 
-        // ✅ DB에 파일 업로드 이력 저장 (국가ID는 아직 없을 수 있음)
-        ContractDTO pDTO = ContractDTO.builder()
-                .userId(uploadDTO.getUserId())
-                .countryId("") // 국가 선택 전이라 비워둠
-                .originalFileUrl(presigned.publicUrl())
-                .ocrText("") // OCR 전 단계라서 비워둠
-                .build();
-
-        contractMapper.insertContract(pDTO);
-
-        return presigned.publicUrl(); // 최종 접근 가능한 URL 반환
+        // ❌ DB에 저장하지 않음
+        // Presigned URL만 반환
+        return presigned.publicUrl();
     }
+
 
     @Override
     public String extractTextFromImage(ContractUploadDTO uploadDTO) throws Exception {
@@ -129,9 +122,9 @@ public class ContractService implements IContractService {
         log.info("DB 저장 실행 - userId={}, countryId={}, file={}",
                 dto.getUserId(), dto.getCountryId(), dto.getOriginalFileUrl());
 
-        // countryId가 없으면 "0"으로 세팅해서 매퍼에서 NULL 처리 가능하게 함
-        if (dto.getCountryId() == null || dto.getCountryId().isEmpty()) {
-            dto.setCountryId("0");
+        if (dto.getUserId() == null || dto.getUserId().isEmpty()
+                || dto.getCountryId() == null || dto.getCountryId().isEmpty()) {
+            throw new IllegalArgumentException("userId와 countryId는 필수 값입니다.");
         }
 
         contractMapper.insertContract(dto);
@@ -139,3 +132,4 @@ public class ContractService implements IContractService {
         log.info("✅ 계약서 저장 완료: {}", dto);
     }
 }
+

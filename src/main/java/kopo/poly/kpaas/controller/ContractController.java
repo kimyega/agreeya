@@ -131,25 +131,21 @@ public class ContractController {
             // OCR 실행
             String ocrText = contractService.extractTextFromImage(uploadDTO);
 
-            // ✅ DB 저장 DTO 생성
+            // ✅ 세션 저장 DTO 생성
             String userId = CmmUtil.nvl((String) session.getAttribute("SS_USER_ID"));
-            String countryId = CmmUtil.nvl((String) session.getAttribute("SS_COUNTRY_ID"));
 
             ContractDTO rDTO = ContractDTO.builder()
                     .userId(userId)
-                    .countryId(countryId.isEmpty() ? null : countryId) // 아직 국가 선택 안 했으면 null
                     .originalFileUrl(imageUrl)
                     .ocrText(ocrText)
                     .build();
 
-            // ✅ DB insert 실행
-            contractService.saveContract(rDTO);
-
-
+            // 세션 속성명 통일 → saveCountry에서 사용하는 이름으로 저장
+            session.setAttribute("contractDraft", rDTO);
 
             return ResultDTO.builder()
                     .result(1)
-                    .msg("OCR 완료 및 DB 저장")
+                    .msg("OCR 완료 및 세션 저장")
                     .data(ocrText)
                     .build();
 
@@ -163,12 +159,14 @@ public class ContractController {
     }
 
 
+
     @PostMapping("/saveCountry")
     @ResponseBody
     public ResponseEntity<ResultDTO> saveCountry(HttpServletRequest request, HttpSession session) {
         log.info("📄 /saveCountry 요청 시작");
-        String countryId = request.getParameter("countryId");
-        log.info("선택 국가 ID: {}", countryId);
+
+        String countryCode = request.getParameter("countryCode");
+        log.info("선택 국가 코드: {}", countryCode);
 
         ContractDTO dto = (ContractDTO) session.getAttribute("contractDraft");
 
@@ -182,19 +180,43 @@ public class ContractController {
         }
 
         try {
-            dto.setCountryId(countryId);
-            log.info("세션 contractDraft에 countryId 세팅 완료");
+            // ✅ 코드로 DB에서 countryId 조회
+            CountryDTO pDTO = CountryDTO.builder()
+                    .countryCode(countryCode)
+                    .build();
 
+            CountryDTO rDTO = countryService.getCountryByCode(pDTO);
+
+            if (rDTO == null || rDTO.getCountryId() == null) {
+                log.warn("⚠️ 국가 조회 실패: {}", countryCode);
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(ResultDTO.builder()
+                                .result(0)
+                                .msg("유효하지 않은 국가 코드입니다.")
+                                .build());
+            }
+
+            String countryId = String.valueOf(rDTO.getCountryId());
+
+            // 세션 contractDraft에 countryId 세팅
+            dto.setCountryId(countryId);
+            log.info("세션 contractDraft에 countryId 세팅 완료: {}", countryId);
+            // 세션에 countryId 저장 (추가!)
+            session.setAttribute("SS_COUNTRY_ID", countryId);
+            log.info("세션 SS_COUNTRY_ID 세팅 완료: {}", countryId);
+
+            // DB 저장
             contractService.saveContract(dto);
             log.info("DB 저장 완료");
 
+            // 세션 정리
             session.removeAttribute("contractDraft");
             log.info("세션 contractDraft 제거 완료");
 
             return ResponseEntity.ok(ResultDTO.builder()
                     .result(1)
                     .msg("계약서 저장 성공")
-                    .data(dto.getCountryId())
+                    .data(countryId) // countryId 반환
                     .build());
 
         } catch (Exception e) {
@@ -212,79 +234,46 @@ public class ContractController {
     @PostMapping("/analyze")
     @ResponseBody
     public String analyzeContract(HttpSession session) {
+        log.info("📄 /analyze 요청 시작");
+
         try {
-
             String userId = CmmUtil.nvl((String) session.getAttribute("SS_USER_ID"));
-            String countryId = CmmUtil.nvl((String) session.getAttribute("SS_COUNTRY_ID"));
-            log.info("📌 세션 값 확인: userId={}, countryId={}", userId, countryId);
-
-            if (userId.isEmpty() || countryId.isEmpty()) {
-                log.warn("⚠️ 세션 값 없음 → 분석 불가");
-                return "fail";
+            if (userId.isEmpty()) {
+                log.warn("⚠️ 로그인 정보 없음 → 분석 불가");
+                return "fail"; // 단순 문자열 리턴
             }
 
+            // 최신 계약서 조회
+            ContractDTO latest = contractService.getLatestContractByUserId(
+                    ContractDTO.builder().userId(userId).build()
+            );
 
-            ContractDTO cDTO = ContractDTO.builder()
-                    .userId(userId)
-                    .build();
-
-            ContractDTO latest = contractService.getLatestContractByUserId(cDTO);
-
-            if (latest == null) {
-                log.warn("⚠️ 업로드된 계약서 없음");
-                return "fail";
+            if (latest == null || latest.getCountryId() == null) {
+                log.warn("⚠️ 계약서 또는 국가 정보 없음 → 분석 불가");
+                return "fail"; // 단순 문자열 리턴
             }
 
-            // 3. 최종 DTO 조립
+            // 최종 DTO 조립
             ContractDTO dto = ContractDTO.builder()
                     .contractId(latest.getContractId())
                     .userId(userId)
-                    .countryId(countryId)
+                    .countryId(latest.getCountryId()) // 세션 대신 DB 값 사용
                     .build();
 
             log.info("📌 분석 시작: contractId={}, userId={}, countryId={}",
                     dto.getContractId(), dto.getUserId(), dto.getCountryId());
 
-            // 4. 서비스 호출
+            // 서비스 호출
             analysisService.analyzeContract(dto);
             session.setAttribute("SS_CONTRACT_ID", dto.getContractId());
 
             log.info("✅ 분석 완료: contractId={}", dto.getContractId());
-            return "success";
 
+            return "success"; // ✅ 프론트에서 기대하는 문자열
         } catch (Exception e) {
             log.error("❌ 분석 실패", e);
-            return "fail";
+            return "fail"; // 에러 발생 시 단순 실패 문자열
         }
-    }
-    @ResponseBody
-    @PostMapping("/selectNation")
-    public String selectNation(HttpServletRequest request, HttpSession session) throws Exception {
-
-        String userId = CmmUtil.nvl((String) session.getAttribute("SS_USER_ID"));
-        if (userId.isEmpty()) {
-            return "login_required";
-        }
-
-        String countryCode = CmmUtil.nvl(request.getParameter("countryCode"));
-        if (countryCode.isEmpty()) {
-            return "fail";
-        }
-
-        CountryDTO pDTO = CountryDTO.builder()
-                .countryCode(countryCode) // ✅ 코드로 조회
-                .build();
-
-        CountryDTO rDTO = countryService.getCountryByCode(pDTO); // 새 메서드 필요
-
-        if (rDTO.getCountryId() == null) {
-            return "fail";
-        }
-
-        session.setAttribute("SS_COUNTRY_ID", rDTO.getCountryId().toString());
-        log.info("사용자 [{}] → 국가 [{}]({}) 선택 완료", userId, rDTO.getCountryName(), rDTO.getCountryCode());
-
-        return "success";
     }
 
     /**
