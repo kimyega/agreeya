@@ -12,8 +12,6 @@ public interface IContractMapper {
      */
     int insertContract(ContractDTO dto);
 
-    int deleteContractByUserAndCountry(ContractDTO pDTO) throws Exception;
-
     ContractDTO getLatestContractByUserId(ContractDTO pDTO) throws Exception;
 }
 
