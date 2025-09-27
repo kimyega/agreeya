@@ -109,13 +109,6 @@ public class ContractService implements IContractService {
         return contractMapper.getLatestContractByUserId(pDTO);
     }
 
-    @Override
-    public void deleteContractByUserAndCountry(ContractDTO pDTO) throws Exception {
-        log.info("deleteContractByUserAndCountry start, userId={}, countryId={}",
-                pDTO.getUserId(), pDTO.getCountryId());
-        contractMapper.deleteContractByUserAndCountry(pDTO);
-    }
-
     @Transactional
     @Override
     public void saveContract(ContractDTO dto) throws Exception {

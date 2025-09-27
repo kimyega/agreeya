@@ -28,8 +28,5 @@ public interface IContractService {
      * @param dto 저장할 계약서 DTO
      */
     void saveContract(ContractDTO dto) throws Exception;
-
-    void deleteContractByUserAndCountry(ContractDTO pDTO) throws Exception;
-
     ContractDTO getLatestContractByUserId(ContractDTO pDTO) throws Exception;
 }

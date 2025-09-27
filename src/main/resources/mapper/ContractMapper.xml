@@ -11,13 +11,6 @@
         VALUES (#{userId}, CAST(#{countryId} AS SIGNED), #{originalFileUrl}, #{ocrText})
     </insert>
 
-    <!-- 계약서 삭제 -->
-    <delete id="deleteContractByUserAndCountry" parameterType="ContractDTO">
-        DELETE FROM contracts
-        WHERE user_id = #{userId}
-          AND country_id = CAST(#{countryId} AS SIGNED)
-    </delete>
-
     <select id="getLatestContractByUserId" parameterType="ContractDTO" resultType="ContractDTO">
         SELECT contract_id, user_id, country_id, original_file_url, ocr_text, created_at
         FROM contracts

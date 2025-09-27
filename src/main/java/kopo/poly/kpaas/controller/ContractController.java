@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import kopo.poly.kpaas.dto.*;
+import kopo.poly.kpaas.infra.NcosObjectService;
 import kopo.poly.kpaas.infra.NcosPresignService;
 import kopo.poly.kpaas.service.IAnalysisService;
 import kopo.poly.kpaas.service.ICaseService;
@@ -31,8 +32,11 @@ public class ContractController {
     private final IContractService contractService; // ✅ 서비스 주입
 
     private final IAnalysisService analysisService;
-    private final NcosPresignService ncosPresignService;
     private final ICaseService caseService;
+
+    // ncos 관련 서비스
+    private final NcosPresignService ncosPresignService;
+    private final NcosObjectService ncosObjectService;
 
 
     @GetMapping("/upload")
@@ -141,7 +145,7 @@ public class ContractController {
                     .build();
 
             // 세션 속성명 통일 → saveCountry에서 사용하는 이름으로 저장
-            session.setAttribute("contractDraft", rDTO);
+            session.setAttribute("SS_CONTRACT_DRAFT", rDTO);
 
             return ResultDTO.builder()
                     .result(1)
@@ -168,10 +172,10 @@ public class ContractController {
         String countryCode = request.getParameter("countryCode");
         log.info("선택 국가 코드: {}", countryCode);
 
-        ContractDTO dto = (ContractDTO) session.getAttribute("contractDraft");
+        ContractDTO dto = (ContractDTO) session.getAttribute("SS_CONTRACT_DRAFT");
 
         if (dto == null) {
-            log.warn("⚠️ 세션에 contractDraft 없음");
+            log.warn("⚠️ 세션에 SS_CONTRACT_DRAFT 없음");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(ResultDTO.builder()
                             .result(0)
@@ -201,16 +205,13 @@ public class ContractController {
             // 세션 contractDraft에 countryId 세팅
             dto.setCountryId(countryId);
             log.info("세션 contractDraft에 countryId 세팅 완료: {}", countryId);
-            // 세션에 countryId 저장 (추가!)
-            session.setAttribute("SS_COUNTRY_ID", countryId);
-            log.info("세션 SS_COUNTRY_ID 세팅 완료: {}", countryId);
 
             // DB 저장
             contractService.saveContract(dto);
             log.info("DB 저장 완료");
 
             // 세션 정리
-            session.removeAttribute("contractDraft");
+            session.removeAttribute("SS_CONTRACT_DRAFT");
             log.info("세션 contractDraft 제거 완료");
 
             return ResponseEntity.ok(ResultDTO.builder()
@@ -277,11 +278,12 @@ public class ContractController {
     }
 
     /**
-     * 홈화면 이동 시 → 세션 + DB 데이터 삭제
+     * 홈화면 이동 시 → 세션 + 이미지 데이터 삭제
      */
     @ResponseBody
     @PostMapping("/cancelNation")
-    public String cancelNation(HttpServletRequest request, HttpSession session) throws Exception {
+    public String cancelNation(HttpSession session) {
+        log.info("{}.cancelNation Start!", this.getClass().getName());
 
         String userId = CmmUtil.nvl((String) session.getAttribute("SS_USER_ID"));
         if (userId.isEmpty()) {
@@ -289,43 +291,27 @@ public class ContractController {
             return "login_required";
         }
 
-        // 세션에서 확인
-        String countryId = CmmUtil.nvl((String) session.getAttribute("SS_COUNTRY_ID"));
-        String countryCode = CmmUtil.nvl(request.getParameter("countryCode"));
+        ContractDTO sDTO = (ContractDTO) session.getAttribute("SS_CONTRACT_DRAFT");
+        if (sDTO != null) {
+            String imageUrl = CmmUtil.nvl(sDTO.getOriginalFileUrl());
+            log.info("📌 삭제할 이미지 URL = {}", imageUrl);
 
-        log.info("📌 cancelNation 요청: userId={}, countryId(session)={}, countryCode(param)={}",
-                userId, countryId, countryCode);
-
-        // 세션에 없으면 countryCode로 DB 조회
-        if (countryId.isEmpty() && !countryCode.isEmpty()) {
-            CountryDTO pDTO = CountryDTO.builder()
-                    .countryCode(countryCode)
-                    .build();
-
-            CountryDTO rDTO = countryService.getCountryByCode(pDTO);
-            if (rDTO.getCountryId() != null) {
-                countryId = String.valueOf(rDTO.getCountryId());
-                log.info("📌 DB 조회 결과 → countryId={}", countryId);
+            try {
+                ncosObjectService.deleteObject(imageUrl);
+            } catch (Exception e) {
+                log.error("❌ Object Storage 삭제 실패", e);
+                return "delete_failed";
             }
         }
 
-        if (countryId.isEmpty()) {
-            log.warn("⚠️ countryId 없음 → 삭제 불가");
-            return "fail";
-        }
+        // 세션 정리
+        session.removeAttribute("SS_CONTRACT_DRAFT");
 
-        ContractDTO pDTO = ContractDTO.builder()
-                .userId(String.valueOf(userId))      // int → String
-                .countryId(String.valueOf(countryId)) // int → String
-                .build();
-
-        contractService.deleteContractByUserAndCountry(pDTO);
-        log.info("✅ 사용자 [{}] → 국가 [{}] 계약서 삭제 완료", userId, countryId);
-
-        session.removeAttribute("SS_COUNTRY_ID");
+        log.info("{}.cancelNation End!", this.getClass().getName());
 
         return "success";
     }
+
     // 데이터 조회@ResponseBody
     @PostMapping("/similar/data")
     @ResponseBody
