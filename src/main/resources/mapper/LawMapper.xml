@@ -23,17 +23,18 @@
         FROM laws
     </select>
 
-    <!-- ✅ 세션 국가 기준 조회 -->
-    <select id="getLawsByCountryId" parameterType="String" resultType="LawDTO">
+    <select id="getLawsByCountryId" parameterType="string" resultType="LawDTO">
         SELECT law_id,
                country_id,
                title,
                article_number,
                content,
-               law_vector,
-               updated_at
+               updated_at,
+               law_vector
         FROM laws
-        WHERE country_id = #{countryId}
+        WHERE country_id = CAST(#{countryId} AS SIGNED)
     </select>
+
+
 
 </mapper>

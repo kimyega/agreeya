@@ -7,13 +7,14 @@
 
     <!-- 국가id로 countryId 조회 -->
     <select id="getCountryByCode" parameterType="CountryDTO" resultType="CountryDTO">
-        SELECT country_id,
-               country_name,
-               country_code
+        SELECT country_id   AS countryId,
+               country_name AS countryName,
+               country_code AS countryCode
         FROM countries
         WHERE country_code = #{countryCode}
             LIMIT 1
     </select>
+
 
 
 </mapper>
