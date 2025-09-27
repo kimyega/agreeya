@@ -6,10 +6,12 @@
 <mapper namespace="kopo.poly.kpaas.mapper.IContractMapper">
 
     <!-- 계약서 정보 저장 -->
-    <insert id="insertContract" parameterType="ContractDTO">
+    <insert id="insertContract" parameterType="ContractDTO"
+            useGeneratedKeys="true" keyProperty="contractId">
         INSERT INTO contracts (user_id, country_id, original_file_url, ocr_text)
         VALUES (#{userId}, #{countryId}, #{originalFileUrl}, #{ocrText})
     </insert>
+    <!-- 계약서 삭제 -->
     <delete id="deleteContractByUserAndCountry" parameterType="ContractDTO">
         DELETE FROM contracts
         WHERE user_id = #{userId}
@@ -23,6 +25,14 @@
         ORDER BY contract_id DESC
             LIMIT 1
     </select>
+
+    <update id="updateContractCountry" parameterType="ContractDTO">
+        UPDATE contracts
+        SET country_id = #{countryId}
+        WHERE contract_id = #{contractId}
+          AND user_id = #{userId}
+    </update>
+
 
 
 </mapper>

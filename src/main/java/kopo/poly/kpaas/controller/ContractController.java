@@ -3,12 +3,10 @@ package kopo.poly.kpaas.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
-import kopo.poly.kpaas.dto.ContractDTO;
-import kopo.poly.kpaas.dto.ContractUploadDTO;
-import kopo.poly.kpaas.dto.CountryDTO;
-import kopo.poly.kpaas.dto.ResultDTO;
+import kopo.poly.kpaas.dto.*;
 import kopo.poly.kpaas.infra.NcosPresignService;
 import kopo.poly.kpaas.service.IAnalysisService;
+import kopo.poly.kpaas.service.ICaseService;
 import kopo.poly.kpaas.service.IContractService;
 import kopo.poly.kpaas.service.ICountryService;
 import kopo.poly.kpaas.util.CmmUtil;
@@ -18,10 +16,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.ui.Model;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+
+import java.util.*;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -34,6 +32,8 @@ public class ContractController {
 
     private final IAnalysisService analysisService;
     private final NcosPresignService ncosPresignService;
+    private final ICaseService caseService;
+
 
     @GetMapping("/upload")
     public String upload() {
@@ -47,11 +47,6 @@ public class ContractController {
         return "contract/loading"; // → contract/loading.jsp
     }
 
-    @GetMapping("/result")
-    public String result() {
-        log.info("📄 계약서 분석 결과 화면 호출");
-        return "contract/result"; // → contract/result.jsp
-    }
 
     @GetMapping("/similar")
     public String similar() {
@@ -119,7 +114,7 @@ public class ContractController {
     @ResponseBody
     public ResultDTO processOcr(HttpServletRequest request, HttpSession session) {
         try {
-            String imageUrl = request.getParameter("imageUrl");  // request에서 파라미터 추출
+            String imageUrl = request.getParameter("imageUrl");
             if (imageUrl == null || imageUrl.isEmpty()) {
                 return ResultDTO.builder()
                         .result(0)
@@ -133,17 +128,28 @@ public class ContractController {
                     .fileUrl(imageUrl)
                     .build();
 
+            // OCR 실행
             String ocrText = contractService.extractTextFromImage(uploadDTO);
 
+            // ✅ DB 저장 DTO 생성
+            String userId = CmmUtil.nvl((String) session.getAttribute("SS_USER_ID"));
+            String countryId = CmmUtil.nvl((String) session.getAttribute("SS_COUNTRY_ID"));
+
             ContractDTO rDTO = ContractDTO.builder()
+                    .userId(userId)
+                    .countryId(countryId.isEmpty() ? null : countryId) // 아직 국가 선택 안 했으면 null
                     .originalFileUrl(imageUrl)
                     .ocrText(ocrText)
                     .build();
-            session.setAttribute("SS_CONTRACT_DTO", rDTO);
+
+            // ✅ DB insert 실행
+            contractService.saveContract(rDTO);
+
+
 
             return ResultDTO.builder()
                     .result(1)
-                    .msg("OCR 완료")
+                    .msg("OCR 완료 및 DB 저장")
                     .data(ocrText)
                     .build();
 
@@ -155,6 +161,7 @@ public class ContractController {
                     .build();
         }
     }
+
 
     @PostMapping("/saveCountry")
     @ResponseBody
@@ -200,6 +207,56 @@ public class ContractController {
         }
     }
 
+
+
+    @PostMapping("/analyze")
+    @ResponseBody
+    public String analyzeContract(HttpSession session) {
+        try {
+
+            String userId = CmmUtil.nvl((String) session.getAttribute("SS_USER_ID"));
+            String countryId = CmmUtil.nvl((String) session.getAttribute("SS_COUNTRY_ID"));
+            log.info("📌 세션 값 확인: userId={}, countryId={}", userId, countryId);
+
+            if (userId.isEmpty() || countryId.isEmpty()) {
+                log.warn("⚠️ 세션 값 없음 → 분석 불가");
+                return "fail";
+            }
+
+
+            ContractDTO cDTO = ContractDTO.builder()
+                    .userId(userId)
+                    .build();
+
+            ContractDTO latest = contractService.getLatestContractByUserId(cDTO);
+
+            if (latest == null) {
+                log.warn("⚠️ 업로드된 계약서 없음");
+                return "fail";
+            }
+
+            // 3. 최종 DTO 조립
+            ContractDTO dto = ContractDTO.builder()
+                    .contractId(latest.getContractId())
+                    .userId(userId)
+                    .countryId(countryId)
+                    .build();
+
+            log.info("📌 분석 시작: contractId={}, userId={}, countryId={}",
+                    dto.getContractId(), dto.getUserId(), dto.getCountryId());
+
+            // 4. 서비스 호출
+            analysisService.analyzeContract(dto);
+            session.setAttribute("SS_CONTRACT_ID", dto.getContractId());
+
+            log.info("✅ 분석 완료: contractId={}", dto.getContractId());
+            return "success";
+
+        } catch (Exception e) {
+            log.error("❌ 분석 실패", e);
+            return "fail";
+        }
+    }
     @ResponseBody
     @PostMapping("/selectNation")
     public String selectNation(HttpServletRequest request, HttpSession session) throws Exception {
@@ -269,8 +326,8 @@ public class ContractController {
         }
 
         ContractDTO pDTO = ContractDTO.builder()
-                .userId(userId)
-                .countryId(countryId)
+                .userId(String.valueOf(userId))      // int → String
+                .countryId(String.valueOf(countryId)) // int → String
                 .build();
 
         contractService.deleteContractByUserAndCountry(pDTO);
@@ -280,55 +337,65 @@ public class ContractController {
 
         return "success";
     }
-
-
-    @PostMapping("/analyze")
+    // 데이터 조회@ResponseBody
+    @PostMapping("/similar/data")
     @ResponseBody
-    public String analyzeContract(HttpSession session) {
-        try {
+    public List<CaseDTO> getSimilarCases(HttpSession session) throws Exception {
+        String userId = CmmUtil.nvl((String) session.getAttribute("SS_USER_ID"));
+        String countryId = CmmUtil.nvl((String) session.getAttribute("SS_COUNTRY_ID"));
 
-            String userId = CmmUtil.nvl((String) session.getAttribute("SS_USER_ID"));
-            String countryId = CmmUtil.nvl((String) session.getAttribute("SS_COUNTRY_ID"));
+        log.info("▶ 유사사례 조회 userId={} countryId={}", userId, countryId);
 
-            log.info("📌 세션 값 확인: userId={}, countryId={}", userId, countryId);
-
-            if (userId.isEmpty() || countryId.isEmpty()) {
-                log.warn("⚠️ 세션 값 없음 → 분석 불가");
-                return "fail";
-            }
-
-
-            ContractDTO cDTO = ContractDTO.builder()
-                    .userId(userId)
-                    .build();
-
-            ContractDTO latest = contractService.getLatestContractByUserId(cDTO);
-
-            if (latest == null) {
-                log.warn("⚠️ 업로드된 계약서 없음");
-                return "fail";
-            }
-
-            // 3. 최종 DTO 조립
-            ContractDTO dto = ContractDTO.builder()
-                    .contractId(latest.getContractId())
-                    .userId(userId)
-                    .countryId(countryId)
-                    .build();
-
-            log.info("📌 분석 시작: contractId={}, userId={}, countryId={}",
-                    dto.getContractId(), dto.getUserId(), dto.getCountryId());
-
-            // 4. 서비스 호출
-            analysisService.analyzeContract(dto);
-
-            log.info("✅ 분석 완료: contractId={}", dto.getContractId());
-            return "success";
-
-        } catch (Exception e) {
-            log.error("❌ 분석 실패", e);
-            return "fail";
+        if (userId.isEmpty() || countryId.isEmpty()) {
+            log.warn("⚠️ 세션 값 없음 → 유사사례 조회 불가");
+            return Collections.emptyList();
         }
+
+        // 최신 계약서 조회
+        ContractDTO latest = contractService.getLatestContractByUserId(
+                ContractDTO.builder().userId(userId).build()
+        );
+
+        if (latest == null || latest.getContractId() == null) {
+            log.warn("⚠️ 업로드된 계약서 없음 → 유사사례 조회 불가");
+            return Collections.emptyList();
+        }
+
+        CaseDTO pDTO = CaseDTO.builder()
+                .contractId(latest.getContractId())
+                .countryId(countryId)
+                .build();
+
+        return Optional.ofNullable(caseService.getSimilarCases(pDTO))
+                .orElseGet(Collections::emptyList);
     }
 
+    @GetMapping("/result")
+    public String result(HttpSession session, Model model) throws Exception {
+        String userId = CmmUtil.nvl((String) session.getAttribute("SS_USER_ID"));
+
+        if (userId.isEmpty()) {
+            log.warn("⚠️ 로그인 세션 없음 → 결과 화면 진입 불가");
+            return "redirect:/login"; // 로그인 페이지로 돌려보내도 됨
+        }
+
+        // 최신 계약서 조회
+        ContractDTO latest = contractService.getLatestContractByUserId(
+                ContractDTO.builder().userId(userId).build()
+        );
+
+        if (latest != null && latest.getContractId() != null) {
+            log.info("📄 계약서 분석 결과 화면 호출, contractId={}", latest.getContractId());
+            model.addAttribute("contractId", latest.getContractId());
+        } else {
+            log.warn("⚠️ 결과 화면 표시할 계약서 없음");
+            model.addAttribute("contractId", "");
+        }
+
+        return "contract/result";
+    }
+
+
+
 }
+
