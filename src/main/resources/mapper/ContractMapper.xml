@@ -6,16 +6,16 @@
 <mapper namespace="kopo.poly.kpaas.mapper.IContractMapper">
 
     <!-- 계약서 정보 저장 -->
-    <insert id="insertContract" parameterType="ContractDTO"
-            useGeneratedKeys="true" keyProperty="contractId">
+    <insert id="insertContract" parameterType="ContractDTO">
         INSERT INTO contracts (user_id, country_id, original_file_url, ocr_text)
-        VALUES (#{userId}, #{countryId}, #{originalFileUrl}, #{ocrText})
+        VALUES (#{userId}, CAST(#{countryId} AS SIGNED), #{originalFileUrl}, #{ocrText})
     </insert>
+
     <!-- 계약서 삭제 -->
     <delete id="deleteContractByUserAndCountry" parameterType="ContractDTO">
         DELETE FROM contracts
         WHERE user_id = #{userId}
-          AND country_id = #{countryId}
+          AND country_id = CAST(#{countryId} AS SIGNED)
     </delete>
 
     <select id="getLatestContractByUserId" parameterType="ContractDTO" resultType="ContractDTO">
@@ -26,9 +26,10 @@
             LIMIT 1
     </select>
 
+
     <update id="updateContractCountry" parameterType="ContractDTO">
         UPDATE contracts
-        SET country_id = #{countryId}
+        SET country_id = CAST(#{countryId} AS SIGNED)
         WHERE contract_id = #{contractId}
           AND user_id = #{userId}
     </update>
