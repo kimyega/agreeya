@@ -52,21 +52,26 @@
     <p class="text-center text-gray-600 text-base mb-10">근무 국가에 따라서 기준이 다르게 적용됩니다</p>
 
     <!-- 국가 카드 -->
-    <!-- 국가 카드 -->
     <form id="countryForm" method="post">
-      <div class="flex justify-center gap-20 mb-6">
-        <button type="button" class="flex flex-col items-center cursor-pointer country-card" value="KR">
-          <img src="${pageContext.request.contextPath}/images/kor.png" class="w-28 h-28 object-contain mb-2" />
+      <div class="flex flex-wrap justify-center gap-6 mb-6">
+        <button type="button"
+                class="country-card flex flex-col items-center w-60 p-4 bg-white rounded-xl shadow-md cursor-pointer
+                   hover:ring-4 hover:ring-blue-400 focus:outline-none active:scale-95 transition-transform duration-150">
+          <img src="${pageContext.request.contextPath}/images/kor.png" class="w-32 h-32 object-contain mb-2" />
           <span class="text-xl font-semibold">대한민국</span>
         </button>
 
-        <button type="button" class="flex flex-col items-center cursor-pointer country-card" value="EU">
-          <img src="${pageContext.request.contextPath}/images/eu.png" class="w-28 h-28 object-contain mb-2" />
+        <button type="button" value="EU"
+                class="country-card flex flex-col items-center w-60 p-4 bg-white rounded-xl shadow-md cursor-pointer
+                   hover:ring-4 hover:ring-blue-400 focus:outline-none active:scale-95 transition-transform duration-150">
+          <img src="${pageContext.request.contextPath}/images/eu.png" class="w-32 h-32 object-contain mb-2" />
           <span class="text-xl font-semibold">EU</span>
         </button>
 
-        <button type="button" class="flex flex-col items-center cursor-pointer country-card" value="JP">
-          <img src="${pageContext.request.contextPath}/images/jp.png" class="w-28 h-28 object-contain mb-2" />
+        <button type="button"
+                class="country-card flex flex-col items-center w-60 p-4 bg-white rounded-xl shadow-md cursor-pointer
+                   hover:ring-4 hover:ring-blue-400 focus:outline-none active:scale-95 transition-transform duration-150">
+          <img src="${pageContext.request.contextPath}/images/jp.png" class="w-32 h-32 object-contain mb-2" />
           <span class="text-xl font-semibold">일본</span>
         </button>
       </div>
@@ -74,7 +79,6 @@
       <!-- 선택된 국가 코드 저장용 -->
       <input type="hidden" name="countryCode" id="countryCode" value="">
     </form>
-
 
     <!-- 체크박스 -->
     <div class="text-center mb-3">

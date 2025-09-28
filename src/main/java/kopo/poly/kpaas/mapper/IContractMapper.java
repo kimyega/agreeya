@@ -1,5 +1,7 @@
 package kopo.poly.kpaas.mapper;
 
+import kopo.poly.kpaas.dto.ContractAnalysisSummaryDTO;
+import kopo.poly.kpaas.dto.ContractClauseDTO;
 import kopo.poly.kpaas.dto.ContractDTO;
 import org.apache.ibatis.annotations.Mapper;
 
@@ -12,9 +14,13 @@ public interface IContractMapper {
      */
     int insertContract(ContractDTO dto);
 
-    int deleteContractByUserAndCountry(ContractDTO pDTO) throws Exception;
-
     ContractDTO getLatestContractByUserId(ContractDTO pDTO) throws Exception;
+
+    // 계약서 요약 결과 조회
+    ContractAnalysisSummaryDTO getContractSummaryByContractId(ContractDTO pDTO) throws Exception;
+
+    // 계약서 조항 리스트 조회
+    java.util.List<ContractClauseDTO> getContractClausesByContractId(ContractDTO pDTO) throws Exception;
 }
 
 
