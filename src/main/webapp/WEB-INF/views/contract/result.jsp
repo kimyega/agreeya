@@ -20,6 +20,8 @@
   <!-- jQuery -->
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script>const contextPath = "${pageContext.request.contextPath}";</script>
+  <script src="${pageContext.request.contextPath}/js/chart.umd.min.js"></script>
+
 </head>
 
 <body class="bg-slate-100 text-gray-800 font-sans">
@@ -39,34 +41,28 @@
       <span class="text-blue-600 flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-blue-600"></span> 결과</span>
     </div>
 
-    <!-- 분석 결과 -->
-    <h2 class="text-xl font-bold text-center mb-6">📊 계약서 위험 요소 분석 결과</h2>
 
-    <!-- 그래프 -->
-    <div class="flex justify-center mb-10">
-      <img src="../images/gr.png" alt="분석 결과 그래프" class="max-w-full w-[550px] h-auto">
-    </div>
+    <!-- 위험 그래프 -->
+    <h2 class="text-3xl font-bold text-center mb-6">📊 계약서 위험 요소 분석</h2>
+    <canvas id="riskChart" class="mb-10"></canvas>
+
+    <!-- 계약 조항 -->
+    <div id="clauseContainer" class="space-y-6"></div>
+
+    <!-- 분석 결과 -->
+    <h2 class="text-3xl font-bold text-center mb-6 mt-10">📊 계약서 위험 요소 분석 결과</h2>
 
     <!-- AI 코멘트 -->
-    <div class="bg-white rounded-lg p-6 mb-10 border border-gray-200 shadow">
-      <h3 class="text-lg font-semibold mb-4">💡 AI 코멘트</h3>
-      <ul class="space-y-2 text-sm text-gray-700">
-        <li>● <b>제8조</b> 계약해지 조건은 모호한 표현이 사용되어 근로자에게 불리할 수 있습니다.</li>
-        <li>● <b>제12조</b> 연장근로는 노동법상 기준을 초과하는 것으로 보입니다.</li>
-        <li>● 기타 조항에 대해 명확한 급여 지급 주기 및 세부조건이 누락되어 있습니다.</li>
-      </ul>
-    </div>
+    <div id="aiCommentContainer" class="mb-10 space-y-4"></div>
 
     <!-- ✅ 유사사례 -->
     <div>
-      <h3 class="text-lg font-semibold mb-4">📚 유사 사례 추천</h3>
+      <h3 class="text-3xl font-bold text-center mb-6">📚 유사 사례 추천</h3>
       <section id="similar-cases" class="space-y-6">
         <p class="text-gray-500">🔄 유사사례 불러오는 중...</p>
       </section>
     </div>
 
-    <!-- ✅ hidden input (contractId 저장) -->
-    <input type="hidden" id="contractId" value="${contractId}"/>
 
     <!-- 버튼 -->
     <div class="flex justify-center mt-10 gap-6">

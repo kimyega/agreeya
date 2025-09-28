@@ -3,8 +3,7 @@ package kopo.poly.kpaas.service.impl;
 import com.google.auth.oauth2.ServiceAccountCredentials;
 import com.google.cloud.vision.v1.*;
 import kopo.poly.kpaas.config.NcosProperties;
-import kopo.poly.kpaas.dto.ContractDTO;
-import kopo.poly.kpaas.dto.ContractUploadDTO;
+import kopo.poly.kpaas.dto.*;
 import kopo.poly.kpaas.infra.NcosPresignService;
 import kopo.poly.kpaas.mapper.IContractMapper;
 import kopo.poly.kpaas.service.IContractService;
@@ -104,12 +103,7 @@ public class ContractService implements IContractService {
         return result.isEmpty() ? "텍스트를 추출하지 못했습니다." : result;
     }
 
-    @Override
-    public ContractDTO getLatestContractByUserId(ContractDTO pDTO) throws Exception {
-        return contractMapper.getLatestContractByUserId(pDTO);
-    }
 
-    @Transactional
     @Override
     public void saveContract(ContractDTO dto) throws Exception {
         log.info("DB 저장 실행 - userId={}, countryId={}, file={}",
@@ -124,5 +118,26 @@ public class ContractService implements IContractService {
 
         log.info("✅ 계약서 저장 완료: {}", dto);
     }
+
+    @Override
+    public ContractDTO getLatestContractByUserId(ContractDTO pDTO) throws Exception {
+        return contractMapper.getLatestContractByUserId(pDTO);
+    }
+
+    @Override
+    public ContractResultDTO getContractResultByContractId(ContractDTO pDTO) throws Exception {
+
+        ContractAnalysisSummaryDTO summary = contractMapper.getContractSummaryByContractId(pDTO);
+        java.util.List<ContractClauseDTO> clauses = contractMapper.getContractClausesByContractId(pDTO);
+
+        ContractResultDTO rDTO = ContractResultDTO.builder()
+                .summary(summary)
+                .clauses(clauses)
+                .build();
+
+        return rDTO;
+    }
+
+
 }
 

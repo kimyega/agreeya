@@ -1,20 +1,12 @@
 $(document).ready(function() {
-    const contractId = $("#contractId").val();
-    console.log("🔍 result.js 실행됨, contractId=", contractId);
-
-    if (!contractId) {
-        console.error("❌ contractId가 비어 있습니다.");
-        $("#similar-cases").html("<p class='text-red-500'>⚠️ 계약 ID가 없어 유사사례를 조회할 수 없습니다.</p>");
-        return;
-    }
+    console.log("🔍 result.js 실행됨");
 
     // 유사사례 조회 AJAX
     $.ajax({
         url: contextPath + "/contract/similar/data",
         type: "POST",
-        data: { contractId: contractId },
         beforeSend: function() {
-            console.log("📡 /contract/similar/data 요청 보냄 → contractId=", contractId);
+            console.log("📡 /contract/similar/data 요청 보냄 (세션 contractId 사용)");
         },
         success: function(cases) {
             console.log("✅ 응답 받음:", cases);
@@ -46,21 +38,83 @@ $(document).ready(function() {
         },
         error: function(xhr, status, error) {
             console.error("❌ AJAX 오류:", status, error);
-            console.error("📩 응답 내용:", xhr.responseText);
             $("#similar-cases").html("<p class='text-red-500'>⚠️ 유사사례를 불러오는 중 오류가 발생했습니다.</p>");
         }
     });
 
     // 버튼 이벤트
     $("#draftBtn").on("click", function() {
-        if (!contractId) {
-            alert("계약 ID가 없습니다. 다시 시도해주세요.");
-            return;
-        }
-        window.location.href = contextPath + "/contract/draft?contractId=" + contractId;
+        window.location.href = contextPath + "/contract/draft"; // 세션에서 contractId 사용
     });
 
     $("#homeBtn").on("click", function() {
         window.location.href = contextPath + "/";
     });
+
+    // AJAX로 요약 + 조항 데이터 가져오기
+    $.ajax({
+        url: contextPath + "/contract/result/data",
+        type: "POST",
+        dataType: "json",
+        success: function(res) {
+            if (res.summary) {
+                $("#aiCommentContainer").html(`
+                  <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 text-sm text-gray-700">
+                    ${res.summary.translatedText}
+                  </div>
+                `);
+
+                let riskData = res.summary.riskChartData;
+                if (typeof riskData === "string") {
+                    riskData = JSON.parse(riskData);
+                }
+
+                const ctx = document.getElementById('riskChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: Object.keys(riskData), // 이제 "임금", "근로시간", "휴가", "기타"
+                        datasets: [{
+                            label: '위험 점수',
+                            data: Object.values(riskData),
+                            backgroundColor: ['#3b82f6','#ef4444','#facc15','#10b981'],
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: { enabled: true }
+                        },
+                        scales: {
+                            y: { beginAtZero: true }
+                        }
+                    }
+                });
+            }
+
+            if (Array.isArray(res.clauses) && res.clauses.length > 0) {
+                let html = '';
+                res.clauses.forEach((c, idx) => {
+                    html += `
+                      <div class="bg-white rounded-2xl shadow-lg p-6 space-y-2">
+                        <h3 class="text-lg font-semibold text-blue-700">조항 ${idx + 1}</h3>
+                        <p class="text-sm text-gray-500">유형: ${c.riskType} ｜ 위험 점수: ${c.riskScore}</p>
+                        <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 text-sm text-gray-800">
+                          ${c.clauseText.replace(/\n/g,'<br>')}
+                        </div>
+                        <p class="text-sm text-red-600">💡 AI 코멘트: ${c.aiComment}</p>
+                      </div>
+                    `;
+                });
+                $("#clauseContainer").html(html);
+            } else {
+                $("#clauseContainer").html("<p class='text-gray-500'>조항 데이터가 없습니다.</p>");
+            }
+        },
+        error: function(xhr,status,error) {
+            console.error("❌ AJAX 오류:", status,error);
+        }
+    });
 });
+

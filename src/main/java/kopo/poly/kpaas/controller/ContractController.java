@@ -70,6 +70,13 @@ public class ContractController {
         return "contract/aiContract"; // → contract/aiContract.jsp
     }
 
+    @GetMapping("/result")
+    public String result() {
+        log.info("📄 AI 계약서 분석 결과 화면 호출");
+        return "contract/result"; // → contract/aiContract.jsp
+    }
+
+
     /* -------------------------------
        1) Presigned URL 발급 엔드포인트
        프론트: fileName, contentType 전달
@@ -345,31 +352,59 @@ public class ContractController {
                 .orElseGet(Collections::emptyList);
     }
 
-    @GetMapping("/result")
-    public String result(HttpSession session, Model model) throws Exception {
+    @PostMapping("/result/data")
+    @ResponseBody
+    public ContractResultDTO result(HttpSession session) throws Exception {
+
+        log.info("{}.result Start!", this.getClass().getName());
+
+
+        // 로그인 세션 확인
         String userId = CmmUtil.nvl((String) session.getAttribute("SS_USER_ID"));
+
+        log.info("userId = {}", userId);
 
         if (userId.isEmpty()) {
             log.warn("⚠️ 로그인 세션 없음 → 결과 화면 진입 불가");
-            return "redirect:/login"; // 로그인 페이지로 돌려보내도 됨
+            return ContractResultDTO.builder()
+                    .summary(null)
+                    .clauses(Collections.emptyList())
+                    .build();
         }
 
-        // 최신 계약서 조회
-        ContractDTO latest = contractService.getLatestContractByUserId(
-                ContractDTO.builder().userId(userId).build()
+        // contractId 세션 가져오기 + null-safe 처리
+        String contractId = CmmUtil.nvl((String) session.getAttribute("SS_CONTRACT_ID"));
+
+        // contractId가 비어있으면 최신 계약서 조회
+        if (contractId.isEmpty()) {
+            log.info("️contractId 없음 → 최신 계약서 조회");
+            contractId = Optional.ofNullable(
+                            contractService.getLatestContractByUserId(
+                                    ContractDTO.builder().userId(userId).build()
+                            )
+                    ).map(ContractDTO::getContractId)
+                    .orElse("");
+        }
+
+
+        log.info("📄 계약서 분석 결과 조회 contractId={}", contractId);
+
+        // null-safe 호출: contractService에서 null 반환 시 기본 객체 반환
+        ContractResultDTO result = Optional.ofNullable(
+                contractService.getContractResultByContractId(
+                        ContractDTO.builder().contractId(contractId).build()
+                )
+        ).orElse(
+                ContractResultDTO.builder()
+                        .summary(null)
+                        .clauses(Collections.emptyList())
+                        .build()
         );
 
-        if (latest != null && latest.getContractId() != null) {
-            log.info("📄 계약서 분석 결과 화면 호출, contractId={}", latest.getContractId());
-            model.addAttribute("contractId", latest.getContractId());
-        } else {
-            log.warn("⚠️ 결과 화면 표시할 계약서 없음");
-            model.addAttribute("contractId", "");
-        }
+        log.info("{}.result End!", this.getClass().getName());
 
-        return "contract/result";
+        return result;
     }
-
 
 
 }
