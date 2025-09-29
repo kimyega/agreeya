@@ -5,10 +5,10 @@ $(document).ready(function() {
     $.ajax({
         url: contextPath + "/contract/similar/data",
         type: "POST",
-        beforeSend: function() {
+        beforeSend: function () {
             console.log("📡 /contract/similar/data 요청 보냄 (세션 contractId 사용)");
         },
-        success: function(cases) {
+        success: function (cases) {
             console.log("✅ 응답 받음:", cases);
 
             if (!Array.isArray(cases)) {
@@ -20,18 +20,28 @@ $(document).ready(function() {
             if (cases.length > 0) {
                 cases.forEach(c => {
                     html += `
-                      <div class="bg-white rounded-2xl shadow-lg p-6 text-left space-y-4">
-                        <h3 class="text-lg font-semibold text-blue-700">
-                          계약서 ID: ${c.contractId}
+                      <div class="bg-white rounded-xl shadow-md p-6 text-left cursor-pointer hover:shadow-lg transition"
+                           onclick="window.location.href='${contextPath}/contract/result?contractId=${c.contractId}'">
+
+                        <!-- 제목 -->
+                        <h3 class="text-lg font-bold text-blue-700 mb-2">
+                          ${c.title || "제목 없음"}
                         </h3>
-                        <p class="text-sm text-gray-500">
-                          국가 ID: ${c.countryId || '-'} ｜ 유사도: ${c.similarityScore || 'N/A'}
+
+                        <!-- 요약 -->
+                        <p class="text-sm text-gray-700 leading-relaxed">
+                          ${c.summary || "요약 없음"}
                         </p>
-                        <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 space-y-4">
-                          <pre class="whitespace-pre-line text-sm text-gray-800 leading-relaxed">
-${c.caseText || c.content || '내용 없음'}
-                          </pre>
-                        </div>
+
+                        <!-- 유형 태그 -->
+                        <span class="inline-block mt-3 px-3 py-1 text-xs rounded-full
+                          ${c.category === '근로시간' ? 'bg-blue-100 text-blue-600' :
+                        c.category === '계약 해지' ? 'bg-red-100 text-red-600' :
+                            c.category === '임금' ? 'bg-green-100 text-green-600' :
+                                c.category === '복리후생' ? 'bg-yellow-100 text-yellow-600' :
+                                    'bg-gray-100 text-gray-600'}">
+                          유형: ${c.category || "미분류"}
+                        </span>
                       </div>
                     `;
                 });
@@ -40,7 +50,7 @@ ${c.caseText || c.content || '내용 없음'}
             }
             $("#similar-cases").html(html);
         },
-        error: function(xhr, status, error) {
+        error: function (xhr, status, error) {
             console.error("❌ AJAX 오류:", status, error);
             $("#similar-cases").html("<p class='text-red-500'>⚠️ 유사사례를 불러오는 중 오류가 발생했습니다.</p>");
         }
@@ -121,3 +131,4 @@ ${c.caseText || c.content || '내용 없음'}
         }
     });
 });
+

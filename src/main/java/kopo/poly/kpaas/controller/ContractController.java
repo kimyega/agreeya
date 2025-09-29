@@ -325,7 +325,7 @@ public class ContractController {
 
     @PostMapping("/similar/data")
     @ResponseBody
-    public List<CaseDTO> getSimilarCases(HttpSession session) throws Exception {
+    public List<ContractDTO> getSimilarCases(HttpSession session) throws Exception {
 
         String contractId = CmmUtil.nvl((String) session.getAttribute("SS_CONTRACT_ID"));
         log.info("▶ 유사사례 조회 contractId={}", contractId);
@@ -346,13 +346,13 @@ public class ContractController {
         }
 
         // 2. 유사도 분석 요청 DTO
-        CaseDTO pDTO = CaseDTO.builder()
+        ContractDTO pDTO = ContractDTO.builder()
                 .contractId(rDTO.getContractId())
                 .countryId(rDTO.getCountryId())
                 .build();
 
         // 3. 유사 사례 상위 3개 가져오기
-        List<CaseDTO> rList = Optional.ofNullable(caseService.getSimilarCases(pDTO))
+        List<ContractDTO> rList = Optional.ofNullable(caseService.getSimilarCases(pDTO))
                 .orElseGet(Collections::emptyList);
 
         if (rList.size() > 3) {
@@ -510,4 +510,3 @@ public class ContractController {
     }
 
 }
-

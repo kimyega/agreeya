@@ -29,7 +29,6 @@ public class ContractService implements IContractService {
     private final IContractMapper contractMapper;
     private final ObjectMapper objectMapper;
 
-
     @Override
     public String saveFile(ContractUploadDTO uploadDTO) throws Exception {
         if (uploadDTO.getFile() == null || uploadDTO.getFile().isEmpty()) {
@@ -158,6 +157,7 @@ public class ContractService implements IContractService {
 
         return rDTO;
     }
+
 
     @Override
     public List<ContractDTO> getContractsWithSummary(UserDTO pDTO) throws Exception {
