@@ -103,7 +103,6 @@ document.addEventListener("DOMContentLoaded", () => {
             // 3️⃣ 업로드 후 OCR 처리 요청
             $.post("/contract/processOcr", { imageUrl: publicUrl }, function(ocrRes) {
               if (ocrRes.result === 1) {
-                alert("OCR 완료!");
                 window.location.href = "/contract/country";
               } else {
                 alert(ocrRes.msg);
@@ -118,6 +117,42 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
+
+  // ==============================
+  // 상단바 모든 링크 → 모달 열기
+  // ==============================
+  const navLinks = document.querySelectorAll('.nav-link');
+  const homeModal = document.getElementById('homeConfirmModal');
+  const confirmBtn = document.getElementById('confirmHomeBtn');
+  const cancelBtn = document.getElementById('cancelHomeBtn');
+
+  let targetHref = null; // 이동할 URL 임시 저장
+
+  navLinks.forEach(link => {
+    link.addEventListener("click", function (e) {
+      e.preventDefault();
+      targetHref = this.getAttribute("href"); // 클릭한 메뉴 URL 저장
+      homeModal.classList.remove("hidden"); // 모달 열기
+    });
   });
+
+  // 모달 → 확인 버튼
+  if (confirmBtn) {
+    confirmBtn.addEventListener("click", function () {
+      if (targetHref) {
+        window.location.href = targetHref; // 선택한 메뉴로 이동
+      }
+    });
+  }
+
+  // 모달 → 취소 버튼
+  if (cancelBtn) {
+    cancelBtn.addEventListener("click", function () {
+      homeModal.classList.add("hidden"); // 모달 닫기
+      targetHref = null; // 취소 시 초기화
+    });
+  }
+
+});
 
 

@@ -15,5 +15,4 @@ public class ContractAnalysisSummaryDTO {
     private String riskChartData;
     private Integer totalRiskLevel;
     private String translatedText;
-    private String createdAt;
 }

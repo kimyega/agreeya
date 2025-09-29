@@ -3,18 +3,17 @@ package kopo.poly.kpaas.service.impl;
 import com.google.auth.oauth2.ServiceAccountCredentials;
 import com.google.cloud.vision.v1.*;
 import kopo.poly.kpaas.config.NcosProperties;
-import kopo.poly.kpaas.dto.ContractDTO;
-import kopo.poly.kpaas.dto.ContractUploadDTO;
+import kopo.poly.kpaas.dto.*;
 import kopo.poly.kpaas.infra.NcosPresignService;
 import kopo.poly.kpaas.mapper.IContractMapper;
 import kopo.poly.kpaas.service.IContractService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.FileInputStream;
 import java.util.Optional;
-
 
 @Slf4j
 @Service
@@ -32,21 +31,25 @@ public class ContractService implements IContractService {
             throw new Exception("파일이 없습니다.");
         }
 
-        String folder = "contracts"; // 원하는 폴더명
+        String folder = "contracts";
         String contentType = Optional.ofNullable(uploadDTO.getFile().getContentType())
                 .orElse("application/octet-stream");
 
-        log.info("[ContractService] Presigned URL 생성 시도 - userId: {}, file: {}", uploadDTO.getUserId(), uploadDTO.getFile().getOriginalFilename());
+        log.info("[ContractService] Presigned URL 생성 시도 - userId: {}, file: {}",
+                uploadDTO.getUserId(), uploadDTO.getFile().getOriginalFilename());
 
         // Presigned URL 생성
-        NcosPresignService.PresignedUpload presigned = ncosPresignService.createUploadUrl(folder, contentType);
+        NcosPresignService.PresignedUpload presigned =
+                ncosPresignService.createUploadUrl(folder, contentType);
 
-        log.info("[ContractService] Presigned URL 발급 완료 - uploadUrl: {}, publicUrl: {}", presigned.uploadUrl(), presigned.publicUrl());
+        log.info("[ContractService] Presigned URL 발급 완료 - uploadUrl: {}, publicUrl: {}",
+                presigned.uploadUrl(), presigned.publicUrl());
 
-        // 실제 업로드는 프론트엔드에서 URL로 PUT 요청하거나,
-
-        return presigned.publicUrl(); // 최종 접근 가능한 URL 반환
+        // ❌ DB에 저장하지 않음
+        // Presigned URL만 반환
+        return presigned.publicUrl();
     }
+
 
     @Override
     public String extractTextFromImage(ContractUploadDTO uploadDTO) throws Exception {
@@ -100,20 +103,41 @@ public class ContractService implements IContractService {
         return result.isEmpty() ? "텍스트를 추출하지 못했습니다." : result;
     }
 
+
+    @Override
+    public void saveContract(ContractDTO dto) throws Exception {
+        log.info("DB 저장 실행 - userId={}, countryId={}, file={}",
+                dto.getUserId(), dto.getCountryId(), dto.getOriginalFileUrl());
+
+        if (dto.getUserId() == null || dto.getUserId().isEmpty()
+                || dto.getCountryId() == null || dto.getCountryId().isEmpty()) {
+            throw new IllegalArgumentException("userId와 countryId는 필수 값입니다.");
+        }
+
+        contractMapper.insertContract(dto);
+
+        log.info("✅ 계약서 저장 완료: {}", dto);
+    }
+
     @Override
     public ContractDTO getLatestContractByUserId(ContractDTO pDTO) throws Exception {
         return contractMapper.getLatestContractByUserId(pDTO);
     }
 
     @Override
-    public void deleteContractByUserAndCountry(ContractDTO pDTO) throws Exception {
-        log.info("deleteContractByUserAndCountry start, userId={}, countryId={}",
-                pDTO.getUserId(), pDTO.getCountryId());
-        contractMapper.deleteContractByUserAndCountry(pDTO);
+    public ContractResultDTO getContractResultByContractId(ContractDTO pDTO) throws Exception {
+
+        ContractAnalysisSummaryDTO summary = contractMapper.getContractSummaryByContractId(pDTO);
+        java.util.List<ContractClauseDTO> clauses = contractMapper.getContractClausesByContractId(pDTO);
+
+        ContractResultDTO rDTO = ContractResultDTO.builder()
+                .summary(summary)
+                .clauses(clauses)
+                .build();
+
+        return rDTO;
     }
-    @Override
-    public void saveContract(ContractDTO dto) throws Exception {
-        log.info("DB 저장 - userId: {}, file: {}", dto.getUserId(), dto.getOriginalFileUrl());
-        // TODO: 실제 DB 저장 구현
-    }
+
+
 }
+
