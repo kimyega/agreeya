@@ -17,8 +17,9 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
     <!--폰트(KR,JP)-->
-    <script src="/fonts/NotoSansKR-Regular.js"></script>
-    <script src="/fonts/NotoSansJP-Regular.js"></script>
+    <script src="/js/fonts/NotoSansKR-Regular.js"></script>
+    <script src="/js/fonts/NotoSansJP-Regular.js"></script>
+
 
     <!-- jsPDF + html2canvas -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>

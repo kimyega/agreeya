@@ -412,10 +412,19 @@ public class ContractController {
 
     @PostMapping("/newDraft")
     @ResponseBody
-    public ResultDTO generateDraft(@RequestParam("contractId") String contractId) {
+    public ResultDTO generateDraft(HttpSession session) {
         try {
-            ContractDTO pDTO = ContractDTO.builder()
+            // ✅ 세션에서 contractId 가져오기
+            String contractId = (String) session.getAttribute("SS_CONTRACT_ID");
 
+            if (contractId == null) {
+                return ResultDTO.builder()
+                        .result(-1)
+                        .msg("세션에 계약 ID가 없습니다")
+                        .build();
+            }
+
+            ContractDTO pDTO = ContractDTO.builder()
                     .contractId(contractId)
                     .build();
 
@@ -430,7 +439,7 @@ public class ContractController {
             return ResultDTO.builder()
                     .result(1)
                     .msg("초안 생성 성공")
-                    .data(draftJson) // JSON String 반환
+                    .data(draftJson)
                     .build();
 
         } catch (Exception e) {
@@ -440,6 +449,7 @@ public class ContractController {
                     .msg("초안 생성 중 오류 발생: " + e.getMessage())
                     .build();
         }
+
     }
 
 
