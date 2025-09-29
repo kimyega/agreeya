@@ -415,6 +415,7 @@ public class ContractController {
     public ResultDTO generateDraft(@RequestParam("contractId") String contractId) {
         try {
             ContractDTO pDTO = ContractDTO.builder()
+
                     .contractId(contractId)
                     .build();
 
