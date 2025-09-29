@@ -8,8 +8,8 @@ import java.util.List;
 public interface ICaseMapper {
 
     // 특정 계약서 텍스트 조회
-    String getContractTextById(String contractId) throws Exception;
+    ContractDTO getContractById(ContractDTO pDTO) throws Exception;
 
     // 비교 대상 계약서 목록 (자기 자신 제외)
-    List<ContractDTO> getOtherContracts(String contractId) throws Exception;
+    List<ContractDTO> getOtherContracts(ContractDTO pDTO) throws Exception;
 }

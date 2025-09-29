@@ -68,5 +68,4 @@
                 #{translatedText}
             )
     </insert>
-
 </mapper>

@@ -17,6 +17,7 @@ public class ContractDTO {
     private String originalFileUrl;
     private String ocrText;
     private String createdAt;
+    private String contractVector;
 
     // 유사도 계산 관련
     private Double similarity;   // 계약서끼리 비교
