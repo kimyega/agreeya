@@ -20,10 +20,10 @@
 
         <!-- 메뉴 -->
         <nav class="flex items-center space-x-8 text-xl font-semibold text-gray-800 pr-4">
-            <a href="/"id="homeLink" class="hover:text-blue-600">홈</a>
-            <a href="/chatbot/aiSimulationMain" class="hover:text-blue-600">AI 모의 협상</a>
-            <a href="/contract/upload" class="hover:text-blue-600">계약서 분석</a>
-            <a href="/chatbot/qnaChatbot" class="hover:text-blue-600">Q&A 챗봇</a>
+            <a href="/"id="homeLink" class="nav-link hover:text-blue-600">홈</a>
+            <a href="/chatbot/aiSimulationMain" class="nav-link hover:text-blue-600">AI 모의 협상</a>
+            <a href="/contract/upload" class="nav-link hover:text-blue-600">계약서 분석</a>
+            <a href="/chatbot/qnaChatbot" class="nav-link hover:text-blue-600">Q&A 챗봇</a>
 
             <!-- 로그인 여부 확인 -->
             <c:choose>
@@ -37,9 +37,9 @@
                         </button>
                         <div id="profileDropdown"
                              class="absolute right-0 mt-2 w-40 bg-white border border-gray-300 rounded-md shadow-lg hidden z-50">
-                            <a href="/user/mypage" class="block px-4 py-3 text-center text-gray-800 hover:bg-gray-100">내 정보</a>
+                            <a href="/user/mypage" class="nav-link block px-4 py-3 text-center text-gray-800 hover:bg-gray-100">내 정보</a>
                             <a href="/user/logout"
-                               class="block px-4 py-3 text-center text-red-600 hover:bg-red-100 border-t border-gray-300">로그아웃</a>
+                               class="nav-link block px-4 py-3 text-center text-red-600 hover:bg-red-100 border-t border-gray-300">로그아웃</a>
                         </div>
                     </div>
                 </c:when>

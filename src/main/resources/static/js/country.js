@@ -7,40 +7,41 @@ document.addEventListener('DOMContentLoaded', function () {
     const nextBtn = document.getElementById('nextBtn');
     const prevBtn = document.getElementById('prevBtn');
     const modal = document.getElementById('euModal');
-    const homeLink = document.getElementById('homeLink');
+
+    // 상단 메뉴 관련
+    const navLinks = document.querySelectorAll('.nav-link');
     const homeModal = document.getElementById('homeConfirmModal');
     const confirmBtn = document.getElementById('confirmHomeBtn');
     const cancelBtn = document.getElementById('cancelHomeBtn');
-    const countryCodeInput = document.getElementById('countryCode'); // hidden input
+    const countryCodeInput = document.getElementById('countryCode');
+
+    let targetHref = null; // ✅ 클릭한 메뉴 URL 저장용
 
     // ==============================
-    // 상단바 홈 버튼 → 모달 열기
+    // 상단바 모든 버튼 → 모달 열기
     // ==============================
-    if (homeLink) {
-        homeLink.addEventListener("click", function (e) {
+    navLinks.forEach(link => {
+        link.addEventListener("click", function (e) {
             e.preventDefault();
+            targetHref = this.getAttribute("href");
             homeModal.classList.remove("hidden");
         });
-    }
+    });
 
     // ==============================
-    // 모달 → 확인 버튼 (세션 삭제 후 홈 이동)
+    // 모달 → 확인 버튼 (세션 삭제 후 이동)
     // ==============================
     if (confirmBtn) {
         confirmBtn.addEventListener("click", function () {
-            console.log("📌 cancelNation 호출 준비: 선택된 국가코드 =", selectedCountryCode);
+            if (!targetHref) return;
 
             $.ajax({
                 url: "/contract/cancelNation",
                 type: "POST",
-                data: { countryCode: selectedCountryCode }, // ✅ 코드 전달
-                beforeSend: function () {
-                    console.log("📩 서버로 전송할 데이터(cancelNation):", { countryCode: selectedCountryCode });
-                },
                 success: function (res) {
                     console.log("✅ cancelNation 응답:", res);
                     if (res === "success") {
-                        window.location.href = "/";
+                        window.location.href = targetHref; // ✅ 클릭한 메뉴로 이동
                     } else if (res === "login_required") {
                         alert("로그인 후 이용 가능합니다.");
                         window.location.href = "/user/login";
@@ -60,6 +61,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (cancelBtn) {
         cancelBtn.addEventListener("click", function () {
             homeModal.classList.add("hidden");
+            targetHref = null; // 초기화
         });
     }
 
@@ -68,8 +70,14 @@ document.addEventListener('DOMContentLoaded', function () {
     // ==============================
     countryCards.forEach(card => {
         card.addEventListener('click', () => {
-            const code = card.value;               // DB의 country_code (예: KR, EU, JP)
-            const name = card.innerText.trim();   // 화면에 표시될 이름
+            const code = card.value;               // DB의 country_code (예: KR, JP)
+            const name = card.innerText.trim();   // 화면 표시 이름
+
+            // 🔹 기존 선택 해제
+            countryCards.forEach(c => c.classList.remove('ring-4', 'ring-blue-500'));
+
+            // 🔹 현재 선택된 카드에 Tailwind 효과 추가
+            card.classList.add('ring-4', 'ring-blue-500');
 
             selectedCountryCode = code;
             selectedCountryName = name;
@@ -90,7 +98,7 @@ document.addEventListener('DOMContentLoaded', function () {
     modal.addEventListener('click', (e) => {
         if (e.target.tagName === 'BUTTON') {
             const name = e.target.textContent.trim();
-            const code = 'EU'; // ✅ EU 선택 시 코드 고정 (상세 국가는 name만 표시)
+            const code = 'EU'; // ✅ EU는 코드 고정
 
             selectedCountryCode = code;
             selectedCountryName = name;
@@ -114,28 +122,29 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
-        console.log("📌 selectNation 호출 준비: 선택된 국가코드 =", selectedCountryCode, "국가명 =", selectedCountryName);
+        console.log("📌 saveCountry 호출 준비: 선택된 국가코드 =", selectedCountryCode, "국가명 =", selectedCountryName);
 
         $.ajax({
-            url: "/contract/selectNation",
+            url: "/contract/saveCountry",
             type: "POST",
-            data: { countryCode: selectedCountryCode }, // ✅ 코드 전송
+            dataType: "json", // ✅ JSON 응답
+            data: { countryCode: selectedCountryCode }, // ✅ 컨트롤러와 통일
             beforeSend: function () {
-                console.log("📩 서버로 전송할 데이터(selectNation):", { countryCode: selectedCountryCode });
+                console.log("📩 서버로 전송할 데이터(saveCountry):", { countryCode: selectedCountryCode });
             },
             success: function (res) {
-                console.log("✅ selectNation 응답:", res);
-                if (res === "success") {
+                console.log("✅ saveCountry 응답:", res);
+                if (res.result === 1) {
                     window.location.href = "/contract/loading";
-                } else if (res === "login_required") {
+                } else if (res.result === 0 && res.msg.includes("로그인")) {
                     alert("로그인 후 이용 가능합니다.");
                     window.location.href = "/user/login";
                 } else {
-                    alert("국가 선택 저장 실패");
+                    alert("국가 선택 저장 실패: " + res.msg);
                 }
             },
             error: function (xhr, status, error) {
-                console.error("❌ selectNation 오류:", status, error);
+                console.error("❌ saveCountry 오류:", status, error);
                 alert("서버 오류 발생");
             }
         });

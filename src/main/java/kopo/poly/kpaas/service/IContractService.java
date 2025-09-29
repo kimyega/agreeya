@@ -1,6 +1,7 @@
 package kopo.poly.kpaas.service;
 
 import kopo.poly.kpaas.dto.ContractDTO;
+import kopo.poly.kpaas.dto.ContractResultDTO;
 import kopo.poly.kpaas.dto.ContractUploadDTO;
 
 public interface IContractService {
@@ -29,7 +30,7 @@ public interface IContractService {
      */
     void saveContract(ContractDTO dto) throws Exception;
 
-    void deleteContractByUserAndCountry(ContractDTO pDTO) throws Exception;
-
     ContractDTO getLatestContractByUserId(ContractDTO pDTO) throws Exception;
+
+    ContractResultDTO getContractResultByContractId(ContractDTO pDTO) throws Exception;
 }
