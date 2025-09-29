@@ -193,5 +193,10 @@ public class ContractService implements IContractService {
         return result;
     }
 
+    @Override
+    public int deleteContractById(ContractDTO pDTO) throws Exception {
+        return contractMapper.deleteContractById(pDTO);
+    }
+
 }
 

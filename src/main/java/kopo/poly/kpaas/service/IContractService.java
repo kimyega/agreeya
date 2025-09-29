@@ -41,4 +41,5 @@ public interface IContractService {
 
     List<ContractDTO> getContractsWithSummary(UserDTO pDTO) throws Exception;
 
+    int deleteContractById(ContractDTO pDTO) throws Exception;
 }

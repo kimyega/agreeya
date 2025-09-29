@@ -459,5 +459,55 @@ public class ContractController {
 
     }
 
+    @PostMapping("/loadingCancelNation")
+    @ResponseBody
+    public String loadingCancelNation(HttpSession session) {
+        try {
+            String userId = (String) session.getAttribute("SS_USER_ID");
+            if (userId == null) {
+                return "login_required";
+            }
+
+            // 1. DB에서 최근 계약 가져오기
+            ContractDTO pDTO = ContractDTO.builder().userId(userId).build();
+            ContractDTO rDTO = contractService.getLatestContractByUserId(pDTO);
+
+            if (rDTO == null) {
+                log.warn("삭제할 계약이 없습니다. userId={}", userId);
+                return "no_contract";
+            }
+
+            String contractId = rDTO.getContractId();
+            String fileUrl = rDTO.getOriginalFileUrl();
+
+            // 2. 오브젝트 스토리지 삭제
+            if (fileUrl != null && !fileUrl.isBlank()) {
+                ncosObjectService.deleteObject(fileUrl);
+            }
+
+            // 3. DB 삭제
+            contractService.deleteContractById(
+                    ContractDTO.builder().contractId(contractId).build()
+            );
+
+            log.info("🗑 계약 삭제 완료 - contractId={}, userId={}", contractId, userId);
+            return "success";
+
+        } catch (Exception e) {
+            log.error("❌ loadingCancelNation 실패", e);
+            return "error";
+        }
+    }
+
+    @PostMapping("/clearDraftSession")
+    @ResponseBody
+    public String clearDraftSession(HttpSession session) {
+        session.removeAttribute("SS_CONTRACT_ID");
+        session.removeAttribute("SS_COUNTRY_ID");
+
+        log.info("🧹 Draft 세션 정리 완료");
+        return "success";
+    }
 
 }
+
