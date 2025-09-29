@@ -5,11 +5,13 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import kopo.poly.kpaas.dto.*;
 import kopo.poly.kpaas.infra.NcosObjectService;
+import kopo.poly.kpaas.dto.*;
 import kopo.poly.kpaas.infra.NcosPresignService;
 import kopo.poly.kpaas.service.IAnalysisService;
 import kopo.poly.kpaas.service.ICaseService;
 import kopo.poly.kpaas.service.IContractService;
 import kopo.poly.kpaas.service.ICountryService;
+import kopo.poly.kpaas.service.IDraftService;
 import kopo.poly.kpaas.util.CmmUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,6 +40,8 @@ public class ContractController {
     private final NcosPresignService ncosPresignService;
     private final NcosObjectService ncosObjectService;
 
+
+    private final IDraftService draftService;
 
     @GetMapping("/upload")
     public String upload() {
@@ -413,6 +417,47 @@ public class ContractController {
         return result;
     }
 
+    @PostMapping("/newDraft")
+    @ResponseBody
+    public ResultDTO generateDraft(HttpSession session) {
+        try {
+            // ✅ 세션에서 contractId 가져오기
+            String contractId = (String) session.getAttribute("SS_CONTRACT_ID");
+
+            if (contractId == null) {
+                return ResultDTO.builder()
+                        .result(-1)
+                        .msg("세션에 계약 ID가 없습니다")
+                        .build();
+            }
+
+            ContractDTO pDTO = ContractDTO.builder()
+                    .contractId(contractId)
+                    .build();
+
+            DraftDTO draft = draftService.generateDraftContract(pDTO);
+
+            log.info("✅ 초안 생성 완료: contractId={}", contractId);
+
+            // DraftDTO → JSON 변환
+            ObjectMapper mapper = new ObjectMapper();
+            String draftJson = mapper.writeValueAsString(draft);
+
+            return ResultDTO.builder()
+                    .result(1)
+                    .msg("초안 생성 성공")
+                    .data(draftJson)
+                    .build();
+
+        } catch (Exception e) {
+            log.error("❌ 초안 생성 실패", e);
+            return ResultDTO.builder()
+                    .result(-1)
+                    .msg("초안 생성 중 오류 발생: " + e.getMessage())
+                    .build();
+        }
+
+    }
+
 
 }
-
