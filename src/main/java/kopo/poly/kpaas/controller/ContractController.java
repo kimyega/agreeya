@@ -5,11 +5,13 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import kopo.poly.kpaas.dto.*;
 import kopo.poly.kpaas.infra.NcosObjectService;
+import kopo.poly.kpaas.dto.*;
 import kopo.poly.kpaas.infra.NcosPresignService;
 import kopo.poly.kpaas.service.IAnalysisService;
 import kopo.poly.kpaas.service.ICaseService;
 import kopo.poly.kpaas.service.IContractService;
 import kopo.poly.kpaas.service.ICountryService;
+import kopo.poly.kpaas.service.IDraftService;
 import kopo.poly.kpaas.util.CmmUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,6 +40,8 @@ public class ContractController {
     private final NcosPresignService ncosPresignService;
     private final NcosObjectService ncosObjectService;
 
+
+    private final IDraftService draftService;
 
     @GetMapping("/upload")
     public String upload() {
@@ -319,37 +323,44 @@ public class ContractController {
         return "success";
     }
 
-    // 데이터 조회@ResponseBody
     @PostMapping("/similar/data")
     @ResponseBody
-    public List<CaseDTO> getSimilarCases(HttpSession session) throws Exception {
-        String userId = CmmUtil.nvl((String) session.getAttribute("SS_USER_ID"));
-        String countryId = CmmUtil.nvl((String) session.getAttribute("SS_COUNTRY_ID"));
+    public List<ContractDTO> getSimilarCases(HttpSession session) throws Exception {
 
-        log.info("▶ 유사사례 조회 userId={} countryId={}", userId, countryId);
+        String contractId = CmmUtil.nvl((String) session.getAttribute("SS_CONTRACT_ID"));
+        log.info("▶ 유사사례 조회 contractId={}", contractId);
 
-        if (userId.isEmpty() || countryId.isEmpty()) {
-            log.warn("⚠️ 세션 값 없음 → 유사사례 조회 불가");
+        if (contractId.isEmpty()) {
+            log.warn("⚠️ 세션 contractId 없음 → 유사사례 조회 불가");
             return Collections.emptyList();
         }
 
-        // 최신 계약서 조회
-        ContractDTO latest = contractService.getLatestContractByUserId(
-                ContractDTO.builder().userId(userId).build()
+        // 1. DB에서 계약서 조회
+        ContractDTO rDTO = contractService.getContractById(
+                ContractDTO.builder().contractId(contractId).build()
         );
 
-        if (latest == null || latest.getContractId() == null) {
-            log.warn("⚠️ 업로드된 계약서 없음 → 유사사례 조회 불가");
+        if (rDTO == null || rDTO.getContractId() == null) {
+            log.warn("⚠️ 계약서 조회 실패 contractId={}", contractId);
             return Collections.emptyList();
         }
 
-        CaseDTO pDTO = CaseDTO.builder()
-                .contractId(latest.getContractId())
-                .countryId(countryId)
+        // 2. 유사도 분석 요청 DTO
+        ContractDTO pDTO = ContractDTO.builder()
+                .contractId(rDTO.getContractId())
+                .countryId(rDTO.getCountryId())
                 .build();
 
-        return Optional.ofNullable(caseService.getSimilarCases(pDTO))
+        // 3. 유사 사례 상위 3개 가져오기
+        List<ContractDTO> rList = Optional.ofNullable(caseService.getSimilarCases(pDTO))
                 .orElseGet(Collections::emptyList);
+
+        if (rList.size() > 3) {
+            rList = rList.subList(0, 3);
+        }
+
+        log.info("✅ 유사사례 조회 완료: {}건", rList.size());
+        return rList;
     }
 
     @PostMapping("/result/data")
@@ -406,6 +417,96 @@ public class ContractController {
         return result;
     }
 
+    @PostMapping("/newDraft")
+    @ResponseBody
+    public ResultDTO generateDraft(HttpSession session) {
+        try {
+            // ✅ 세션에서 contractId 가져오기
+            String contractId = (String) session.getAttribute("SS_CONTRACT_ID");
+
+            if (contractId == null) {
+                return ResultDTO.builder()
+                        .result(-1)
+                        .msg("세션에 계약 ID가 없습니다")
+                        .build();
+            }
+
+            ContractDTO pDTO = ContractDTO.builder()
+                    .contractId(contractId)
+                    .build();
+
+            DraftDTO draft = draftService.generateDraftContract(pDTO);
+
+            log.info("✅ 초안 생성 완료: contractId={}", contractId);
+
+            // DraftDTO → JSON 변환
+            ObjectMapper mapper = new ObjectMapper();
+            String draftJson = mapper.writeValueAsString(draft);
+
+            return ResultDTO.builder()
+                    .result(1)
+                    .msg("초안 생성 성공")
+                    .data(draftJson)
+                    .build();
+
+        } catch (Exception e) {
+            log.error("❌ 초안 생성 실패", e);
+            return ResultDTO.builder()
+                    .result(-1)
+                    .msg("초안 생성 중 오류 발생: " + e.getMessage())
+                    .build();
+        }
+
+    }
+
+    @PostMapping("/loadingCancelNation")
+    @ResponseBody
+    public String loadingCancelNation(HttpSession session) {
+        try {
+            String userId = (String) session.getAttribute("SS_USER_ID");
+            if (userId == null) {
+                return "login_required";
+            }
+
+            // 1. DB에서 최근 계약 가져오기
+            ContractDTO pDTO = ContractDTO.builder().userId(userId).build();
+            ContractDTO rDTO = contractService.getLatestContractByUserId(pDTO);
+
+            if (rDTO == null) {
+                log.warn("삭제할 계약이 없습니다. userId={}", userId);
+                return "no_contract";
+            }
+
+            String contractId = rDTO.getContractId();
+            String fileUrl = rDTO.getOriginalFileUrl();
+
+            // 2. 오브젝트 스토리지 삭제
+            if (fileUrl != null && !fileUrl.isBlank()) {
+                ncosObjectService.deleteObject(fileUrl);
+            }
+
+            // 3. DB 삭제
+            contractService.deleteContractById(
+                    ContractDTO.builder().contractId(contractId).build()
+            );
+
+            log.info("🗑 계약 삭제 완료 - contractId={}, userId={}", contractId, userId);
+            return "success";
+
+        } catch (Exception e) {
+            log.error("❌ loadingCancelNation 실패", e);
+            return "error";
+        }
+    }
+
+    @PostMapping("/clearDraftSession")
+    @ResponseBody
+    public String clearDraftSession(HttpSession session) {
+        session.removeAttribute("SS_CONTRACT_ID");
+        session.removeAttribute("SS_COUNTRY_ID");
+
+        log.info("🧹 Draft 세션 정리 완료");
+        return "success";
+    }
 
 }
-

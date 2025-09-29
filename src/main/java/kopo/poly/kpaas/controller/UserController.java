@@ -2,9 +2,11 @@ package kopo.poly.kpaas.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import kopo.poly.kpaas.dto.ContractDTO;
 import kopo.poly.kpaas.dto.MsgDTO;
 import kopo.poly.kpaas.dto.ResultDTO;
 import kopo.poly.kpaas.dto.UserDTO;
+import kopo.poly.kpaas.service.IContractService;
 import kopo.poly.kpaas.service.IUserService;
 import kopo.poly.kpaas.util.CmmUtil;
 import kopo.poly.kpaas.util.EncryptUtil;
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -25,6 +28,61 @@ import java.util.Optional;
 public class UserController {
 
     private final IUserService userService;
+    private final IContractService contractService;
+
+    // ===== 화면 이동 =====
+    @GetMapping("/login")
+    public String login() {
+        log.info("GET /user/login");
+        return "user/login";
+    }
+
+    @GetMapping("/signup")
+    public String signup() {
+        log.info("GET /user/signup");
+        return "user/signup";
+    }
+
+    @GetMapping("/findEmail")
+    public String findEmail() {
+        log.info("GET /user/findEmail");
+        return "user/findEmail";
+    }
+
+    @GetMapping("/findPw")
+    public String findPw() {
+        log.info("GET /user/findPw");
+        return "user/findPw";
+    }
+
+    @GetMapping("/phoneVerify")
+    public String phoneVerify() {
+        log.info("GET /user/phoneVerify");
+        return "user/phoneVerify";
+    }
+
+    @GetMapping("/emailVerify")
+    public String emailVerify() {
+        log.info("GET /user/emailVerify");
+        return "user/emailVerify";
+    }
+
+    @GetMapping("/changePw")
+    public String changePw() {
+        log.info("GET /user/changePw");
+        return "user/changePw";
+    }
+
+    /**
+     * 마이페이지 뷰
+     */
+    @GetMapping("/mypage")
+    public String mypage() {
+        log.info("🟢 mypage 진입");
+        return "user/mypage";
+    }
+
+
 
     // ===== 로그인 처리 =====
     @ResponseBody
@@ -52,14 +110,6 @@ public class UserController {
         return null;
     }
 
-    /**
-     * 마이페이지 뷰
-     */
-    @GetMapping("/mypage")
-    public String mypage() {
-        log.info("🟢 mypage 진입");
-        return "user/mypage";
-    }
 
     /**
      * 마이페이지 프로필 조회
@@ -274,48 +324,28 @@ public class UserController {
         return dto;
     }
 
+    /**
+     * 유저별 계약 리스트 + 요약 정보 반환 (Ajax 용)
+     */
+    @ResponseBody
+    @GetMapping("/mypage/list")
+    public List<ContractDTO> getUserContracts(HttpSession session) throws Exception {
+        log.info("🟢 getUserContracts 실행");
 
-    // ===== 화면 이동 =====
-    @GetMapping("/login")
-    public String login() {
-        log.info("GET /user/login");
-        return "user/login";
-    }
+        String userId = CmmUtil.nvl((String) session.getAttribute("SS_USER_ID"));
+        if (userId.isEmpty()) {
+            log.warn("⚠️ 세션 없음 → 로그인 필요");
+            return null;
+        }
 
-    @GetMapping("/signup")
-    public String signup() {
-        log.info("GET /user/signup");
-        return "user/signup";
-    }
+        UserDTO pDTO = UserDTO.builder()
+                .userId(userId)  // userId 채워주기
+                .build();
 
-    @GetMapping("/findEmail")
-    public String findEmail() {
-        log.info("GET /user/findEmail");
-        return "user/findEmail";
-    }
+        List<ContractDTO> contractList = contractService.getContractsWithSummary(pDTO);
 
-    @GetMapping("/findPw")
-    public String findPw() {
-        log.info("GET /user/findPw");
-        return "user/findPw";
-    }
-
-    @GetMapping("/phoneVerify")
-    public String phoneVerify() {
-        log.info("GET /user/phoneVerify");
-        return "user/phoneVerify";
-    }
-
-    @GetMapping("/emailVerify")
-    public String emailVerify() {
-        log.info("GET /user/emailVerify");
-        return "user/emailVerify";
-    }
-
-    @GetMapping("/changePw")
-    public String changePw() {
-        log.info("GET /user/changePw");
-        return "user/changePw";
+        log.info("📌 반환 계약 리스트: {}", contractList.size());
+        return contractList;
     }
 
 }

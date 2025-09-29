@@ -11,14 +11,31 @@
         VALUES (#{userId}, CAST(#{countryId} AS SIGNED), #{originalFileUrl}, #{ocrText})
     </insert>
 
+    <!-- 최신 계약서 조회 (userId 기준) -->
     <select id="getLatestContractByUserId" parameterType="ContractDTO" resultType="ContractDTO">
-        SELECT contract_id, user_id, country_id, original_file_url, ocr_text, created_at
+        SELECT contract_id,
+               user_id,
+               country_id,
+               original_file_url,
+               ocr_text,
+               created_at
         FROM contracts
         WHERE user_id = #{userId}
         ORDER BY contract_id DESC
             LIMIT 1
     </select>
 
+    <!-- 계약서 단건 조회 (contractId 기준) -->
+    <select id="getContractById" parameterType="ContractDTO" resultType="ContractDTO">
+        SELECT contract_id,
+               user_id,
+               country_id,
+               original_file_url,
+               ocr_text,
+               created_at
+        FROM contracts
+        WHERE contract_id = #{contractId}
+    </select>
 
     <update id="updateContractCountry" parameterType="ContractDTO">
         UPDATE contracts
@@ -26,7 +43,6 @@
         WHERE contract_id = #{contractId}
           AND user_id = #{userId}
     </update>
-
 
     <!-- 계약서 요약 조회 -->
     <select id="getContractSummaryByContractId" parameterType="ContractDTO" resultType="ContractAnalysisSummaryDTO">
@@ -50,6 +66,37 @@
         FROM contract_clauses
         WHERE contract_id = #{contractId}
         ORDER BY clause_id
+    </select>
+
+    <delete id="deleteContractById" parameterType="ContractDTO">
+        DELETE FROM contracts
+        WHERE contract_id = #{contractId}
+    </delete>
+
+    <!-- 특정 유저 계약 리스트 조회 -->
+    <select id="findByUserId" parameterType="UserDTO" resultType="ContractDTO">
+        SELECT
+            contract_id,
+            user_id,
+            country_id,
+            original_file_url,
+            ocr_text,
+            created_at
+        FROM contracts
+        WHERE user_id = #{userId}
+        ORDER BY created_at DESC
+    </select>
+
+    <!-- 특정 계약의 분석 요약 조회 -->
+    <select id="findSummaryByContractId" parameterType="ContractDTO" resultType="ContractAnalysisSummaryDTO">
+        SELECT
+            summary_id,
+            contract_id,
+            risk_chart_data,
+            total_risk_level,
+            translated_text
+        FROM contract_analysis_summary
+        WHERE contract_id = #{contractId}
     </select>
 
 </mapper>
