@@ -7,21 +7,26 @@
 <mapper namespace="kopo.poly.kpaas.mapper.ICaseMapper">
 
     <!-- 기준 계약서 텍스트 -->
-    <select id="getContractTextById" parameterType="string" resultType="string">
-        SELECT ocr_text
+    <select id="getContractById" parameterType="ContractDTO" resultType="ContractDTO">
+        SELECT contract_id,
+               contract_vector,
+               ocr_text,
+               country_id,
+               user_id,
+               created_at
         FROM contracts
         WHERE contract_id = CAST(#{contractId} AS SIGNED)
     </select>
 
     <!-- 다른 계약서 목록 (자기 자신 제외) -->
-    <select id="getOtherContracts" parameterType="string" resultType="ContractDTO">
+    <select id="getOtherContracts" parameterType="ContractDTO" resultType="ContractDTO">
         SELECT contract_id,
                country_id,
                ocr_text,
                created_at,
                user_id,
-               original_file_url
-
+               original_file_url,
+               contract_vector
         FROM contracts
         WHERE contract_id != CAST(#{contractId} AS SIGNED)
     </select>

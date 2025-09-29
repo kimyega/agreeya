@@ -18,6 +18,7 @@ import kopo.poly.kpaas.dto.LawDTO;
 import kopo.poly.kpaas.mapper.IAnalysisMapper;
 import kopo.poly.kpaas.service.IAnalysisService;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -25,28 +26,14 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Slf4j
+@RequiredArgsConstructor
 @Service
 public class AnalysisService implements IAnalysisService {
 
     private final IAnalysisMapper analysisMapper;
     private final GptService gptService;
-    private final ObjectMapper mapper = new ObjectMapper();
+    private final ObjectMapper mapper;
 
-    private final OpenAiEmbeddingModel embeddingModel;
-
-    // ✅ 생성자 주입 (규칙 준수)
-    public AnalysisService(IAnalysisMapper analysisMapper,
-                           GptService gptService,
-                           @Value("${openai.api.key}") String apiKey) {
-        this.analysisMapper = analysisMapper;
-        this.gptService = gptService;
-
-        // OpenAI 임베딩 모델 초기화
-        this.embeddingModel = OpenAiEmbeddingModel.builder()
-                .apiKey(apiKey)
-                .modelName(OpenAiEmbeddingModelName.TEXT_EMBEDDING_3_SMALL)
-                .build();
-    }
 
     @Override
     public void analyzeContract(ContractDTO pDTO) throws Exception {
@@ -75,27 +62,53 @@ public class AnalysisService implements IAnalysisService {
         // ============================================================
         // ✅ (랭체인 시작) 모든 법령 내용을 chunk로 나누고 임베딩 저장
         // ============================================================
+
+        // In-memory 스토어 생성
         InMemoryEmbeddingStore<Document> store = new InMemoryEmbeddingStore<>();
+        ObjectMapper objectMapper = new ObjectMapper();
+
         for (LawDTO law : lawList) {
-            if (law.getContent() == null) continue;
-            String[] lawChunks = law.getContent().split("\\n\\n+"); // 빈 줄 기준 분리
-            for (String chunk : lawChunks) {
-                if (!chunk.isBlank()) {
-                    Embedding emb = embeddingModel.embed(chunk).content();
-                    store.add(emb, Document.from(chunk));
-                }
+            if (law.getContent() == null || law.getLawVector() == null) continue;
+
+            // DB에 저장된 String 벡터(JSON 형식) → float 배열
+            float[] vector;
+            try {
+                vector = objectMapper.readValue(law.getLawVector(), float[].class);
+            } catch (Exception e) {
+                log.error("벡터 변환 실패: {}", law.getLawId(), e);
+                continue;
             }
+
+            Embedding emb = new Embedding(vector);
+            store.add(emb, Document.from(law.getContent()));
         }
 
-        // ✅ 계약서 OCR 텍스트 임베딩 → 유사한 법령 Top 50 검색 TOP의 갯수 가 더 넘어가면 api 토큰 수 한계 넘어감
-        Embedding contractEmbedding = embeddingModel.embed(contractText).content();
-        List<EmbeddingMatch<Document>> matches = store.findRelevant(contractEmbedding, 30);
+        // 계약서 OCR 텍스트 임베딩
 
+        // 1. List<Float> 가져오기
+        List<Float> contractVectorList = gptService.createEmbedding(contractText);
+
+        // 2. float[]로 변환
+        float[] contractVector = new float[contractVectorList.size()];
+        for (int i = 0; i < contractVectorList.size(); i++) {
+            contractVector[i] = contractVectorList.get(i);
+        }
+
+
+        // 3. Embedding 생성
+        Embedding contractEmbedding = new Embedding(contractVector);
+
+        // 4. 유사한 법령 찾기
+        List<EmbeddingMatch<Document>> lawMatches = store.findRelevant(contractEmbedding, 30);
+
+        // 유사한 법령 추출
         StringBuilder similarLaws = new StringBuilder();
-        for (EmbeddingMatch<Document> match : matches) {
-            similarLaws.append(match.embedded().text()).append("\n\n");
+        for (EmbeddingMatch<Document> m : lawMatches) {
+            similarLaws.append(m.embedded().text()).append("\n\n");
         }
-        log.info("🔎 유사한 법령 추출 완료, {}개 선택", matches.size());
+
+
+        log.info("🔎 유사한 법령 추출 완료, {}개 선택", lawMatches.size());
         // ============================================================
         // ✅ (랭체인 끝)
         // ============================================================

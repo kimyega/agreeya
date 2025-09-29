@@ -7,8 +7,8 @@
 
     <!-- 계약서 정보 저장 -->
     <insert id="insertContract" parameterType="ContractDTO">
-        INSERT INTO contracts (user_id, country_id, original_file_url, ocr_text)
-        VALUES (#{userId}, CAST(#{countryId} AS SIGNED), #{originalFileUrl}, #{ocrText})
+        INSERT INTO contracts (user_id, country_id, original_file_url, ocr_text, contract_vector)
+        VALUES (#{userId}, CAST(#{countryId} AS SIGNED), #{originalFileUrl}, #{ocrText}, #{contractVector})
     </insert>
 
     <!-- 최신 계약서 조회 (userId 기준) -->
