@@ -137,6 +137,23 @@ public class ContractService implements IContractService {
 
         return rDTO;
     }
+    @Override
+    public ContractDTO getContractById(ContractDTO pDTO) throws Exception {
+        if (pDTO == null || pDTO.getContractId() == null || pDTO.getContractId().isEmpty()) {
+            throw new IllegalArgumentException("contractId는 필수 값입니다.");
+        }
+
+        log.info("📌 계약서 단건 조회 실행 - contractId={}", pDTO.getContractId());
+
+        ContractDTO rDTO = Optional.ofNullable(
+                contractMapper.getContractById(pDTO)
+        ).orElseGet(ContractDTO::new);
+
+        log.info("✅ 계약서 단건 조회 완료: {}", rDTO);
+
+        return rDTO;
+    }
+
 
 
 }

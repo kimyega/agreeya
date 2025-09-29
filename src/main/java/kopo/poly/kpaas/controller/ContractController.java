@@ -323,37 +323,44 @@ public class ContractController {
         return "success";
     }
 
-    // 데이터 조회@ResponseBody
     @PostMapping("/similar/data")
     @ResponseBody
     public List<CaseDTO> getSimilarCases(HttpSession session) throws Exception {
-        String userId = CmmUtil.nvl((String) session.getAttribute("SS_USER_ID"));
-        String countryId = CmmUtil.nvl((String) session.getAttribute("SS_COUNTRY_ID"));
 
-        log.info("▶ 유사사례 조회 userId={} countryId={}", userId, countryId);
+        String contractId = CmmUtil.nvl((String) session.getAttribute("SS_CONTRACT_ID"));
+        log.info("▶ 유사사례 조회 contractId={}", contractId);
 
-        if (userId.isEmpty() || countryId.isEmpty()) {
-            log.warn("⚠️ 세션 값 없음 → 유사사례 조회 불가");
+        if (contractId.isEmpty()) {
+            log.warn("⚠️ 세션 contractId 없음 → 유사사례 조회 불가");
             return Collections.emptyList();
         }
 
-        // 최신 계약서 조회
-        ContractDTO latest = contractService.getLatestContractByUserId(
-                ContractDTO.builder().userId(userId).build()
+        // 1. DB에서 계약서 조회
+        ContractDTO rDTO = contractService.getContractById(
+                ContractDTO.builder().contractId(contractId).build()
         );
 
-        if (latest == null || latest.getContractId() == null) {
-            log.warn("⚠️ 업로드된 계약서 없음 → 유사사례 조회 불가");
+        if (rDTO == null || rDTO.getContractId() == null) {
+            log.warn("⚠️ 계약서 조회 실패 contractId={}", contractId);
             return Collections.emptyList();
         }
 
+        // 2. 유사도 분석 요청 DTO
         CaseDTO pDTO = CaseDTO.builder()
-                .contractId(latest.getContractId())
-                .countryId(countryId)
+                .contractId(rDTO.getContractId())
+                .countryId(rDTO.getCountryId())
                 .build();
 
-        return Optional.ofNullable(caseService.getSimilarCases(pDTO))
+        // 3. 유사 사례 상위 3개 가져오기
+        List<CaseDTO> rList = Optional.ofNullable(caseService.getSimilarCases(pDTO))
                 .orElseGet(Collections::emptyList);
+
+        if (rList.size() > 3) {
+            rList = rList.subList(0, 3);
+        }
+
+        log.info("✅ 유사사례 조회 완료: {}건", rList.size());
+        return rList;
     }
 
     @PostMapping("/result/data")

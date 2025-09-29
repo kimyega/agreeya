@@ -33,4 +33,7 @@ public interface IContractService {
     ContractDTO getLatestContractByUserId(ContractDTO pDTO) throws Exception;
 
     ContractResultDTO getContractResultByContractId(ContractDTO pDTO) throws Exception;
+
+    ContractDTO getContractById(ContractDTO pDTO) throws Exception;
+
 }
