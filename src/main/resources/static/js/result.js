@@ -21,12 +21,16 @@ $(document).ready(function() {
                 cases.forEach(c => {
                     html += `
                       <div class="bg-white rounded-2xl shadow-lg p-6 text-left space-y-4">
-                        <h3 class="text-lg font-semibold text-blue-700">${c.title}</h3>
+                        <h3 class="text-lg font-semibold text-blue-700">
+                          계약서 ID: ${c.contractId}
+                        </h3>
                         <p class="text-sm text-gray-500">
-                          유형: ${c.riskType || '미분류'} ｜ 조항번호: ${c.articleNumber || '-'}
+                          국가 ID: ${c.countryId || '-'} ｜ 유사도: ${c.similarityScore || 'N/A'}
                         </p>
                         <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 space-y-4">
-                          <pre class="whitespace-pre-line text-sm text-gray-800 leading-relaxed">${c.content}</pre>
+                          <pre class="whitespace-pre-line text-sm text-gray-800 leading-relaxed">
+${c.caseText || c.content || '내용 없음'}
+                          </pre>
                         </div>
                       </div>
                     `;
@@ -51,7 +55,7 @@ $(document).ready(function() {
         window.location.href = contextPath + "/";
     });
 
-    // AJAX로 요약 + 조항 데이터 가져오기
+    // 계약서 요약 + 조항 데이터 가져오기
     $.ajax({
         url: contextPath + "/contract/result/data",
         type: "POST",
@@ -73,7 +77,7 @@ $(document).ready(function() {
                 new Chart(ctx, {
                     type: 'bar',
                     data: {
-                        labels: Object.keys(riskData), // 이제 "임금", "근로시간", "휴가", "기타"
+                        labels: Object.keys(riskData),
                         datasets: [{
                             label: '위험 점수',
                             data: Object.values(riskData),
@@ -117,4 +121,3 @@ $(document).ready(function() {
         }
     });
 });
-

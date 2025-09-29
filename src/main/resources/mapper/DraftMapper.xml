@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kopo.poly.kpaas.mapper.IDraftMapper">
+
+    <!-- 조항별 코멘트 조회 -->
+    <select id="getClausesByContractId" resultType="ContractClauseDTO" parameterType="ContractDTO">
+        SELECT clause_id,
+               contract_id,
+               clause_text,
+               risk_score,
+               risk_type,
+               ai_comment
+        FROM contract_clauses
+        WHERE contract_id = #{contractId}
+        ORDER BY clause_id ASC
+    </select>
+
+    <!-- 요약 조회 -->
+    <select id="getSummaryByContractId" resultType="ContractAnalysisSummaryDTO" parameterType="ContractDTO">
+        SELECT summary_id,
+               contract_id,
+               risk_chart_data,
+               total_risk_level,
+               translated_text
+        FROM contract_analysis_summary
+        WHERE contract_id = #{contractId}
+    </select>
+
+</mapper>

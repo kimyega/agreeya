@@ -54,7 +54,7 @@
     <!-- 국가 카드 -->
     <form id="countryForm" method="post">
       <div class="flex flex-wrap justify-center gap-6 mb-6">
-        <button type="button"
+        <button type="button" value="KR"
                 class="country-card flex flex-col items-center w-60 p-4 bg-white rounded-xl shadow-md cursor-pointer
                    hover:ring-4 hover:ring-blue-400 focus:outline-none active:scale-95 transition-transform duration-150">
           <img src="${pageContext.request.contextPath}/images/kor.png" class="w-32 h-32 object-contain mb-2" />
@@ -68,7 +68,7 @@
           <span class="text-xl font-semibold">EU</span>
         </button>
 
-        <button type="button"
+        <button type="button" value="JP"
                 class="country-card flex flex-col items-center w-60 p-4 bg-white rounded-xl shadow-md cursor-pointer
                    hover:ring-4 hover:ring-blue-400 focus:outline-none active:scale-95 transition-transform duration-150">
           <img src="${pageContext.request.contextPath}/images/jp.png" class="w-32 h-32 object-contain mb-2" />
