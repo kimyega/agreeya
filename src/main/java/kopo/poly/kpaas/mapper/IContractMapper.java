@@ -22,8 +22,8 @@ public interface IContractMapper {
     // 계약서 조항 리스트 조회
     java.util.List<ContractClauseDTO> getContractClausesByContractId(ContractDTO pDTO) throws Exception;
 
-    // IContractMapper.java
-    ContractDTO getContractById(ContractDTO pDTO) throws Exception;
+    // 계약 삭제
+    int deleteContractById(ContractDTO pDTO) throws Exception;
 }
 
 

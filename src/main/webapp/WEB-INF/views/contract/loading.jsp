@@ -21,6 +21,8 @@
   <!-- Table CSS JS -->
   <link rel="stylesheet" href="${pageContext.request.contextPath}/css/table.css"/>
   <script src="${pageContext.request.contextPath}/js/table.js"></script>
+  <!-- ✅ JS -->
+  <script src="${pageContext.request.contextPath}/js/loading.js"></script>
 </head>
 
 <body class="bg-slate-100 text-gray-800 font-sans">
@@ -81,9 +83,27 @@
       <i class="fa-solid fa-check mr-2"></i> 분석이 완료되었습니다!
     </p>
   </div>
+
+  <!-- 홈 이동 확인 모달 -->
+  <div id="homeConfirmModal"
+       class="hidden fixed inset-0 bg-black/50 flex justify-center items-center z-[1000]">
+    <div class="bg-white rounded-lg shadow-xl w-96 p-6 text-center">
+      <h3 class="text-xl font-bold mb-4">정말 나가시겠습니까?</h3>
+      <p class="text-gray-600 mb-6">선택한 내용은 저장되지 않습니다.</p>
+      <div class="flex justify-center space-x-4">
+        <button id="confirmHomeBtn"
+                class="px-5 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+          확인
+        </button>
+        <button id="cancelHomeBtn"
+                class="px-5 py-2 bg-gray-300 rounded hover:bg-gray-400">
+          취소
+        </button>
+      </div>
+    </div>
+  </div>
+
 </main>
 
-<!-- ✅ JS -->
-  <script src="../js/loading.js"></script>
 </body>
 </html>

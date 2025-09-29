@@ -155,6 +155,9 @@ public class ContractService implements IContractService {
     }
 
 
-
+    @Override
+    public int deleteContractById(ContractDTO pDTO) throws Exception {
+        return contractMapper.deleteContractById(pDTO);
+    }
 }
 

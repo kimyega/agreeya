@@ -34,6 +34,5 @@ public interface IContractService {
 
     ContractResultDTO getContractResultByContractId(ContractDTO pDTO) throws Exception;
 
-    ContractDTO getContractById(ContractDTO pDTO) throws Exception;
-
+    int deleteContractById(ContractDTO pDTO) throws Exception;
 }
