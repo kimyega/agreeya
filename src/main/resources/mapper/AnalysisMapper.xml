@@ -15,6 +15,7 @@
                created_at
         FROM contracts
         WHERE contract_id = #{contractId}
+        LIMIT 1
     </select>
 
     <!-- 법령: 다중 -->

@@ -1,6 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
          pageEncoding="UTF-8" %>
-<!DOCTYPE html >
+<!DOCTYPE html>
 <html lang="ko">
 <head>
     <meta charset="UTF-8" />
@@ -10,12 +10,25 @@
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- Font Awesome (아이콘용) -->
+    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 
-    <!-- Table CSS JS -->
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!--폰트(KR,JP)-->
+    <script src="/fonts/NotoSansKR-Regular.js"></script>
+    <script src="/fonts/NotoSansJP-Regular.js"></script>
+
+    <!-- jsPDF + html2canvas -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <!-- 웹폰트 (한글/일본어/영문) -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR&family=Noto+Sans+JP&family=Roboto&display=swap" rel="stylesheet">
+
+    <!-- Custom CSS -->
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/table.css"/>
-    <script src="${pageContext.request.contextPath}/js/table.js"></script>
 </head>
 
 <body class="bg-slate-100 text-gray-800 font-sans">
@@ -29,7 +42,7 @@
 </a>
 
 <main class="max-w-3xl mx-auto px-6 py-16">
-    <h1 class="text-4xl font-bold text-gray-900 mb-6 text-center">AI 기반 계약서 초안이 준비 되었습니다</h1>
+    <h1 class="text-4xl font-bold text-gray-900 mb-6 text-center">AI 기반 계약서 초안 입니다</h1>
     <p class="text-center text-gray-500 mb-8">
         AI가 분석한 결과를 바탕으로 위험 요소가 제거된 계약서 초안을 생성했습니다.
     </p>
@@ -37,19 +50,17 @@
     <section class="bg-white rounded-xl p-6 shadow-md">
         <h2 class="font-semibold text-xl mb-3">계약서 초안 미리보기</h2>
 
+        <!-- contractId (URL 파라미터) -->
+        <input type="hidden" id="contractId" value="${param.contractId}">
+
+        <!-- 계약서 출력 영역 -->
         <pre id="contractPreview"
              class="bg-gray-100 p-4 rounded-md h-96 max-h-96 overflow-y-auto text-gray-700 whitespace-pre-wrap text-base leading-relaxed"
-             style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif;">
-[근로계약서 예시]
-1. 근로자 성명: 홍길동
-2. 고용 형태: 정규직
-3. 근무 기간: 2025.08.01 ~ 2026.07.31
-4. 근무 장소: 서울특별시 마포구
-5. 임금: 월 2,500,000원
-6. 주당 근로시간: 40시간
-    </pre>
+             style="font-family: 'Noto Sans KR', 'Noto Sans JP', 'Roboto', sans-serif;">
+로딩 중...
+        </pre>
 
-        <!-- 버튼 그룹: 오른쪽 정렬 -->
+        <!-- 버튼 그룹 -->
         <div class="mt-6 flex justify-end gap-4 items-center">
             <button id="translateBtn"
                     class="bg-gray-300 hover:bg-gray-400 text-gray-900 px-5 py-2 rounded-md font-semibold">
@@ -61,11 +72,10 @@
                 PDF 다운로드
             </button>
         </div>
-
     </section>
 </main>
 
-<!-- ✅ 번역 모달 -->
+<!-- 번역 모달 -->
 <div id="translateModal" class="fixed inset-0 z-50 hidden bg-black/50 flex items-center justify-center">
     <div class="bg-white rounded-xl w-64 p-6 space-y-4 shadow-lg text-center">
         <h3 class="text-lg font-bold text-gray-800">언어 선택</h3>
@@ -75,86 +85,8 @@
     </div>
 </div>
 
-<!-- ✅ 스크립트 -->
-<script type="javascript">
-    const translateBtn = document.getElementById('translateBtn');
-    const translateModal = document.getElementById('translateModal');
-    const contractPreview = document.getElementById('contractPreview');
-
-    translateBtn.addEventListener('click', () => {
-        translateModal.classList.remove('hidden');
-    });
-
-    const translations = {
-        ko: `[근로계약서 예시]
-1. 근로자 성명: 홍길동
-2. 고용 형태: 정규직
-3. 근무 기간: 2025.08.01 ~ 2026.07.31
-4. 근무 장소: 서울특별시 마포구
-5. 임금: 월 2,500,000원
-6. 주당 근로시간: 40시간`,
-
-        ja: `[労働契約書例]
-1. 労働者名: ホン・ギルドン
-2. 雇用形態: 正社員
-3. 勤務期間: 2025年08月01日 ～ 2026年07月31日
-4. 勤務地: ソウル特別市麻浦区
-5. 給与: 月額 2,500,000ウォン
-6. 週間労働時間: 40時間`,
-
-        en: `[Sample Labor Contract]
-1. Employee Name: Hong Gil-dong
-2. Employment Type: Full-time
-3. Employment Period: 2025.08.01 ~ 2026.07.31
-4. Work Location: Mapo-gu, Seoul
-5. Salary: 2,500,000 KRW per month
-6. Weekly Working Hours: 40 hours`
-    };
-
-    // 번역 모달 버튼 처리
-    translateModal.querySelectorAll('button[data-lang]').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const lang = btn.getAttribute('data-lang');
-            contractPreview.textContent = translations[lang];
-            translateModal.classList.add('hidden');
-        });
-    });
-
-    // 외부 클릭 시 모달 닫기
-    translateModal.addEventListener('click', (e) => {
-        if (e.target === translateModal) {
-            translateModal.classList.add('hidden');
-        }
-    });
-
-    // PDF 다운로드
-    const pdfBtn = document.getElementById('pdfBtn');
-    // PDF 다운로드 버튼 클릭 시
-    pdfBtn.addEventListener('click', () => {
-        const target = contractPreview;
-
-        html2canvas(target, {
-            scale: 3, // 더 선명하게
-            useCORS: true
-        }).then(canvas => {
-            const imgData = canvas.toDataURL('image/png');
-            const { jsPDF } = window.jspdf;
-            const pdf = new jsPDF({
-                orientation: 'portrait',
-                unit: 'mm',
-                format: 'a4'
-            });
-
-            const pdfWidth = 190; // 여백 고려
-            const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-
-            pdf.addImage(imgData, 'PNG', 10, 10, pdfWidth, pdfHeight);
-            pdf.save('contract_draft.pdf');
-        });
-
-    });
-</script>
+<!-- Custom JS -->
+<script src="${pageContext.request.contextPath}/js/aiContract.js"></script>
 
 </body>
 </html>
-
