@@ -52,4 +52,9 @@
         ORDER BY clause_id
     </select>
 
+    <delete id="deleteContractById" parameterType="ContractDTO">
+        DELETE FROM contracts
+        WHERE contract_id = #{contractId}
+    </delete>
+
 </mapper>
