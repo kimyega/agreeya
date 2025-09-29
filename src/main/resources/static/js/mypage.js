@@ -20,6 +20,66 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('pfEmail').textContent = d.email ?? '-';
     document.getElementById('pfRegDt').textContent = d.createdAt ?? '-';
 
+    // 계약서 리스트 조회
+    const resContracts = await fetch(contextPath + '/user/mypage/list', {
+      method: 'GET',
+      credentials: 'include'
+    });
+
+    if (!resContracts.ok) throw new Error('계약서 응답 오류');
+
+    const contracts = await resContracts.json();
+    console.log("계약서 리스트 응답:", contracts);  // ✅ 전체 리스트 출력
+
+    const tbody = document.getElementById('contractList');
+    tbody.innerHTML = '';
+
+    contracts.forEach((c, index) => {
+      console.log(`계약서 #${index + 1}:`, c);
+
+      const tr = document.createElement('tr');
+      tr.classList.add('border-b');
+
+      // 분석일
+      const dateTd = document.createElement('td');
+      dateTd.classList.add('py-3');
+      dateTd.textContent = c.createdAt ?? '-';
+
+      // 위험요소 건수
+      const riskTd = document.createElement('td');
+      riskTd.classList.add('py-3');
+      riskTd.textContent = c.riskCount ?? 0;
+      riskTd.classList.add(c.riskCount > 0 ? 'text-red-500' : 'text-green-500');
+
+      // 위험도 등급
+      const levelTd = document.createElement('td');
+      levelTd.classList.add('py-3');
+      levelTd.textContent = c.riskLevel ?? '-';
+
+      // 위험도 색상
+      if (c.riskLevel === '높음') {
+        levelTd.classList.add('text-red-500');
+      } else if (c.riskLevel === '보통') {
+        levelTd.classList.add('text-yellow-500');
+      } else {
+        levelTd.classList.add('text-green-500');
+      }
+
+      // 리포트 링크
+      const linkTd = document.createElement('td');
+      linkTd.classList.add('py-3');
+      const link = document.createElement('a');
+      link.href = `/contract/result?contractId=${c.contractId}`;
+      link.textContent = '리포트';
+      link.classList.add('text-blue-600', 'hover:underline');
+      linkTd.appendChild(link);
+
+      tr.append(dateTd, riskTd, levelTd, linkTd);
+      tbody.appendChild(tr);
+    });
+
+
+
   } catch (e) {
     console.error(e);
     alert('프로필 로딩 실패');

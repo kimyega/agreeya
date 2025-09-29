@@ -15,4 +15,8 @@ public class ContractDTO {
     private String originalFileUrl;
     private String ocrText;
     private String createdAt;
+
+
+    private Integer riskCount;   // 위험 요소 건수
+    private String riskLevel;    // 낮음/보통/높음
 }

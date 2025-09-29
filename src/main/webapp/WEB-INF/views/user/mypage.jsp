@@ -51,20 +51,11 @@
       <tr class="border-b">
         <th class="py-2">분석일</th>
         <th class="py-2">위험요소</th>
+        <th class="py-2">위험도</th>
         <th class="py-2">보기</th>
       </tr>
       </thead>
-      <tbody>
-      <tr class="border-b">
-        <td class="py-3">2025-06-25</td>
-        <td class="text-red-500">2건</td>
-        <td><a href="/contract/result" class="text-blue-600 hover:underline">리포트</a></td>
-      </tr>
-      <tr>
-        <td class="py-3">2025-07-25</td>
-        <td class="text-green-500">0건</td>
-        <td><a href="/contract/result" class="text-blue-600 hover:underline">리포트</a></td>
-      </tr>
+      <tbody id="contractList">
       </tbody>
     </table>
   </section>
