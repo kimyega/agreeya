@@ -11,6 +11,7 @@
         VALUES (#{userId}, CAST(#{countryId} AS SIGNED), #{originalFileUrl}, #{ocrText})
     </insert>
 
+    <!-- 최신 계약서 조회 (userId 기준) -->
     <select id="getLatestContractByUserId" parameterType="ContractDTO" resultType="ContractDTO">
         SELECT contract_id, user_id, country_id, original_file_url, ocr_text, created_at
         FROM contracts
@@ -56,5 +57,31 @@
         DELETE FROM contracts
         WHERE contract_id = #{contractId}
     </delete>
+
+    <!-- 특정 유저 계약 리스트 조회 -->
+    <select id="findByUserId" parameterType="UserDTO" resultType="ContractDTO">
+        SELECT
+            contract_id,
+            user_id,
+            country_id,
+            original_file_url,
+            ocr_text,
+            created_at
+        FROM contracts
+        WHERE user_id = #{userId}
+        ORDER BY created_at DESC
+    </select>
+
+    <!-- 특정 계약의 분석 요약 조회 -->
+    <select id="findSummaryByContractId" parameterType="ContractDTO" resultType="ContractAnalysisSummaryDTO">
+        SELECT
+            summary_id,
+            contract_id,
+            risk_chart_data,
+            total_risk_level,
+            translated_text
+        FROM contract_analysis_summary
+        WHERE contract_id = #{contractId}
+    </select>
 
 </mapper>
