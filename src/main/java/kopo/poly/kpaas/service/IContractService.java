@@ -3,6 +3,9 @@ package kopo.poly.kpaas.service;
 import kopo.poly.kpaas.dto.ContractDTO;
 import kopo.poly.kpaas.dto.ContractResultDTO;
 import kopo.poly.kpaas.dto.ContractUploadDTO;
+import kopo.poly.kpaas.dto.UserDTO;
+
+import java.util.List;
 
 public interface IContractService {
 
@@ -36,4 +39,7 @@ public interface IContractService {
 
     ContractDTO getContractById(ContractDTO pDTO) throws Exception;
 
+    List<ContractDTO> getContractsWithSummary(UserDTO pDTO) throws Exception;
+
+    int deleteContractById(ContractDTO pDTO) throws Exception;
 }
