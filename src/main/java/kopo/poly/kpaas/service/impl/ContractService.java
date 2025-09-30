@@ -1,5 +1,6 @@
 package kopo.poly.kpaas.service.impl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.auth.oauth2.ServiceAccountCredentials;
 import com.google.cloud.vision.v1.*;
 import kopo.poly.kpaas.config.NcosProperties;
@@ -10,9 +11,11 @@ import kopo.poly.kpaas.service.IContractService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.io.FileInputStream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Slf4j
@@ -24,6 +27,7 @@ public class ContractService implements IContractService {
     private final NcosProperties ncosProperties;
 
     private final IContractMapper contractMapper;
+    private final ObjectMapper objectMapper;
 
     @Override
     public String saveFile(ContractUploadDTO uploadDTO) throws Exception {
@@ -156,8 +160,43 @@ public class ContractService implements IContractService {
 
 
     @Override
+    public List<ContractDTO> getContractsWithSummary(UserDTO pDTO) throws Exception {
+        List<ContractDTO> contracts = Optional.ofNullable(contractMapper.findByUserId(pDTO))
+                .orElse(new ArrayList<>());
+        List<ContractDTO> result = new ArrayList<>();
+
+        for (ContractDTO c : contracts) {
+            ContractAnalysisSummaryDTO summary = contractMapper.findSummaryByContractId(c);
+            int riskCount = 0, totalRiskLevel = 0;
+
+            if (summary != null && summary.getRiskChartData() != null && !summary.getRiskChartData().isEmpty()) {
+                try {
+                    Map<String, Integer> riskData = objectMapper.readValue(summary.getRiskChartData(), Map.class);
+                    riskCount = riskData.values().stream().mapToInt(Integer::intValue).sum();
+                } catch (Exception e) {
+                    log.warn("riskChartData 파싱 실패: {}", summary.getRiskChartData(), e);
+                    riskCount = 0;
+                }
+            }
+
+            totalRiskLevel = summary.getTotalRiskLevel();
+            String riskLevel = (totalRiskLevel <= 40) ? "안전" : (totalRiskLevel <= 70) ? "보통" : "높음";
+
+            result.add(ContractDTO.builder()
+                    .contractId(c.getContractId())
+                    .createdAt(c.getCreatedAt())
+                    .riskCount(riskCount)
+                    .riskLevel(riskLevel)
+                    .build()
+            );
+        }
+        return result;
+    }
+
+    @Override
     public int deleteContractById(ContractDTO pDTO) throws Exception {
         return contractMapper.deleteContractById(pDTO);
     }
+
 }
 
