@@ -5,7 +5,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>안심계약 - 유사 사례 상세보기</title>
+    <title>안심계약 - 유사 계약서 추천</title>
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -31,13 +31,13 @@
 
     <!-- 제목 -->
     <section>
-        <h2 class="text-4xl font-extrabold text-gray-900 mb-4">📚 유사 사례 상세 보기</h2>
-        <p class="text-lg text-gray-600">AI와 법률 DB 분석을 기반으로 추천된 근로계약 사례입니다.</p>
+        <h2 class="text-4xl font-extrabold text-gray-900 mb-4">📚 유사 계약서 추천</h2>
+        <p class="text-lg text-gray-600">AI가 분석한 계약서 사례를 확인하고, 상세 분석 결과 페이지로 이동할 수 있습니다.</p>
     </section>
 
     <!-- 유사사례 영역 -->
-    <section id="similar-cases" class="space-y-12">
-        <p class="text-gray-500">🔄 유사사례 불러오는 중...</p>
+    <section id="similar-cases" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <p class="text-gray-500 text-center">🔄 유사 계약서 불러오는 중...</p>
     </section>
 
     <!-- ✅ hidden input (contractId 저장) -->
@@ -61,13 +61,24 @@
     © 2025 안심계약. All rights reserved.
 </footer>
 
-<!-- ✅ JS (inline script) -->
+<!-- ✅ JS -->
 <script>
     $(document).ready(function() {
-        const contractId = $("#contractId").val(); // ✅ JSP hidden input 값 읽기
-        console.log("🔍 similar.js 실행됨, contractId=", contractId);
+        const contractId = $("#contractId").val();
+        console.log("🔍 similarCase.jsp 실행됨, contractId=", contractId);
 
-        // 유사사례 조회 AJAX
+        // 카테고리별 색상 매핑
+        function getCategoryClass(category) {
+            switch (category) {
+                case "근로시간": return "bg-blue-100 text-blue-600";
+                case "계약 해지": return "bg-red-100 text-red-600";
+                case "임금": return "bg-green-100 text-green-600";
+                case "복리후생": return "bg-yellow-100 text-yellow-600";
+                default: return "bg-gray-100 text-gray-600";
+            }
+        }
+
+        // 유사 계약서 조회 AJAX
         $.ajax({
             url: contextPath + "/contract/similar/data",
             type: "POST",
@@ -81,27 +92,30 @@
                 let html = "";
                 if (cases.length > 0) {
                     cases.forEach(c => {
+                        let categoryClass = getCategoryClass(c.category);
                         html += `
-                        <div class="bg-white rounded-2xl shadow-lg p-8 text-left space-y-4">
-                          <h3 class="text-2xl font-semibold text-blue-700">${c.title}</h3>
-                          <p class="text-sm text-gray-500">
-                            유형: ${c.riskType || '미분류'} ｜ 조항번호: ${c.articleNumber || '-'}
-                          </p>
-                          <div class="bg-gray-50 border border-gray-200 rounded-xl p-6 space-y-4">
-                            <h4 class="text-lg font-bold text-blue-600">📄 관련 법령 내용</h4>
-                            <pre class="whitespace-pre-line text-sm text-gray-800 leading-relaxed">${c.content}</pre>
+                          <div class="bg-white rounded-xl shadow-md p-6 cursor-pointer
+                                      hover:shadow-lg hover:scale-[1.02] transition transform"
+                               onclick="window.location.href='${contextPath}/contract/result?contractId=${c.contractId}'">
+                            <h3 class="text-lg font-bold text-blue-600 mb-2">${c.title || "제목 없음"}</h3>
+                            <p class="text-sm text-gray-700 mb-3">
+                              ${(c.summary && c.summary.length > 120) ? c.summary.substring(0, 120) + "..." : c.summary || "요약 없음"}
+                            </p>
+                            <span class="inline-block px-3 py-1 text-xs font-medium rounded-full ${categoryClass}">
+                              유형: ${c.category || '미분류'}
+                            </span>
                           </div>
-                        </div>
-                      `;
+                        `;
                     });
                 } else {
-                    html = "<p class='text-gray-500'>❌ 추천된 유사사례가 없습니다.</p>";
+                    html = "<p class='text-gray-500 text-center'>❌ 추천된 유사 계약서가 없습니다.</p>";
                 }
                 $("#similar-cases").html(html);
             },
+
             error: function(xhr, status, error) {
                 console.error("❌ AJAX 오류:", status, error);
-                $("#similar-cases").html("<p class='text-red-500'>⚠️ 유사사례를 불러오는 중 오류가 발생했습니다.</p>");
+                $("#similar-cases").html("<p class='text-red-500 text-center'>⚠️ 유사 계약서를 불러오는 중 오류가 발생했습니다.</p>");
             }
         });
 

@@ -12,6 +12,7 @@ import kopo.poly.kpaas.service.ICaseService;
 import kopo.poly.kpaas.service.IContractService;
 import kopo.poly.kpaas.service.ICountryService;
 import kopo.poly.kpaas.service.IDraftService;
+import kopo.poly.kpaas.service.impl.GptService;
 import kopo.poly.kpaas.util.CmmUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -40,6 +41,8 @@ public class ContractController {
     private final NcosPresignService ncosPresignService;
     private final NcosObjectService ncosObjectService;
 
+    // gpt 서비스
+    private final GptService gptService;
 
     private final IDraftService draftService;
 
@@ -217,6 +220,14 @@ public class ContractController {
             dto.setCountryId(countryId);
             log.info("세션 contractDraft에 countryId 세팅 완료: {}", countryId);
 
+            // 계약서 OCR 텍스트로 임베딩 생성 후 JSON으로 저장
+            if (dto.getOcrText() != null && !dto.getOcrText().isBlank()) {
+                List<Float> embeddingList = gptService.createEmbedding(dto.getOcrText());
+                String embeddingJson = new ObjectMapper().writeValueAsString(embeddingList);
+                dto.setContractVector(embeddingJson);
+                log.info("계약서 임베딩 생성 및 DTO에 세팅 완료");
+            }
+
             // DB 저장
             contractService.saveContract(dto);
             log.info("DB 저장 완료");
@@ -325,7 +336,7 @@ public class ContractController {
 
     @PostMapping("/similar/data")
     @ResponseBody
-    public List<CaseDTO> getSimilarCases(HttpSession session) throws Exception {
+    public List<ContractDTO> getSimilarCases(HttpSession session) throws Exception {
 
         String contractId = CmmUtil.nvl((String) session.getAttribute("SS_CONTRACT_ID"));
         log.info("▶ 유사사례 조회 contractId={}", contractId);
@@ -346,13 +357,13 @@ public class ContractController {
         }
 
         // 2. 유사도 분석 요청 DTO
-        CaseDTO pDTO = CaseDTO.builder()
+        ContractDTO pDTO = ContractDTO.builder()
                 .contractId(rDTO.getContractId())
                 .countryId(rDTO.getCountryId())
                 .build();
 
         // 3. 유사 사례 상위 3개 가져오기
-        List<CaseDTO> rList = Optional.ofNullable(caseService.getSimilarCases(pDTO))
+        List<ContractDTO> rList = Optional.ofNullable(caseService.getSimilarCases(pDTO))
                 .orElseGet(Collections::emptyList);
 
         if (rList.size() > 3) {
@@ -510,4 +521,3 @@ public class ContractController {
     }
 
 }
-
