@@ -1,19 +1,4 @@
-// ===== 공통 메시지/스타일 헬퍼 =====
-const setError = (input, msgEl, message) => {
-    input.classList.remove("valid");
-    input.classList.add("invalid");
-    msgEl.classList.remove("success");
-    msgEl.classList.add("error");
-    msgEl.textContent = message;
-};
 
-const setSuccess = (input, msgEl, message) => {
-    input.classList.remove("invalid");
-    input.classList.add("valid");
-    msgEl.classList.remove("error");
-    msgEl.classList.add("success");
-    msgEl.textContent = message;
-};
 
 // ===== 페이지 로직 =====
 document.addEventListener("DOMContentLoaded", function () {
@@ -30,6 +15,23 @@ document.addEventListener("DOMContentLoaded", function () {
     const year = document.getElementById("birth-year");
     const month = document.getElementById("birth-month");
     const day = document.getElementById("birth-day");
+
+    // ===== 공통 메시지/스타일 헬퍼 =====
+    const setError = (input, msgEl, message) => {
+        input.classList.remove("valid");
+        input.classList.add("invalid");
+        msgEl.classList.remove("success");
+        msgEl.classList.add("error");
+        msgEl.textContent = message;
+    };
+
+    const setSuccess = (input, msgEl, message) => {
+        input.classList.remove("invalid");
+        input.classList.add("valid");
+        msgEl.classList.remove("error");
+        msgEl.classList.add("success");
+        msgEl.textContent = message;
+    };
 
     // 숫자만 입력 허용 + 붙여넣기 차단
     const allowOnlyNumbers = (input) => {
@@ -173,7 +175,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-// 이메일 인증번호 확인
+    // 이메일 인증번호 확인
     function verifyEmailCode() {
         const code = document.getElementById("email-code");
         const msg = document.getElementById("email-code-msg");
@@ -208,17 +210,18 @@ document.addEventListener("DOMContentLoaded", function () {
             el.style.cursor = "not-allowed";
         });
     }
+    window.verifyEmailCode = verifyEmailCode;
 
-// 이벤트 연결
+    // 이벤트 연결
     document.getElementById("sendEmailBtn").addEventListener("click", checkEmail);
     $("#email-code").on("blur", verifyEmailCode);
 
-// 이메일 값이 바뀌면 인증 다시 요구
+    // 이메일 값이 바뀌면 인증 다시 요구
     $("#email").on("input", function () {
         emailVerified = false;
     });
 
-// 폼 제출
+    // 폼 제출
     signupForm?.addEventListener("submit", function (e) {
         e.preventDefault();
 
