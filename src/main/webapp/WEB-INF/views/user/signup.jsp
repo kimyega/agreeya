@@ -19,6 +19,7 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/table.css"/>
     <script src="${pageContext.request.contextPath}/js/table.js"></script>
 
+
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/signup.css"/>
 
 </head>
@@ -134,7 +135,7 @@
             <div class="flex gap-2">
                 <input id="email-code" type="text" placeholder="인증번호를 입력해주세요"
                        class="flex-1 p-3 border rounded-lg focus:outline-none focus:ring-0" />
-                <button type="button" onclick="verifyEmailCode()" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 text-sm">
+                <button type="button" id="sendEmailBtn" onclick="verifyEmailCode()" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 text-sm">
                     인증확인
                 </button>
             </div>
@@ -161,5 +162,6 @@
 
 <!-- ✅ 페이지 전용 JS -->
 <script src="${pageContext.request.contextPath}/js/signup.js"></script>
+
 </body>
 </html>
