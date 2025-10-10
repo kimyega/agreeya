@@ -520,4 +520,15 @@ public class ContractController {
         return "success";
     }
 
+    @PostMapping("/clearSimilarSession")
+    @ResponseBody
+    public String clearCountrySession(HttpSession session) {
+        session.removeAttribute("SS_COUNTRY_ID");
+
+        log.info("🧹 Similar 세션 정리 완료");
+        return "success";
+    }
+
+
 }
+
