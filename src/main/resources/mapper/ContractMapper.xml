@@ -99,4 +99,16 @@
         WHERE contract_id = #{contractId}
     </select>
 
+    <!-- 계약서 조회 (userId 기준) -->
+    <select id="getContractListByUserId" parameterType="UserDTO" resultType="ContractDTO">
+        SELECT contract_id,
+               user_id,
+               country_id,
+               original_file_url,
+               ocr_text,
+               created_at
+        FROM contracts
+        WHERE user_id = #{userId}
+        ORDER BY contract_id DESC
+    </select>
 </mapper>
