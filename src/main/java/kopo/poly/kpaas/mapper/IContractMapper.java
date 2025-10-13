@@ -35,6 +35,9 @@ public interface IContractMapper {
     ContractAnalysisSummaryDTO findSummaryByContractId(ContractDTO pDTO) throws Exception;
     // 계약 삭제
     int deleteContractById(ContractDTO pDTO) throws Exception;
+
+    // 계약서 아이디 조회
+    List<ContractDTO> getContractListByUserId(UserDTO pDTO) throws Exception;
 }
 
 
