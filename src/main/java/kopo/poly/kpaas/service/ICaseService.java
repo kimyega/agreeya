@@ -8,4 +8,4 @@ public interface ICaseService {
     // 계약서 유사사례 조회
     List<ContractDTO> getSimilarCases(ContractDTO pDTO) throws Exception;
 
-}
+    }
