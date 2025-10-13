@@ -4,6 +4,9 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.Date;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -31,4 +34,6 @@ public class ContractDTO {
 
     private Integer riskCount;   // 위험 요소 건수
     private String riskLevel;    // 낮음/보통/높음
+
+    private Date CreatedAtDate;
 }

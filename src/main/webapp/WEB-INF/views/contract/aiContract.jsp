@@ -24,7 +24,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
-    <!-- 웹폰트 (한글/일본어/영문) -->
+    <!-- 웹폰트 -->
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR&family=Noto+Sans+JP&family=Roboto&display=swap" rel="stylesheet">
 
     <!-- Custom CSS -->
@@ -54,11 +54,13 @@
         <input type="hidden" id="contractId" value="${param.contractId}">
 
         <!-- 계약서 출력 영역 -->
-        <pre id="contractPreview"
-             class="bg-gray-100 p-4 rounded-md h-96 max-h-96 overflow-y-auto text-gray-700 whitespace-pre-wrap text-base leading-relaxed"
+        <div id="contractPreview"
+             class="bg-gray-100 p-4 rounded-md h-96 max-h-96 overflow-y-auto text-gray-700 text-base leading-relaxed flex justify-center items-center"
              style="font-family: 'Noto Sans KR', 'Noto Sans JP', 'Roboto', sans-serif;">
-로딩 중...
-        </pre>
+            <div class="loading-dots text-gray-500 font-semibold">
+                로딩 중<span>.</span><span>.</span><span>.</span>
+            </div>
+        </div>
 
         <!-- 버튼 그룹 -->
         <div class="mt-6 flex justify-end gap-4 items-center">
