@@ -62,6 +62,12 @@
         계약서 초안 자동 생성
       </button>
 
+      <!-- ✅ 조건부 표시 버튼 -->
+      <button id="backToSimilarBtn"
+              class="hidden bg-blue-600 text-white font-semibold px-6 py-3 rounded-full hover:bg-blue-700 transition w-full sm:w-auto text-center">
+        유사사례 추천으로 돌아가기
+      </button>
+
       <button id="homeBtn"
               class="bg-gray-200 text-gray-800 font-semibold px-6 py-3 rounded-full hover:bg-gray-300 transition w-full sm:w-auto text-center">
         홈으로 돌아가기
