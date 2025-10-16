@@ -4,7 +4,7 @@ $(document).ready(function () {
     const contractId = $("#contractId").val() || new URLSearchParams(window.location.search).get("contractId");
     console.log("📄 현재 contractId =", contractId);
 
-    // ✅ 로딩 애니메이션 스타일 (섹션 내부 중앙 배치)
+    // ✅ 로딩 애니메이션 스타일 삽입
     const loadingStyle = `
     <style id="loading-style">
         .loading-container {
@@ -110,7 +110,7 @@ $(document).ready(function () {
                     const categoryClass = getCategoryClass(c.category);
                     html += `
                         <div class="bg-white rounded-xl shadow-md p-6 cursor-pointer hover:shadow-lg hover:scale-[1.02] transition"
-                             onclick="window.location.href='${contextPath}/contract/result?contractId=${c.contractId}'">
+                             onclick="window.location.href='${contextPath}/contract/result?contractId=${c.contractId}&from=similar'">
                             <h3 class="text-lg font-bold text-blue-600 mb-2">${c.title || "제목 없음"}</h3>
                             <p class="text-sm text-gray-700 mb-3">
                                 ${(c.summary && c.summary.length > 120)

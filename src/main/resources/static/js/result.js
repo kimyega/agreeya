@@ -1,15 +1,31 @@
 $(document).ready(function () {
     console.log("✅ result.js 실행됨");
 
-    const contractId = new URLSearchParams(window.location.search).get("contractId") || "";
+    const urlParams = new URLSearchParams(window.location.search);
+    const contractId = urlParams.get("contractId") || "";
+    const from = urlParams.get("from"); // ✅ 진입 경로 파악
 
-    // 버튼 이벤트
+    // ✅ 유사사례 추천에서 진입한 경우 (추천 결과)
+    if (from === "similar") {
+        console.log("📚 유사사례에서 진입 — 초안생성/유사사례 버튼 숨김 + 유사사례 추천 돌아가기 버튼 표시");
+        $("#similarCaseBtn").hide();
+        $("#draftBtn").hide();
+        $("#backToSimilarBtn").removeClass("hidden");
+    }
+
+    // ✅ 버튼 이벤트
     $("#similarCaseBtn").on("click", function () {
         window.location.href = contextPath + "/contract/similar?contractId=" + contractId;
     });
 
     $("#draftBtn").on("click", function () {
         window.location.href = contextPath + "/contract/draft?contractId=" + contractId;
+    });
+
+    // ✅ 추가: 추천 결과에서 유사사례 페이지로 돌아가기
+    $("#backToSimilarBtn").on("click", function () {
+        console.log("🔙 유사사례 추천으로 돌아가기 클릭됨");
+        window.location.href = contextPath + "/contract/similar?contractId=" + contractId;
     });
 
     $("#homeBtn").on("click", function () {
@@ -25,13 +41,13 @@ $(document).ready(function () {
         success: function (res) {
             console.log("📡 result/data 응답:", res);
 
-            // AI 코멘트 요약
+            // ✅ AI 코멘트 요약
             if (res.summary) {
                 $("#aiCommentContainer").html(`
-          <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 text-sm text-gray-700">
-            ${res.summary.translatedText}
-          </div>
-        `);
+                    <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 text-sm text-gray-700">
+                        ${res.summary.translatedText}
+                    </div>
+                `);
 
                 let riskData = res.summary.riskChartData;
                 if (typeof riskData === "string") riskData = JSON.parse(riskData);
@@ -57,20 +73,20 @@ $(document).ready(function () {
                 });
             }
 
-            // 조항별 결과
+            // ✅ 조항별 결과
             if (Array.isArray(res.clauses) && res.clauses.length > 0) {
                 let html = "";
                 res.clauses.forEach((c, idx) => {
                     html += `
-            <div class="bg-white rounded-2xl shadow-lg p-6 space-y-2">
-              <h3 class="text-lg font-semibold text-blue-700">조항 ${idx + 1}</h3>
-              <p class="text-sm text-gray-500">유형: ${c.riskType} ｜ 위험 점수: ${c.riskScore}</p>
-              <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 text-sm text-gray-800">
-                ${c.clauseText.replace(/\n/g, "<br>")}
-              </div>
-              <p class="text-sm text-red-600">💡 AI 코멘트: ${c.aiComment}</p>
-            </div>
-          `;
+                        <div class="bg-white rounded-2xl shadow-lg p-6 space-y-2">
+                            <h3 class="text-lg font-semibold text-blue-700">조항 ${idx + 1}</h3>
+                            <p class="text-sm text-gray-500">유형: ${c.riskType} ｜ 위험 점수: ${c.riskScore}</p>
+                            <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 text-sm text-gray-800">
+                                ${c.clauseText.replace(/\n/g, "<br>")}
+                            </div>
+                            <p class="text-sm text-red-600">💡 AI 코멘트: ${c.aiComment}</p>
+                        </div>
+                    `;
                 });
                 $("#clauseContainer").html(html);
             } else {
