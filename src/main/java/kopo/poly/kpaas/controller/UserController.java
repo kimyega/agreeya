@@ -153,7 +153,7 @@ public class UserController {
     public int deleteUser(HttpSession session) throws Exception {
         log.info("🟢 deleteUser 실행");
 
-        String userId = CmmUtil.nvl((String) session.getAttribute("LOGIN_USER_ID"));
+        String userId = CmmUtil.nvl((String) session.getAttribute("SS_USER_ID"));
         if (userId.isEmpty()) {
             log.warn("⚠️ 로그인 안됨 - 탈퇴 불가");
             return 0;

@@ -1,5 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
          pageEncoding="UTF-8" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <!DOCTYPE html >
 <html lang="ko">
 <head>
@@ -9,6 +11,9 @@
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
     <!-- Font Awesome (아이콘용) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
@@ -48,7 +53,7 @@
         <h3 class="text-xl font-bold text-green-600">② 상황 직접 입력 후 협상 시뮬레이션</h3>
         <form id="negotiation-form" class="space-y-4">
             <textarea name="situation" rows="3" placeholder="상황 설명 (예: 퇴직금이 없는 조항이 있습니다)" class="w-full p-3 border rounded"></textarea>
-            <input type="text" name="country" placeholder="국가/지역 (예: 사우디아라비아)" class="w-full p-3 border rounded">
+            <input type="text" name="country" placeholder="국가/지역 (예: 일본)" class="w-full p-3 border rounded">
             <input type="text" name="position" placeholder="직종 (예: 건설 현장 노동자)" class="w-full p-3 border rounded">
             <input type="text" name="goal" placeholder="협상 목표 (예: 퇴직금 조항 추가)" class="w-full p-3 border rounded">
             <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
@@ -71,26 +76,34 @@
         </div>
 
         <form class="w-full flex flex-col items-center">
-            <div class="flex items-center space-x-2 mb-4 justify-center w-full">
-                <input type="radio" id="date1" name="analysisDate" class="w-5 h-5" checked />
-                <label for="date1" class="cursor-pointer text-center flex-1">
-                    2025-06-25 14시 38분 22초
-                </label>
+
+            <div id="contract-list">
+                <c:forEach var="contract" items="${contracts}" varStatus="status">
+                    <div class="flex items-center space-x-2 mb-4 justify-center w-full">
+                        <input type="radio"
+                               id="date${status.index}"
+                               name="analysisDate"
+                               class="w-5 h-5"
+                               value="${contract.contractId}"
+                               <c:if test="${status.index == 0}">checked</c:if> />
+                        <label for="date${status.index}" class="cursor-pointer text-center flex-1">
+                            <fmt:formatDate value="${contract.createdAtDate}" pattern="yyyy-MM-dd HH시 mm분 ss초"/>
+                        </label>
+                    </div>
+                    <hr class="border-gray-300 mb-4 w-full" />
+                </c:forEach>
             </div>
 
-            <hr class="border-gray-300 mb-4 w-full" />
-
-            <div class="flex items-center space-x-2 justify-center w-full">
-                <input type="radio" id="date2" name="analysisDate" class="w-5 h-5" />
-                <label for="date2" class="cursor-pointer text-center flex-1">
-                    2025-07-25 18시 38분 22초
-                </label>
+            <div class="flex justify-center mt-2 space-x-2">
+                <button id="prevPage" type="button" class="px-3 py-1 bg-gray-200 rounded">이전</button>
+                <span id="pageInfo" class="px-3 py-1 text-gray-800 font-semibold"></span>
+                <button id="nextPage" type="button" class="px-3 py-1 bg-gray-200 rounded">다음</button>
             </div>
 
             <!-- 선택 버튼 -->
             <button type="button"
-                    onclick="location.href='/chatbot/aiSimulationChat'"
-                    class="mt-6 bg-[#207CEB] text-white font-semibold rounded px-6 py-2 hover:bg-blue-700 transition w-full">
+                    class="select-btn
+                    mt-6 bg-[#207CEB] text-white font-semibold rounded px-6 py-2 hover:bg-blue-700 transition w-full">
                 선택
             </button>
         </form>
@@ -164,6 +177,7 @@
     });
 
     const form = document.getElementById('negotiation-form');
+    const $form = $('#negotiation-form');
     const emptyModal = document.getElementById('emptyModal');
     const emptyModalClose = document.getElementById('emptyModalClose');
 
@@ -182,16 +196,107 @@
             return;
         }
 
-        // 모두 입력했을 경우 simulation.html로 이동
-        window.location.href = '/chatbot/aiSimulationChat';
+        // AJAX POST
+        $.ajax({
+            type: 'POST',
+            url: '/chatbot/simulate', // 서버에서 처리할 엔드포인트
+            dataType: 'JSON',
+            data: $form.serialize(),
+            success: function(json) {
+                console.log("POST 성공:", json);
+                // 성공 시 시뮬레이션 페이지로 이동
+                window.location.href = '/chatbot/aiSimulationChat';
+            },
+            error: function() {
+                alert('서버 전송에 실패했습니다.');
+            }
+        });
     });
 
+
+
+
+    const itemsPerPage = 5;
+    let currentPage = 1;
+
+    function renderPage(page) {
+        const allItems = Array.from(document.querySelectorAll('#contract-list > div'));
+        const start = (page - 1) * itemsPerPage;
+        const end = start + itemsPerPage;
+
+        allItems.forEach((item, index) => {
+            item.style.display = index >= start && index < end ? 'flex' : 'none';
+        });
+    }
+
+    renderPage(currentPage);
+
+
+    const totalPages = Math.ceil(document.querySelectorAll('#contract-list > div').length / itemsPerPage);
+    const pageInfo = document.getElementById('pageInfo');
+    const prevPage = document.getElementById('prevPage');
+    const nextPage = document.getElementById('nextPage');
+
+    function updatePageInfo() {
+        pageInfo.textContent = currentPage +  '/' + totalPages;
+    }
+
+    prevPage.addEventListener('click', (e) => {
+        e.preventDefault();
+
+        if(currentPage > 1) {
+            currentPage--;
+            renderPage(currentPage);
+            updatePageInfo();
+        }
+    });
+
+    nextPage.addEventListener('click', (e) => {
+        e.preventDefault();
+
+        if(currentPage < totalPages) {
+            currentPage++;
+            renderPage(currentPage);
+            updatePageInfo();
+        }
+    });
+
+    updatePageInfo();
+
+    const selectBtn = document.querySelector('#modal .select-btn'); // 선택 버튼
+    selectBtn.addEventListener('click', () => {
+        const selectedContract = document.querySelector('input[name=analysisDate]:checked');
+
+        if (!selectedContract) {
+            alert("계약서를 선택해주세요.");
+            return;
+        }
+
+        const contractId = selectedContract.value;
+
+
+
+        $.ajax({
+            type: 'POST',
+            url: '/chatbot/simulate',
+            dataType: 'JSON',
+            data: {
+                contractId
+            },
+            success: function(json) {
+                console.log("POST 성공:", json);
+                window.location.href = '/chatbot/aiSimulationChat';
+            },
+            error: function() {
+                alert('서버 전송에 실패했습니다.');
+            }
+        });
+    });
 
     // 모달 닫기 버튼 이벤트
     emptyModalClose.addEventListener('click', () => {
         emptyModal.classList.add('hidden');
     });
-
 </script>
 </body>
 </html>

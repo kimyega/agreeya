@@ -198,5 +198,18 @@ public class ContractService implements IContractService {
         return contractMapper.deleteContractById(pDTO);
     }
 
+    @Override
+    public List<ContractDTO> getContractListByUserId(UserDTO pDTO) throws Exception {
+
+        log.info("{}.Start!", this.getClass().getName());
+
+        List<ContractDTO> contracts = Optional.ofNullable(contractMapper.getContractListByUserId(pDTO))
+                .orElse(new ArrayList<>());
+
+        log.info("{}.End!", this.getClass().getName());
+
+        return contracts;
+    }
+
 }
 
