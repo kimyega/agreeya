@@ -9,7 +9,7 @@ $(document).ready(function () {
         "연장근무 수당은 법적으로 어떻게 계산되나요?"
     ];
 
-// ✅ 초기 웰컴 메시지
+    // ✅ 초기 웰컴 메시지
     const welcomeMsg = `
     <div class="chat-row">
         <img src="${contextPath}/images/logo.png"
@@ -34,22 +34,37 @@ $(document).ready(function () {
 `;
     $("#chat-box").html(welcomeMsg);
 
-    // ✅ FAQ 클릭
+    // ✅ FAQ 버튼 클릭 시
     $(document).on("click", ".faq-btn", function () {
         const selectedQuestion = $(this).text();
         sendMessage(selectedQuestion);
     });
 
-    // ✅ 직접 입력 시
+    // ✅ 직접 입력 시 (비어 있으면 경고 말풍선 출력)
     $("#chat-form").on("submit", function (e) {
         e.preventDefault();
         const message = $("#user-input").val().trim();
-        if (message) sendMessage(message);
+
+        if (!message) {
+            const errorMsg = `
+                <div class="chat-row">
+                    <img src="${contextPath}/images/logo.png" 
+                         alt="Agreeya 로고" 
+                         class="bot-icon h-10"/>
+                    <div class="error-msg">⚠️ 입력란이 비어 있습니다. 질문을 입력해주세요.</div>
+                </div>
+            `;
+            $("#chat-box").append(errorMsg);
+            return; // 전송 중단
+        }
+
+        sendMessage(message);
     });
 
-    // ✅ 메시지 전송
+    // ✅ 메시지 전송 함수
     function sendMessage(message) {
 
+        // 사용자 메시지 추가
         const userMsg = `
             <div class="flex justify-end my-2">
                 <div class="user-msg">${message}</div>
@@ -57,7 +72,6 @@ $(document).ready(function () {
         `;
         $("#chat-box").append(userMsg);
         $("#user-input").val("");
-        scrollToBottom();
 
         // ✅ 로딩 (...) 표시
         const loadingDiv = $(`
@@ -71,7 +85,6 @@ $(document).ready(function () {
             </div>
         `);
         $("#chat-box").append(loadingDiv);
-        scrollToBottom();
 
         // ✅ 서버 요청
         $.ajax({
@@ -80,13 +93,12 @@ $(document).ready(function () {
             data: { question: message },
             dataType: "text",
             success: function (res) {
-
                 // 로딩 제거
                 $("#loading-dots").remove();
 
                 const safeRes = escapeHtml(res).replace(/\r?\n/g, "<br/>");
 
-                // ✅ AI 응답
+                // AI 응답 표시
                 const botContainer = $(`
                     <div class="chat-row">
                         <img src="${contextPath}/images/logo.png" 
@@ -108,18 +120,16 @@ $(document).ready(function () {
                     </div>
                 `;
                 $("#chat-box").append(errorMsg);
-                scrollToBottom();
             }
         });
     }
 
-    // ✅ 새 채팅
+    // ✅ 새 채팅 (초기화)
     $("#clearChat").on("click", function () {
         $("#chat-box").html(welcomeMsg);
-        scrollToBottom();
     });
 
-    // ✅ 자동 스크롤
+    // ✅ 자동 스크롤 (함수만 남겨둠, 호출 X)
     function scrollToBottom() {
         const chatBox = $("#chat-box");
         chatBox.stop().animate({ scrollTop: chatBox[0].scrollHeight }, 400);
@@ -131,7 +141,6 @@ $(document).ready(function () {
         const interval = setInterval(() => {
             if (i < text.length) {
                 element.html(text.substring(0, i + 1));
-                scrollToBottom();
                 i++;
             } else {
                 clearInterval(interval);
@@ -139,7 +148,7 @@ $(document).ready(function () {
         }, speed);
     }
 
-    // ✅ HTML escape
+    // ✅ HTML escape (XSS 방지)
     function escapeHtml(text) {
         return text
             .replace(/&/g, "&amp;")
