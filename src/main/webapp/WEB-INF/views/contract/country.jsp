@@ -10,14 +10,14 @@
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
 
-  <!-- Font Awesome (아이콘용) -->
+  <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 
-  <!-- Table CSS JS -->
+  <!-- 공통 CSS/JS -->
   <link rel="stylesheet" href="${pageContext.request.contextPath}/css/table.css"/>
   <script src="${pageContext.request.contextPath}/js/table.js"></script>
 
-  <!-- ✅ jQuery 추가 -->
+  <!-- jQuery -->
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 
@@ -48,12 +48,14 @@
       </div>
     </div>
 
+    <!-- 제목 -->
     <h2 class="text-center text-2xl font-bold mb-1">취업 국가를 선택해주세요</h2>
     <p class="text-center text-gray-600 text-base mb-10">근무 국가에 따라서 기준이 다르게 적용됩니다</p>
 
     <!-- 국가 카드 -->
     <form id="countryForm" method="post">
       <div class="flex flex-wrap justify-center gap-6 mb-6">
+        <!-- 대한민국 -->
         <button type="button" value="KR"
                 class="country-card flex flex-col items-center w-60 p-4 bg-white rounded-xl shadow-md cursor-pointer
                    hover:ring-4 hover:ring-blue-400 focus:outline-none active:scale-95 transition-transform duration-150">
@@ -61,13 +63,15 @@
           <span class="text-xl font-semibold">대한민국</span>
         </button>
 
-        <button type="button" value="EU"
+        <!-- 호주 -->
+        <button type="button" value="AU"
                 class="country-card flex flex-col items-center w-60 p-4 bg-white rounded-xl shadow-md cursor-pointer
                    hover:ring-4 hover:ring-blue-400 focus:outline-none active:scale-95 transition-transform duration-150">
-          <img src="${pageContext.request.contextPath}/images/eu.png" class="w-32 h-32 object-contain mb-2" />
-          <span class="text-xl font-semibold">EU</span>
+          <img src="${pageContext.request.contextPath}/images/au.png" class="w-32 h-32 object-contain mb-2" />
+          <span class="text-xl font-semibold">호주</span>
         </button>
 
+        <!-- 일본 -->
         <button type="button" value="JP"
                 class="country-card flex flex-col items-center w-60 p-4 bg-white rounded-xl shadow-md cursor-pointer
                    hover:ring-4 hover:ring-blue-400 focus:outline-none active:scale-95 transition-transform duration-150">
@@ -76,11 +80,11 @@
         </button>
       </div>
 
-      <!-- 선택된 국가 코드 저장용 -->
+      <!-- 선택된 국가 코드 저장 -->
       <input type="hidden" name="countryCode" id="countryCode" value="">
     </form>
 
-    <!-- 체크박스 -->
+    <!-- 유사사례 체크박스 -->
     <div class="text-center mb-3">
       <label class="inline-flex items-center text-lg">
         <input type="checkbox" class="w-5 h-5 mr-2" />
@@ -93,44 +97,8 @@
 
     <!-- 버튼 -->
     <div class="flex justify-between mt-8">
-      <button id="prevBtn" class="bg-blue-500 text-white px-6 py-3 rounded-full font-bold">이전 단계</button>
-      <button id="nextBtn" class="bg-blue-400 text-white px-6 py-3 rounded-full font-bold opacity-50" disabled>다음 단계 →</button>
-    </div>
-  </div>
-
-  <!-- EU 모달 -->
-  <div id="euModal" class="fixed inset-0 bg-black/50 flex justify-center items-center z-50 hidden">
-    <div class="bg-white w-full max-w-2xl rounded-lg p-8 overflow-y-auto max-h-[80vh]">
-      <h3 class="text-2xl font-bold mb-6 text-center">EU 국가 선택</h3>
-      <div class="grid grid-cols-2 gap-4 text-lg text-center">
-        <button class="bg-gray-100 py-3 rounded">독일</button>
-        <button class="bg-gray-100 py-3 rounded">프랑스</button>
-        <button class="bg-gray-100 py-3 rounded">이탈리아</button>
-        <button class="bg-gray-100 py-3 rounded">스페인</button>
-        <button class="bg-gray-100 py-3 rounded">네덜란드</button>
-        <button class="bg-gray-100 py-3 rounded">벨기에</button>
-        <button class="bg-gray-100 py-3 rounded">오스트리아</button>
-        <button class="bg-gray-100 py-3 rounded">핀란드</button>
-        <button class="bg-gray-100 py-3 rounded">스웨덴</button>
-        <button class="bg-gray-100 py-3 rounded">덴마크</button>
-        <button class="bg-gray-100 py-3 rounded">포르투갈</button>
-        <button class="bg-gray-100 py-3 rounded">그리스</button>
-        <button class="bg-gray-100 py-3 rounded">폴란드</button>
-        <button class="bg-gray-100 py-3 rounded">체코</button>
-        <button class="bg-gray-100 py-3 rounded">헝가리</button>
-        <button class="bg-gray-100 py-3 rounded">루마니아</button>
-        <button class="bg-gray-100 py-3 rounded">불가리아</button>
-        <button class="bg-gray-100 py-3 rounded">슬로바키아</button>
-        <button class="bg-gray-100 py-3 rounded">슬로베니아</button>
-        <button class="bg-gray-100 py-3 rounded">크로아티아</button>
-        <button class="bg-gray-100 py-3 rounded">리투아니아</button>
-        <button class="bg-gray-100 py-3 rounded">라트비아</button>
-        <button class="bg-gray-100 py-3 rounded">에스토니아</button>
-        <button class="bg-gray-100 py-3 rounded">아일랜드</button>
-        <button class="bg-gray-100 py-3 rounded">룩셈부르크</button>
-        <button class="bg-gray-100 py-3 rounded">키프로스</button>
-        <button class="bg-gray-100 py-3 rounded">몰타</button>
-      </div>
+      <button id="prevBtn" class="bg-blue-500 text-white px-6 py-3 rounded-full font-bold hover:bg-blue-600">이전 단계</button>
+      <button id="nextBtn" class="bg-blue-400 text-white px-6 py-3 rounded-full font-bold opacity-50 cursor-not-allowed" disabled>다음 단계 →</button>
     </div>
   </div>
 
@@ -154,7 +122,7 @@
   </div>
 </main>
 
-<!-- ✅ JS -->
+<!-- JS -->
 <script src="${pageContext.request.contextPath}/js/country.js"></script>
 </body>
 </html>

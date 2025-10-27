@@ -1,3 +1,13 @@
+function showModal(message, callback) {
+    const modal = $("#alertModal");
+    $("#alertModalMsg").text(message);
+    modal.removeClass("hidden");
+    $("#alertModalBtn").off("click").on("click", function () {
+        modal.addClass("hidden");
+        if (callback) callback();
+    });
+}
+
 // ===== 비밀번호 재설정 로직 =====
 $("#reset-form").on("submit", function (e) {
     e.preventDefault();
@@ -11,7 +21,6 @@ $("#reset-form").on("submit", function (e) {
     newMsg.text("");
     confirmMsg.text("");
 
-    // 비밀번호 유효성: 영문+숫자 포함 6자 이상
     const regex = /^(?=.*[A-Za-z])(?=.*\d).{6,}$/;
 
     if (!pw1) {
@@ -20,8 +29,6 @@ $("#reset-form").on("submit", function (e) {
     } else if (!regex.test(pw1)) {
         newMsg.text("영문+숫자 포함 6자 이상이어야 합니다.").removeClass("text-green-500").addClass("text-red-500");
         valid = false;
-    } else {
-        newMsg.text("").removeClass("text-red-500").addClass("text-green-500");
     }
 
     if (!pw2) {
@@ -30,13 +37,10 @@ $("#reset-form").on("submit", function (e) {
     } else if (pw1 !== pw2) {
         confirmMsg.text("비밀번호가 일치하지 않습니다.").removeClass("text-green-500").addClass("text-red-500");
         valid = false;
-    } else {
-        confirmMsg.text("").removeClass("text-red-500").addClass("text-green-500");
     }
 
     if (!valid) return;
 
-    // Ajax 요청
     $.ajax({
         url: "/user/resetPassword",
         type: "post",
@@ -44,14 +48,13 @@ $("#reset-form").on("submit", function (e) {
         data: { password: pw1 },
         success: function (json) {
             if (json.result === 1) {
-                alert(json.msg);
-                location.href = "/user/login"; // 로그인 화면으로 이동
+                showModal(json.msg, () => location.href = "/user/login");
             } else {
-                alert(json.msg);
+                showModal(json.msg);
             }
         },
         error: function () {
-            alert("❌ 서버 요청 중 오류 발생");
+            showModal("❌ 서버 요청 중 오류 발생");
         }
     });
 });

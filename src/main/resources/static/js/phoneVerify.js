@@ -28,10 +28,6 @@ document.addEventListener('DOMContentLoaded', () => {
             showErr('인증번호는 6자리 숫자여야 합니다.');
             return;
         }
-        if (!savedTel) {
-            showErr('세션이 만료되었습니다. 처음부터 다시 진행해주세요.');
-            return;
-        }
 
         $.ajax({
             url: "/email/userVerifyFindEmail",
