@@ -57,7 +57,7 @@
 
         <!-- 입력 -->
         <form id="chat-form" class="flex gap-2">
-            <input type="text" id="user-input" placeholder="질문을 입력하세요..." class="chat-input" required/>
+            <input type="text" id="user-input" name="question" placeholder="메시지를 입력하세요..." autocomplete="off" />
             <button type="submit" class="chat-btn">전송</button>
         </form>
     </div>
