@@ -50,15 +50,24 @@
     </div>
 </main>
 
-<!-- (선택) 전송 안내 모달 -->
-<div id="successModal" class="fixed inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm z-50 hidden">
-    <div class="bg-white rounded-2xl shadow-xl p-10 w-full max-w-md text-center border border-gray-300">
-        <h2 class="text-xl font-semibold mb-6 text-green-600">전송되었습니다.</h2>
-        <button onclick="closeModal()" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-6 rounded-full">
+<!-- ✅ findPw.jsp 하단 모달 (글씨 강조 버전) -->
+<div id="alertModal"
+     class="fixed inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm hidden z-50">
+    <div class="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md text-center">
+
+        <!-- ✨ 글씨 두껍게 강조 + 중앙 정렬 유지 -->
+        <p id="alertModalMsg"
+           class="text-gray-900 mb-8 text-lg font-semibold text-center leading-relaxed break-keep">
+        </p>
+
+        <button id="alertModalBtn"
+                class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200">
             확인
         </button>
     </div>
 </div>
+
+
 
 <!-- 페이지 JS (있다면 사용) -->
 <script src="/js/findPw.js"></script>

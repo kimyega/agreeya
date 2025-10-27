@@ -62,6 +62,19 @@
         </form>
     </div>
 </main>
+<!-- ✅ changePw.jsp 맨 하단 모달 (글자 잘림 수정 버전) -->
+<div id="alertModal"
+     class="fixed inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm hidden z-50">
+    <div class="bg-white rounded-2xl shadow-xl py-6 px-6 w-full max-w-xs text-center">
+        <p id="alertModalMsg"
+           class="text-gray-900 mb-6 text-lg font-semibold text-center leading-relaxed break-keep whitespace-pre-line">
+        </p>
+        <button id="alertModalBtn"
+                class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-6 rounded-lg transition-all duration-200">
+            확인
+        </button>
+    </div>
+</div>
 
 <!-- 페이지 JS -->
 <script src="/js/changePw.js"></script>

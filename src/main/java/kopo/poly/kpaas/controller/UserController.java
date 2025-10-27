@@ -348,4 +348,44 @@ public class UserController {
         return contractList;
     }
 
+    /**
+     * ✅ 전화번호 존재 여부 확인
+     */
+    @ResponseBody
+    @PostMapping("/checkPhoneExist")
+    public MsgDTO checkPhoneExist(UserDTO pDTO) throws Exception {
+
+        log.info("{}.checkPhoneExist Start!", this.getClass().getName());
+
+        MsgDTO dto = new MsgDTO();
+        int result = 0;
+        String msg;
+
+        try {
+
+            pDTO.setTel(EncryptUtil.encAES128BCBC(CmmUtil.nvl(pDTO.getTel())));
+            log.info("입력 전화번호(암호화): {}", pDTO.getTel());
+
+
+            UserDTO rDTO = userService.getUserByPhone(pDTO);
+
+            if (rDTO != null) {
+                result = 1;
+                msg = "등록된 번호입니다.";
+            } else {
+                msg = "등록되지 않은 번호입니다.";
+            }
+
+        } catch (Exception e) {
+            result = -1;
+            msg = "전화번호 확인 중 오류가 발생했습니다.";
+            log.error("checkPhoneExist Error : {}", e.getMessage());
+        }
+
+        dto.setResult(result);
+        dto.setMsg(msg);
+
+        log.info("{}.checkPhoneExist End!", this.getClass().getName());
+        return dto;
+    }
 }

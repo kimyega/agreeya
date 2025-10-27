@@ -1,3 +1,14 @@
+// ✅ 모달 함수 추가 (맨 위나 맨 아래 아무 곳에 추가 가능)
+function showModal(message, callback) {
+    const modal = $("#alertModal");
+    $("#alertModalMsg").text(message);
+    modal.removeClass("hidden");
+    $("#alertModalBtn").off("click").on("click", function () {
+        modal.addClass("hidden");
+        if (callback) callback();
+    });
+}
+
 // ===== 본문 로직 =====
 $("#find-password-form").on("submit", function (e) {
     e.preventDefault();
@@ -15,7 +26,6 @@ $("#find-password-form").on("submit", function (e) {
         return;
     }
 
-    // 기본 이메일 형식 간단 체크
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
         emailMsg.text("이메일 형식이 올바르지 않습니다.");
@@ -23,23 +33,20 @@ $("#find-password-form").on("submit", function (e) {
         return;
     }
 
-    // Ajax 요청
     $.ajax({
         url: "/email/sendResetCode",
         type: "post",
         dataType: "json",
-        data: { email: email }, // serialize 대신 email만 명확히 전송
+        data: { email: email },
         success: function (json) {
             if (json.result === 1) {
-                alert(json.msg);
-                location.href = "/user/emailVerify"; // 인증코드 입력 화면으로 이동
+                showModal(json.msg, () => location.href = "/user/emailVerify");
             } else {
-                alert(json.msg);
+                showModal(json.msg);
             }
         },
         error: function () {
-            alert("❌ 서버 요청 중 오류 발생");
+            showModal("❌ 서버 요청 중 오류 발생");
         }
     });
 });
-
