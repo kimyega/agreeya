@@ -54,7 +54,7 @@
                 <span id="resultName"></span> 이메일을 찾았습니다!
             </h2>
             <p class="mb-6 text-lg">
-                이메일: <span id="resultEmail" class="font-bold"></span>
+                <span id="resultEmail" class="font-bold"></span>
             </p>
 
             <a href="/user/login"
