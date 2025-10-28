@@ -5,13 +5,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import kopo.poly.kpaas.dto.*;
 import kopo.poly.kpaas.infra.NcosObjectService;
-import kopo.poly.kpaas.dto.*;
 import kopo.poly.kpaas.infra.NcosPresignService;
-import kopo.poly.kpaas.service.IAnalysisService;
-import kopo.poly.kpaas.service.ICaseService;
-import kopo.poly.kpaas.service.IContractService;
-import kopo.poly.kpaas.service.ICountryService;
-import kopo.poly.kpaas.service.IDraftService;
+import kopo.poly.kpaas.service.*;
 import kopo.poly.kpaas.service.impl.GptService;
 import kopo.poly.kpaas.util.CmmUtil;
 import lombok.RequiredArgsConstructor;
@@ -19,9 +14,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.ui.Model;
-
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.*;
 
@@ -104,8 +100,6 @@ public class ContractController {
             data.put("uploadUrl", presigned.uploadUrl());
             data.put("publicUrl", presigned.publicUrl());
             data.put("key", presigned.key()); // 필요하면
-
-
 
             // Map → JSON 문자열 변환
             ObjectMapper mapper = new ObjectMapper();
