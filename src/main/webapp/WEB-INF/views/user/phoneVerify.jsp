@@ -51,7 +51,7 @@
     <div id="resultModal" class="hidden fixed inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm z-50">
         <div class="bg-white rounded-2xl shadow-xl p-10 w-full max-w-md text-center border border-gray-300">
             <h2 class="text-xl font-semibold mb-4">
-                <span id="resultName"></span>님의 이메일을 찾았습니다!
+                <span id="resultName"></span> 이메일을 찾았습니다!
             </h2>
             <p class="mb-6 text-lg">
                 이메일: <span id="resultEmail" class="font-bold"></span>
@@ -64,6 +64,20 @@
         </div>
     </div>
 </main>
+
+<!-- ❗기존 화면 하단에 추가 -->
+<div id="alertModal"
+     class="fixed inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm hidden z-50">
+    <div class="bg-white rounded-2xl shadow-xl py-6 px-6 w-full max-w-xs text-center">
+        <p id="alertModalMsg"
+           class="text-gray-900 mb-6 text-lg font-semibold text-center leading-relaxed break-keep whitespace-pre-line">
+        </p>
+        <button id="alertModalBtn"
+                class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-6 rounded-lg transition-all duration-200">
+            확인
+        </button>
+    </div>
+</div>
 
 <!-- 페이지 전용 JS (있으면 사용) -->
 <script src="/js/phoneVerify.js"></script>
