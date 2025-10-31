@@ -10,9 +10,11 @@ import kopo.poly.kpaas.mapper.IContractMapper;
 import kopo.poly.kpaas.service.IContractService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
 import java.io.FileInputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -28,6 +30,8 @@ public class ContractService implements IContractService {
 
     private final IContractMapper contractMapper;
     private final ObjectMapper objectMapper;
+
+    private final Environment environment;
 
     @Override
     public String saveFile(ContractUploadDTO uploadDTO) throws Exception {
@@ -69,10 +73,13 @@ public class ContractService implements IContractService {
 
         StringBuilder extractedText = new StringBuilder();
 
-        // 프로젝트 루트 기준 키 파일 경로
-        String keyFilePath = "keys/kpaas-vision-key.json";
+        // ✅ application.properties에서 값 불러오기
+        String keyFilePath = environment.getProperty("google.credentials.path", "keys/kpaas-vision-key.json");
 
-        try (FileInputStream serviceAccount = new FileInputStream(keyFilePath)) {
+        // ✅ 리소스 경로에서 읽기
+        try (InputStream serviceAccount =
+                     getClass().getClassLoader().getResourceAsStream(keyFilePath)) {
+
             ImageAnnotatorSettings settings = ImageAnnotatorSettings.newBuilder()
                     .setCredentialsProvider(() -> ServiceAccountCredentials.fromStream(serviceAccount))
                     .build();
