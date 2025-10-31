@@ -5,16 +5,15 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.io.Serializable;
 import java.util.Date;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ContractDTO implements Serializable {
-    private static final long serialVersionUID = 1L;
-         // 기본 계약서 정보
+public class ContractDTO {
+
+    // 기본 계약서 정보
     private String contractId;
     private String userId;
     private String countryId;
