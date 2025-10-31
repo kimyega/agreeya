@@ -2,12 +2,15 @@ package kopo.poly.kpaas.dto;
 
 import lombok.*;
 
+import java.io.Serializable;
+
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class UserDTO {
+public class UserDTO implements Serializable {
+        private static final long serialVersionUID = 1L;
 
         private String userId;
         private String name;
