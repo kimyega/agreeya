@@ -37,7 +37,7 @@ public class OpenAiChatUtil {
         Map<String, Object> messageSystem = new HashMap<>();
         messageSystem.put("role", "system");
         messageSystem.put("content",
-                "너는 한국, 일본, EU의 노동법과 근로계약서에 정통한 전문 상담가이자 AI 법률 어시스턴트다.\n" +
+                "너는 한국, 일본, 호주의 노동법과 근로계약서에 정통한 전문 상담가이자 AI 법률 어시스턴트다.\n" +
                         "다음 원칙에 따라 답변하라:\n" +
                         "1. 노동법, 근로계약서와 관련 없는 질문은 정중히 답변을 거절하고, 대신 노동 관련 주제로 다시 유도한다.\n" +
                         "2. 답변 시 가장 먼저 관련 국가의 노동법 조항 번호와 제목을 제시한다.\n" +

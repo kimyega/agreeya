@@ -5,11 +5,14 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ResultDTO {
+public class ResultDTO implements Serializable {
+    private static final long serialVersionUID = 1L;
 
     /**
      * 공통 응답 DTO
